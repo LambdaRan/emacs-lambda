@@ -184,3 +184,9 @@
 [submodule "site-lisp/extensions/all-the-icons"]
 	path = site-lisp/extensions/all-the-icons
 	url = https://github.com/domtronn/all-the-icons.el.git
+[submodule "site-lisp/extensions/ace-jump-mode"]
+	path = site-lisp/extensions/ace-jump-mode
+	url = https://github.com/winterTTr/ace-jump-mode.git
+[submodule "site-lisp/extensions/emacs-memoize"]
+	path = site-lisp/extensions/emacs-memoize
+	url = https://github.com/skeeto/emacs-memoize.git
