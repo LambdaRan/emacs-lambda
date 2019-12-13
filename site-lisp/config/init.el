@@ -31,8 +31,6 @@
     (require 'one-key)
     ;; 显示行号
     (require 'display-line-numbers)
-    (require 'init-line-number)
-
     (require 'basic-toolkit)
     (require 'redo)
     (require 'highlight-parentheses)
@@ -42,28 +40,24 @@
     (require 'init-awesome-tab)
     ;; 不要自动备份
     (require 'init-backup)
-
+    (require 'init-line-number)
     (require 'init-auto-save)
     (require 'init-mode)
 ;;    (require 'init-sdcv)
     (require 'init-dired)
-
-    ;; (require 'init-indent)
+    (require 'init-indent)
     (require 'init-one-key)
     (require 'init-key)
     ;; 只读模式下使用vi样式的单按键操作
     (require 'init-vi-navigate)
     (require 'init-performance)
 
-    (require 'init-ide)
     ;; 可以延后加载的
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-        (require 'pretty-lambdada)
 ;;         (require 'browse-kill-ring)
-        ;; 二进制编辑
-        (require 'elf-mode)
+
         ;; 后台自动删除不用的buffer
         (require 'init-tempbuf)
         ;; minibuf中参数提示
@@ -89,13 +83,13 @@
         (require 'init-idle)
 
 ;;         (require 'init-auto-sudoedit)
-        (require 'init-highlight-indent-guides)
+        ;; 问题：打开PHP大文件很卡
+       ;; (require 'init-highlight-indent-guides)
 ;;         (require 'init-pyim)
 
         (require 'init-diff-hl)
         (require 'init-projectile)
-        ;; 工具集
-        ;; (require 'lazycat-toolkit)
+    
         ;; Restore session at last.
         (require 'init-session)
         (emacs-session-restore)

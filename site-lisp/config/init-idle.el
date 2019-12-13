@@ -84,7 +84,6 @@
 
 ;;; Code:
 
-(pretty-lambda-for-modes)
 ;; (browse-kill-ring-default-keybindings)    ;加载默认的按键邦定
 (setq browse-kill-ring-quit-action        ;设置退出动作
       (quote save-and-restore))           ;保存还原窗口设置
@@ -95,8 +94,8 @@ from tradition chinese to simple chinese" t)
 (custom-set-variables '(tramp-verbose 0)) ;设置tramp的响应方式, 关闭后不弹出消息
 (setq max-lisp-eval-depth 40000)          ;lisp最大执行深度
 (setq max-specpdl-size 10000)             ;最大容量
-(setq kill-ring-max 1024) ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
-(setq mark-ring-max 1024) ;设置的mark ring容量
+(setq kill-ring-max 1024)                 ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
+(setq mark-ring-max 1024)                 ;设置的mark ring容量
 (setq eval-expression-print-length nil) ;设置执行表达式的长度没有限制
 (setq eval-expression-print-level nil)  ;设置执行表达式的深度没有限制
 (auto-compression-mode 1)               ;打开压缩文件时自动解压缩
@@ -111,7 +110,7 @@ from tradition chinese to simple chinese" t)
 (setq auto-revert-mode 1)               ;自动更新buffer
 (show-paren-mode t)                     ;显示括号匹配
 (setq show-paren-style 'parentheses) ;括号匹配显示但不是烦人的跳到另一个括号。
-(setq blink-matching-paren nil)      ;当插入右括号时不显示匹配的左括号
+;; (setq blink-matching-paren nil)      ;当插入右括号时不显示匹配的左括号
 (setq message-log-max t)         ;设置message记录全部消息, 而不用截去
 (setq require-final-newline nil) ;不自动添加换行符到末尾, 有些情况会出现错误
 (setq ediff-window-setup-function (quote ediff-setup-windows-plain)) ;比较窗口设置在同一个frame里

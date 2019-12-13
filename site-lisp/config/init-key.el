@@ -7,8 +7,12 @@
 ;;  (setq mac-command-modifier 'control)
 ;;  (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
 ;;  )
-;;(setq mac-control-modifier 'super)
-;;(setq mac-command-modifier 'control)
+
+;; https://emacs.stackexchange.com/questions/26616/how-to-use-a-macs-command-key-as-a-control-key
+;; Mac平台下交换 Ctrol 和 Command 键。
+(when (featurep 'cocoa)
+  (setq mac-control-modifier 'super)
+  (setq mac-command-modifier 'control))
 
 ;;; ### Unset key ###
 ;;; --- 卸载按键
@@ -180,12 +184,7 @@
    ("s--" . text-scale-decrease)        ;减小字体大小
    ("s-=" . text-scale-increase)        ;增加字体大小
    ))
-;;; 调整注释中光标处数字
-(lazy-load-global-keys
- '(
-   ("M--" . shift-number-down)
-   ("M-=" . shift-number-up))
- "shift-number")
+
  ;;; ### Multi-Scratch
 (lazy-load-global-keys
  '(
