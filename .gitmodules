@@ -193,6 +193,3 @@
 [submodule "site-lisp/extensions/avy"]
 	path = site-lisp/extensions/avy
 	url = https://github.com/abo-abo/avy.git
-[submodule "site-lisp/extensions/pkg-info"]
-	path = site-lisp/extensions/pkg-info
-	url = https://github.com/emacsorphanage/pkg-info.git
