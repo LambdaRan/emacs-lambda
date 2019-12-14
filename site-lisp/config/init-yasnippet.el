@@ -86,15 +86,6 @@
 
 (add-to-list `yas/root-directory (concat lazycat-emacs-extension-dir "/yasnippet-snippets/snippets"))
 
-(yas-global-mode 1)
-
-;; Disable yasnippet mode on some mode.
-(dolist (hook (list
-               'term-mode-hook
-               ))
-  (add-hook hook '(lambda () (yas-minor-mode -1))))
-
-
 
 ;; my private snippets, should be placed before enabling yasnippet
 (setq my-yasnippets (expand-file-name "~/my-yasnippets"))
@@ -106,6 +97,18 @@
 (when (and  (file-exists-p my-yasnippets)
             (not (member my-yasnippets yas-snippet-dirs)))
   (add-to-list 'yas-snippet-dirs my-yasnippets))
+
+
+(yas-global-mode 1)
+
+;; Disable yasnippet mode on some mode.
+(dolist (hook (list
+               'term-mode-hook
+               ))
+  (add-hook hook '(lambda () (yas-minor-mode -1))))
+
+
+
     
 
 
