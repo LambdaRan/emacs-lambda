@@ -116,11 +116,11 @@
 (setq ad-redefinition-action 'accept)   ;不要烦人的 redefine warning
 (setq frame-resize-pixelwise t) ;设置缩放的模式,避免Mac平台最大化窗口以后右边和下边有空隙
 
-;; 不显示 *scratch*
-;;(defun remove-scratch-buffer ()
+;; ;; 不显示 *scratch*
+;; (defun remove-scratch-buffer ()
 ;;  (if (get-buffer "*scratch*")
 ;;      (kill-buffer "*scratch*")))
-;;(add-hook 'after-change-major-mode-hook 'remove-scratch-buffer)
+;; (add-hook 'after-change-major-mode-hook 'remove-scratch-buffer)
 
 ;; TODO 有问题，
 ;; Don't ask me when close emacs with process is running
