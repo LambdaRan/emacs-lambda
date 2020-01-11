@@ -86,22 +86,25 @@
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
 
+;; (setq-default c-electric-flag nil)
+
 (defun adjust-languages-indent (n)
   (setq-local c-basic-offset n)
 
-  (setq-local coffee-tab-width n)
-  (setq-local javascript-indent-level n)
-  (setq-local js-indent-level n)
-  (setq-local js2-basic-offset n)
+  ;; (setq-local coffee-tab-width n)
+  ;; (setq-local javascript-indent-level n)
+  ;; (setq-local js-indent-level n)
+  ;; (setq-local js2-basic-offset n)
 
-  (setq-local web-mode-attr-indent-offset n)
-  (setq-local web-mode-attr-value-indent-offset n)
-  (setq-local web-mode-code-indent-offset n)
-  (setq-local web-mode-css-indent-offset n)
-  (setq-local web-mode-markup-indent-offset n)
-  (setq-local web-mode-sql-indent-offset n)
+  ;; (setq-local web-mode-attr-indent-offset n)
+  ;; (setq-local web-mode-attr-value-indent-offset n)
+  ;; (setq-local web-mode-code-indent-offset n)
+  ;; (setq-local web-mode-css-indent-offset n)
+  ;; (setq-local web-mode-markup-indent-offset n)
+  ;; (setq-local web-mode-sql-indent-offset n)
 
-  (setq-local css-indent-offset n))
+  ;; (setq-local css-indent-offset n)
+  )
 
 (dolist (hook (list
                'c-mode-hook

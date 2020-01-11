@@ -106,6 +106,8 @@ Includes support for Qt code (signal, slots and alikes)."
 
         ;; base-style
         (c-set-style "stroustrup")
+        
+        (setq c-syntactic-indentation nil)
 
         ;; ;; qt keywords and stuff ...
         ;; ;; set up indenting correctly for new qt kewords

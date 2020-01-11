@@ -83,7 +83,7 @@
 ;;; --- 缓存移动
 (lazy-load-set-keys
  '(
-   ("C-z k" . beginning-of-buffero)      ;缓存开始
+   ("C-z k" . beginning-of-buffer)      ;缓存开始
    ("C-z j" . end-of-buffer)            ;缓存结尾
    ("C-M-f" . forward-paragraph)        ;下一个段落
    ("C-M-b" . backward-paragraph)       ;上一个段落
