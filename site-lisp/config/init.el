@@ -52,6 +52,8 @@
     (require 'init-vi-navigate)
     (require 'init-performance)
 
+    (require 'init-ivy)
+    
     ;; 可以延后加载的
     (run-with-idle-timer
      1 nil
@@ -90,6 +92,7 @@
         (require 'init-diff-hl)
         (require 'init-projectile)
     
+        (require 'init-etags)
         ;; Restore session at last.
         (require 'init-session)
         (emacs-session-restore)

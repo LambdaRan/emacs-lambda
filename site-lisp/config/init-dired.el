@@ -92,18 +92,18 @@
 (setq my-dired-omit-regexp "^\\.?#\\|^\\..*") ;设置忽略文件的匹配正则表达式
 (setq my-dired-omit-extensions '(".cache")) ;设置忽略文件的扩展名列表
 (add-hook 'dired-after-readin-hook '(lambda ()
-                                      (progn
-                                        (require 'dired-extension)
-                                        (dired-sort-method)))) ;先显示目录, 然后显示文件
+                                     (progn
+                                       (require 'dired-extension)
+                                       (dired-sort-method)))) ;先显示目录, 然后显示文件
 (add-hook
  'dired-mode-hook
  '(lambda ()
-    (require 'dired-extension)
-    (dired-omit-method)                 ;隐藏文件的方法
+   (require 'dired-extension)
+   (dired-omit-method)                 ;隐藏文件的方法
 
-    (require 'dired+)
-    (toggle-dired-find-file-reuse-dir 1) ;使用单一模式浏览Dired
-    ))
+   (require 'dired+)
+   (toggle-dired-find-file-reuse-dir 1) ;使用单一模式浏览Dired
+   ))
 (setq dired-guess-shell-alist-user      ;设置文件默认打开的模式
       '(
         ;; 图书
@@ -223,14 +223,14 @@
 ;;; --- Dired 的编辑模式
 (eval-after-load 'wdired
   '(lambda ()
-     (progn
-       (require 'wdired-extension)
-       (lazy-load-set-keys
-        '(
-          ("C-c C-e" . wdired-format-filename) ;格式化文件名
-          )
-        wdired-mode-map
-        ))))
+    (progn
+      (require 'wdired-extension)
+      (lazy-load-set-keys
+       '(
+         ("C-c C-e" . wdired-format-filename) ;格式化文件名
+         )
+       wdired-mode-map
+       ))))
 
 (defvar one-key-menu-dired-sort-alist nil
   "The `one-key' menu alist for DIRED-SORT.")

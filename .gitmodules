@@ -193,3 +193,12 @@
 [submodule "site-lisp/extensions/avy"]
 	path = site-lisp/extensions/avy
 	url = https://github.com/abo-abo/avy.git
+[submodule "site-lisp/extensions/lua-mode"]
+	path = site-lisp/extensions/lua-mode
+	url = git@github.com:immerrr/lua-mode.git
+[submodule "site-lisp/extensions/counsel-etags"]
+	path = site-lisp/extensions/counsel-etags
+	url = git@github.com:redguardtoo/counsel-etags.git
+[submodule "site-lisp/extensions/swiper"]
+	path = site-lisp/extensions/swiper
+	url = git@github.com:abo-abo/swiper.git

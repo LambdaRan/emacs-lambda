@@ -39,7 +39,6 @@
    ("s-[" . eval-expression)                ;执行表达式
    ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
    ("M-h" . set-mark-command) ;Instead C-Space for Chinese input method
-   ("M-H" . set-mark-command) ;Instead C-Space for Chinese input method
    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -158,7 +157,6 @@
    ("M-N" . delete-block-backward)
    ("M-M" . delete-block-forward))
  "delete-block")
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -401,6 +399,7 @@
    ("s-p" . insert-standard-date)
    )
  "lazycat-toolkit")
+
 (eval-after-load 'ielm-mode
   '(lambda ()
     (progn
@@ -488,3 +487,4 @@
  "init-smex")
 
 (provide 'init-key)
+
