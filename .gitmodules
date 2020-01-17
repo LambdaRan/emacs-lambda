@@ -118,9 +118,6 @@
 [submodule "highlight-indent-guides"]
 	path = site-lisp/extensions/highlight-indent-guides
 	url = https://github.com/DarthFennec/highlight-indent-guides.git
-[submodule "olivetti"]
-	path = site-lisp/extensions/olivetti
-	url = https://github.com/rnkn/olivetti.git
 [submodule "names"]
 	path = site-lisp/extensions/names
 	url = https://github.com/Malabarba/names.git
@@ -202,3 +199,6 @@
 [submodule "site-lisp/extensions/swiper"]
 	path = site-lisp/extensions/swiper
 	url = git@github.com:abo-abo/swiper.git
+[submodule "markdown-mode"]
+	path = site-lisp/extensions/markdown-mode
+	url = git@github.com:jrblevin/markdown-mode.git

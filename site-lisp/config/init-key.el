@@ -57,19 +57,31 @@
 
 ;;; ### Color-Rg ###
 ;;; --- 搜索重构
+;; (lazy-load-global-keys
+;;  '(
+;;    ("s-x g" . color-rg-search-symbol)
+;;    ("s-x h" . color-rg-search-input)
+;;    ("s-x j" . color-rg-search-symbol-in-project)
+;;    ("s-x k" . color-rg-search-input-in-project)
+;;    ("s-x ," . color-rg-search-symbol-in-current-file)
+;;    ("s-x ." . color-rg-search-input-in-current-file)
+;;    ("s-x o" . color-rg-search-symbol-with-type)
+;;    ("s-x p" . color-rg-search-project-with-type)
+;;    )
+;;  "color-rg")
 (lazy-load-global-keys
  '(
-   ("s-x g" . color-rg-search-symbol)
-   ("s-x h" . color-rg-search-input)
-   ("s-x j" . color-rg-search-symbol-in-project)
-   ("s-x k" . color-rg-search-input-in-project)
-   ("s-x ," . color-rg-search-symbol-in-current-file)
-   ("s-x ." . color-rg-search-input-in-current-file)
-   ("s-x o" . color-rg-search-symbol-with-type)
-   ("s-x p" . color-rg-search-project-with-type)
+   ("g" . color-rg-search-symbol)
+   ("h" . color-rg-search-input)
+   ("j" . color-rg-search-symbol-in-project)
+   ("k" . color-rg-search-input-in-project)
+   ("," . color-rg-search-symbol-in-current-file)
+   ("." . color-rg-search-input-in-current-file)
+   ("o" . color-rg-search-symbol-with-type)
+   ("p" . color-rg-search-project-with-type)
    )
- "color-rg")
-
+ "color-rg"
+ "C-c c")
 ;; 模糊搜索框架
 (lazy-load-global-keys
  '(
