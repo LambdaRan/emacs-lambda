@@ -134,6 +134,12 @@
      (remq 'process-kill-buffer-query-function
            kill-buffer-query-functions))
 
+(prefer-coding-system 'gb18030)
+(prefer-coding-system 'utf-16)
+(prefer-coding-system 'utf-8-dos)
+(prefer-coding-system 'utf-8-unix)
+(prefer-coding-system 'utf-8-mac)
+
 (provide 'init-generic)
 
 ;;; init-generic.el ends here

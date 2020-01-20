@@ -147,13 +147,17 @@ clean buffer we're an order of magnitude laxer about checking."
      (setq flycheck-check-syntax-automatically '(idle-change
                                                   mode-enabled))
      
-          
+     (setq flycheck-emacs-lisp-load-path 'inherit)          
      
       (setq-default flycheck-temp-prefix ".flycheck")
 
       (with-eval-after-load 'flycheck
         (require 'flycheck-posframe)
-        (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+        (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
+        (setq flycheck-posframe-border-width 1
+              flycheck-posframe-inhibit-functions
+              '((lambda (&rest _) (bound-and-true-p company-backend))))
+        )
       (flycheck-mode 1))))
 
 
