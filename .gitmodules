@@ -130,9 +130,6 @@
 [submodule "posframe"]
 	path = site-lisp/extensions/posframe
 	url = https://github.com/tumashu/posframe.git
-[submodule "site-lisp/extensions/fuz"]
-	path = site-lisp/extensions/fuz
-	url = https://github.com/cireu/fuz.el.git
 [submodule "cnfonts"]
 	path = site-lisp/extensions/cnfonts
 	url = https://github.com/tumashu/cnfonts.git
@@ -202,3 +199,6 @@
 [submodule "markdown-mode"]
 	path = site-lisp/extensions/markdown-mode
 	url = git@github.com:jrblevin/markdown-mode.git
+[submodule "site-lisp/extensions/fuz"]
+	path = site-lisp/extensions/fuz
+	url = https://github.com/rustify-emacs/fuz.el.git
