@@ -24,6 +24,7 @@
     (require 'init-generic)
     (require 'lazycat-theme)
     (when (featurep 'cocoa)
+      (message "init cache path from shell")
       (require 'cache-path-from-shell))
 
     ;; 按需加载插件
@@ -58,7 +59,6 @@
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-;;         (require 'browse-kill-ring)
 
         ;; 后台自动删除不用的buffer
         (require 'init-tempbuf)
@@ -76,7 +76,7 @@
         (require 'init-winpoint)
 
         (require 'init-info)
-;;         (require 'init-atomic-chrome)
+
         (require 'init-c)
         (require 'init-flycheck)
         ;; 中文字体配置工具
@@ -84,10 +84,8 @@
 
         (require 'init-idle)
 
-;;         (require 'init-auto-sudoedit)
         ;; 问题：打开PHP大文件很卡
        ;; (require 'init-highlight-indent-guides)
-;;         (require 'init-pyim)
 
         (require 'init-diff-hl)
         (require 'init-projectile)

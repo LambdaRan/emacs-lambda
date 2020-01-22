@@ -139,20 +139,20 @@
 (defvar one-key-menu-magithub-alist nil
   "The `one-key' menu alist for MAGITHUB.")
 
-(setq one-key-menu-magithub-alist
-      '(
-        (("h" . "Browse") . magithub-browse)
-        (("H" . "Browse file") . magithub-browse-file)
-        (("i" . "Create issue") . magithub-issue-new)
-        (("b" . "Browse issue") . magithub-issue-browse)
-        (("B" . "Browse pull") . magithub-pull-browse)
-        ))
+;; (setq one-key-menu-magithub-alist
+;;       '(
+;;         (("h" . "Browse") . magithub-browse)
+;;         (("H" . "Browse file") . magithub-browse-file)
+;;         (("i" . "Create issue") . magithub-issue-new)
+;;         (("b" . "Browse issue") . magithub-issue-browse)
+;;         (("B" . "Browse pull") . magithub-pull-browse)
+;;         ))
 
-(defun one-key-menu-magithub ()
-  "The `one-key' menu for MAGITHUB."
-  (interactive)
-  (require 'magithub)
-  (one-key-menu "MAGITHUB" one-key-menu-magithub-alist t))
+;; (defun one-key-menu-magithub ()
+;;   "The `one-key' menu for MAGITHUB."
+;;   (interactive)
+;;   (require 'magithub)
+;;   (one-key-menu "MAGITHUB" one-key-menu-magithub-alist t))
 
 (defun magit-submodule-add+ (url)
   (interactive "sURL: ")
