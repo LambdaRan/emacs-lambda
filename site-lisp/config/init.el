@@ -85,7 +85,7 @@
         (require 'init-idle)
 
         ;; 问题：打开PHP大文件很卡
-       ;; (require 'init-highlight-indent-guides)
+        ;; (require 'init-highlight-indent-guides)
 
         (require 'init-diff-hl)
         (require 'init-projectile)
@@ -96,7 +96,8 @@
         (emacs-session-restore)
 
         (server-start)            ;为emacsclient准备使用场景，比如git
-        )))
+        ))
+    )
 )
 
 (provide 'init)

@@ -149,13 +149,13 @@
    ("/" . copy-buffer-file-name-as-kill)     ;显示路径或名称
    ("s" . one-key-menu-dired-sort)           ;排序
    ("F" . one-key-menu-dired-filter)         ;过滤
-   ("W" . wdired-change-to-wdired-mode)      ;切换到dired编辑模式
+   ;; ("W" . wdired-change-to-wdired-mode)      ;切换到dired编辑模式
    )
  dired-mode-map
  )
 (lazy-load-local-keys
  '(
-   ("w" . wdired-change-to-wdired-mode))
+   ("W" . wdired-change-to-wdired-mode))
  dired-mode-map
  "wdired")
 (lazy-load-local-keys
@@ -167,23 +167,27 @@
    )
  dired-mode-map
  "dired-isearch")
+
 (lazy-load-local-keys
  '(
    ("/" . copy-buffer-file-name-as-kill))
  dired-mode-map
  "buffer-extension")
+
 (lazy-load-local-keys
  '(
    (";" . dired-view-minor-mode-toggle) ;字母输入导航模式
    )
  dired-mode-map
  "dired-view")
+
 (lazy-load-local-keys
  '(
    ("T" . dired-tar-pack-unpack)
    )
  dired-mode-map
  "dired-tar")
+
 (lazy-load-local-keys
  '(
    ("M-o" . dired-toggle-omit)          ;切换忽略状态
@@ -198,27 +202,31 @@
    ("{" . dired-gnome-open-file)        ;用GNOME方式打开文件
    ("E" . dired-touch-now)              ;Touch命令
    ("f" . dired-find-file+)             ;打开当前文件或目录
-   ("C-m" . dired-find-file+)           ;打开当前文件或目录
+   ;; ("C-m" . dired-find-file+)           ;打开当前文件或目录
    )
  dired-mode-map
  "dired-extension")
+
 (lazy-load-local-keys
  '(
    ("\"" . grep-dired-dwim)             ;查找特定的lisp文件
    )
  dired-mode-map
  "grep-dired")
+
 (lazy-load-local-keys
  '(
    ("K" . dired-open-file)              ;批量打开文件
    )
  dired-mode-map
  "dired-open")
+
 (lazy-load-local-keys
  '(
    ("]" . dired-show-file-qrcode))
  dired-mode-map
  "eaf.el")
+
 ;;; ### Wdired ###
 ;;; --- Dired 的编辑模式
 (eval-after-load 'wdired

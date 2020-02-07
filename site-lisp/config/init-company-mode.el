@@ -123,7 +123,7 @@
 (setq company-backends (delete 'company-bbdb company-backends))
 (setq company-backends (delete 'company-eclim company-backends))
 (setq company-backends (delete 'company-gtags company-backends))
-(setq company-backends (delete 'company-etags company-backends))
+;; (setq company-backends (delete 'company-etags company-backends))
 (setq company-backends (delete 'company-oddmuse company-backends))
 (add-to-list 'company-backends 'company-files)
 
