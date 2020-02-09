@@ -52,7 +52,6 @@
     ;; 只读模式下使用vi样式的单按键操作
     (require 'init-vi-navigate)
     (require 'init-performance)
-
     (require 'init-ivy)
 
     ;; 可以延后加载的
