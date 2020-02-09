@@ -122,6 +122,8 @@
     (require 'fullscreen)
     (fullscreen)))
 
+(make_fullscreen)
+
 (provide 'init-startup)
 
 ;;; init-startup.el ends here

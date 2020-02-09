@@ -54,7 +54,7 @@
     (require 'init-performance)
 
     (require 'init-ivy)
-    
+
     ;; 可以延后加载的
     (run-with-idle-timer
      1 nil
@@ -89,16 +89,12 @@
 
         (require 'init-diff-hl)
         (require 'init-projectile)
-    
+
         (require 'init-etags)
         (require 'init-doxymacs)
         ;; Restore session at last.
         (require 'init-session)
         (emacs-session-restore)
 
-        (server-start)            ;为emacsclient准备使用场景，比如git
-        ))
-    )
-)
-
+        
 (provide 'init)
