@@ -91,6 +91,7 @@
         (require 'init-projectile)
     
         (require 'init-etags)
+        (require 'init-doxymacs)
         ;; Restore session at last.
         (require 'init-session)
         (emacs-session-restore)

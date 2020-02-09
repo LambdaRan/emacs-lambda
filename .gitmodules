@@ -202,3 +202,6 @@
 [submodule "site-lisp/extensions/fuz"]
 	path = site-lisp/extensions/fuz
 	url = https://github.com/rustify-emacs/fuz.el.git
+[submodule "yasnippet-php-mode"]
+	path = site-lisp/extensions/yasnippet-php-mode
+	url = https://github.com/barendt/yasnippet-php-mode.git

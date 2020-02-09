@@ -1,17 +1,17 @@
-;;; init-auto-save.el --- Init for auto-save.el
+;;; init-doxymacs.el --- Init for doxymacs
 
-;; Filename: init-auto-save.el
-;; Description: Init for auto-save.el
+;; Filename: init-doxymacs.el
+;; Description: Init for doxymacs
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2014, Andy Stewart, all rights reserved.
-;; Created: 2014-01-04 14:18:20
-;; Version: 0.3
-;; Last-Updated: 2018-07-06 20:43:59
+;; Created: 2014-01-04 11:03:11
+;; Version: 0.1
+;; Last-Updated: 2014-01-04 11:03:11
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-auto-save.el
+;; URL: http://www.emacswiki.org/emacs/download/init-doxymacs.el
 ;; Keywords:
-;; Compatibility: GNU Emacs 27.0.50
+;; Compatibility: GNU Emacs 24.3.50.1
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Init for auto-save.el
+;; Init for doxymacs
 ;;
 
 ;;; Installation:
 ;;
-;; Put init-auto-save.el to your load-path.
+;; Put init-doxymacs.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-auto-save)
+;; (require 'init-doxymacs)
 ;;
 ;; No need more.
 
@@ -60,16 +60,10 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-auto-save RET
+;;      M-x customize-group RET init-doxymacs RET
 ;;
 
 ;;; Change log:
-;;
-;; 2018/07/08
-;;      * Move `auto-save-delete-trailing-whitespace-except-current-line' to `auto-save.el'.
-;;
-;; 2018/06/25
-;;      * Delete whitespace before auto-save file.
 ;;
 ;; 2014/01/04
 ;;      * First released.
@@ -87,14 +81,22 @@
 
 ;;; Require
 
-(require 'auto-save)
 
 ;;; Code:
 
-(auto-save-enable)
-(setq auto-save-silent t)
-(setq auto-save-delete-trailing-whitespace t)
+(dolist (hook (list
+               'c-mode-hook
+               'c++-mode-hook
+               'java-mode-hook
+               'php-mode-hook
+               ))
+  (require 'doxymacs)
+  ;; (require 'lazycat-toolkit)
+  (doxymacs-font-lock)                                                    ;注释高亮模式
+  (add-hook hook 'doxymacs-mode)                                          ;加载文档模式
+  ;; (add-hook hook (lambda () (local-set-key (kbd "C-m") 'my-doxymacs-return))) ;注释智能换行
+  )
 
-(provide 'init-auto-save)
+(provide 'init-doxymacs)
 
-;; init-auto-save.el ends here
+;;; init-doxymacs.el ends here

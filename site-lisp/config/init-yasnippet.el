@@ -84,8 +84,8 @@
   (interactive)
   (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.email")))
 
-(add-to-list `yas/root-directory (concat lazycat-emacs-extension-dir "/yasnippet-snippets/snippets"))
-
+(add-to-list `yas-snippet-dirs (concat lazycat-emacs-extension-dir "/yasnippet-snippets/snippets"))
+(add-to-list 'yas-snippet-dirs (concat lazycat-emacs-extension-dir "/yasnippet-php-mode"))
 
 ;; my private snippets, should be placed before enabling yasnippet
 (setq my-yasnippets (expand-file-name "~/my-yasnippets"))
