@@ -205,3 +205,6 @@
 [submodule "yasnippet-php-mode"]
 	path = site-lisp/extensions/yasnippet-php-mode
 	url = https://github.com/barendt/yasnippet-php-mode.git
+[submodule "company-ctags"]
+	path = site-lisp/extensions/company-ctags
+	url = https://github.com/redguardtoo/company-ctags.git

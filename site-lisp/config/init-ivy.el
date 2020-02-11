@@ -3,6 +3,11 @@
 (require 'counsel)
 (require 'lazy-load)
 
+(when (featurep 'cocoa)
+  ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
+  (require 'exec-path-from-shell)
+  (exec-path-from-shell-initialize))
+
 
 (ivy-mode t)
 

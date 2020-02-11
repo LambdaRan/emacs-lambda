@@ -92,6 +92,7 @@
                'ruby-mode-hook
                'python-mode-hook
                'go-mode-hook
+               ;; 'php-mode
                ))
   (add-hook hook '(lambda ()
                     (lsp)

@@ -109,27 +109,65 @@
 (require 'company-files)
 (require 'company-tabnine)
 (require 'company-tng)
+(require 'company-ctags)
 
 ;;; Code:
 
 ;; Config for company mode.
-(setq company-idle-delay 0.2)   ; set the completion menu pop-up delay
+;; Trigger completion immediately.
+(setq company-idle-delay 0.1)
+;; 补全的最小前缀长度
 (setq company-minimum-prefix-length 1) ; pop up a completion menu by tapping a character
-(setq company-show-numbers nil)   ; do not display numbers on the left
+;; Number the candidates (use M-1, M-2 etc to select completions).
+(setq company-show-numbers t)   ; do not display numbers on the left
 (setq company-require-match nil) ; allow input string that do not match candidate words
+
+;; Don't downcase the returned candidates.
+(setq company-dabbrev-downcase nil
+      ;; make previous/next selection in the popup cycles
+      company-selection-wrap-around t
+      company-dabbrev-ignore-case t
+      ;; @see https://github.com/company-mode/company-mode/issues/146
+      company-tooltip-align-annotations t)
+
+;; config company-ctags
+(setq company-ctags-ignore-case t)  ; I use company-ctags instead
 
 ;; Customize company backends.
 (setq company-backends (delete 'company-xcode company-backends))
 (setq company-backends (delete 'company-bbdb company-backends))
 (setq company-backends (delete 'company-eclim company-backends))
 (setq company-backends (delete 'company-gtags company-backends))
-;; (setq company-backends (delete 'company-etags company-backends))
+(setq company-backends (delete 'company-etags company-backends))
 (setq company-backends (delete 'company-oddmuse company-backends))
+(setq company-backends (delete 'company-cmake company-backends))
 (add-to-list 'company-backends 'company-files)
 
-;; TabNine
-(add-to-list 'company-backends #'company-tabnin)
+;; NOT to load company-mode for certain major modes.
+;; Ironic that I suggested this feature but I totally forgot it
+;; until two years later.
+;; https://github.com/company-mode/company-mode/issues/29
+(setq company-global-modes
+      '(not
+        eshell-mode comint-mode erc-mode gud-mode rcirc-mode
+        minibuffer-inactive-mode))
 
+;; @see https://github.com/redguardtoo/emacs.d/commit/2ff305c1ddd7faff6dc9fa0869e39f1e9ed1182d
+(defadvice company-in-string-or-comment (around company-in-string-or-comment-hack activate)
+  (if (memq major-mode '(php-mode html-mode web-mode nxml-mode))
+      (setq ad-return-value nil)
+    ad-do-it))
+
+;; TabNine
+;; (add-to-list 'company-backends #'company-tabnine)
+(add-to-list 'company-backends '(company-tabnine
+                                 company-etags))
+
+;; (add-to-list 'company-backends 'company-etags)
+;; company-ctags is much faster out of box. No further optimiation needed
+;; (require 'company-ctags)
+;; "Replace `company-etags' with `company-ctags' in BACKENDS."
+(company-ctags-auto-setup)
 
 ;; The free version of TabNine is good enough,
 ;; and below code is recommended that TabNine not always
@@ -140,12 +178,6 @@
                (stringp (funcall company-message-func)))
       (unless (string-match "The free version of TabNine only indexes up to" (funcall company-message-func))
         ad-do-it))))
-
-;; Trigger completion immediately.
-(setq company-idle-delay 0.1)
-
-;; Number the candidates (use M-1, M-2 etc to select completions).
-(setq company-show-numbers t)
 
 ;; Use the tab-and-go frontend.
 ;; Allows TAB to select and complete at the same time.
@@ -158,15 +190,13 @@
 ;; Enable global.
 (global-company-mode)
 
-;; Don't downcase the returned candidates.
-(setq company-dabbrev-downcase nil)
-(setq company-dabbrev-ignore-case t)
-
 ;; Add `company-elisp' backend for elisp.
 (add-hook 'emacs-lisp-mode-hook
           '(lambda ()
              (require 'company-elisp)
+            (make-local-variable 'company-backends)
              (push 'company-elisp company-backends)))
+
 
 ;; Key settings.
 (lazy-load-unset-keys

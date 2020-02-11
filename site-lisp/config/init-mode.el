@@ -230,7 +230,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
             '(lambda ()
             ;; 关闭对HTML的支持
               (setq php-template-compatibility nil)
-              (php-enable-psr2-coding-style)
+              ;; (php-enable-psr2-coding-style)
               ))
 
 

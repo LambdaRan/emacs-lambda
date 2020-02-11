@@ -17,7 +17,7 @@
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
-                      '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "s-c" "s-x" "s-v"))
+                      '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "s-c" "s-x" "s-v" "C-x d"))
 ;;  '("C-x C-f" "C-z" "C-q" "s-W" "M-h" "C-x C-c" "C-\\" "s-c" "s-x"))
 
 
@@ -380,7 +380,7 @@
 ;; --- Dired
 (lazy-load-global-keys
  '(
-   ("C-c d" . dired-jump)
+   ("C-x d" . dired-jump)
    ("C-x C-f" . find-file)
    )
  "init-dired")
@@ -499,4 +499,3 @@
  "init-smex")
 
 (provide 'init-key)
-

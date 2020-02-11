@@ -24,7 +24,6 @@
     (require 'init-generic)
     (require 'lazycat-theme)
     (when (featurep 'cocoa)
-      (message "init cache path from shell")
       (require 'cache-path-from-shell))
 
     ;; 按需加载插件
