@@ -115,9 +115,6 @@
 [submodule "multi-term"]
 	path = site-lisp/extensions/multi-term
 	url = https://github.com/manateelazycat/multi-term.git
-[submodule "highlight-indent-guides"]
-	path = site-lisp/extensions/highlight-indent-guides
-	url = https://github.com/DarthFennec/highlight-indent-guides.git
 [submodule "names"]
 	path = site-lisp/extensions/names
 	url = https://github.com/Malabarba/names.git
@@ -163,9 +160,6 @@
 [submodule "site-lisp/extensions/modern-cpp-font-lock"]
 	path = site-lisp/extensions/modern-cpp-font-lock
 	url = https://github.com/ludwigpacifici/modern-cpp-font-lock.git
-[submodule "site-lisp/extensions/Highlight-Indentation-for-Emacs"]
-	path = site-lisp/extensions/Highlight-Indentation-for-Emacs
-	url = https://github.com/antonj/Highlight-Indentation-for-Emacs.git
 [submodule "site-lisp/extensions/f"]
 	path = site-lisp/extensions/f
 	url = https://github.com/rejeep/f.el.git

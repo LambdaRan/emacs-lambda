@@ -146,7 +146,7 @@
     (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
       (set-buffer-file-coding-system 'unix))))
 
-(add-hook 'find-file-hooks
+(add-hook 'find-file-hook
           'no-junk-please-were-unixish)
 
 (provide 'init-generic)
