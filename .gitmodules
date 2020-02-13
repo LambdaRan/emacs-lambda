@@ -133,9 +133,6 @@
 [submodule "cnfonts"]
 	path = site-lisp/extensions/cnfonts
 	url = https://github.com/tumashu/cnfonts.git
-[submodule "projectile"]
-	path = site-lisp/extensions/projectile
-	url = https://github.com/bbatsov/projectile.git
 [submodule "site-lisp/extensions/benchmark-init"]
 	path = site-lisp/extensions/benchmark-init
 	url = https://github.com/dholm/benchmark-init-el.git
@@ -208,3 +205,6 @@
 [submodule "company-ctags"]
 	path = site-lisp/extensions/company-ctags
 	url = https://github.com/redguardtoo/company-ctags.git
+[submodule "find-file-in-project"]
+	path = site-lisp/extensions/find-file-in-project
+	url = https://github.com/technomancy/find-file-in-project.git

@@ -56,8 +56,8 @@
    ))
 
 ;; Integration with `projectile'
-(with-eval-after-load 'projectile
-  (setq projectile-completion-system 'ivy))
+;; (with-eval-after-load 'projectile
+;;   (setq projectile-completion-system 'ivy))
 
 ;; Integration with `magit'
 (with-eval-after-load 'magit

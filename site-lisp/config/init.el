@@ -86,7 +86,8 @@
         ;; (require 'init-highlight-indent-guides)
 
         (require 'init-diff-hl)
-        (require 'init-projectile)
+        ;; (require 'init-projectile)
+        (require 'init-ffip)
 
         (require 'init-etags)
         (require 'init-doxymacs)
