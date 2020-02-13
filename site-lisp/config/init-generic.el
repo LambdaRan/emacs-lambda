@@ -135,10 +135,19 @@
            kill-buffer-query-functions))
 
 (prefer-coding-system 'gb18030)
-(prefer-coding-system 'utf-16)
+;; (prefer-coding-system 'utf-16)
 (prefer-coding-system 'utf-8-dos)
 (prefer-coding-system 'utf-8-unix)
 (prefer-coding-system 'utf-8-mac)
+
+
+(defun no-junk-please-were-unixish ()
+  (let ((coding-str (symbol-name buffer-file-coding-system)))
+    (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
+      (set-buffer-file-coding-system 'unix))))
+
+(add-hook 'find-file-hooks
+          'no-junk-please-were-unixish)
 
 (provide 'init-generic)
 
