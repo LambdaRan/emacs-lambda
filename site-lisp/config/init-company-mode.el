@@ -141,6 +141,10 @@
 (setq company-backends (delete 'company-etags company-backends))
 (setq company-backends (delete 'company-oddmuse company-backends))
 (setq company-backends (delete 'company-cmake company-backends))
+
+;; (dolist (backend '(company-xcode company-bbdb company-eclim company-gtags company-etags company-oddmuse company-cmake))
+;;   (setq company-backends (delete backend company-backends)))
+
 (add-to-list 'company-backends 'company-files)
 
 ;; NOT to load company-mode for certain major modes.
@@ -210,8 +214,9 @@
 (lazy-load-set-keys
  '(
    ("TAB" . company-complete-selection)
-   ("M-h" . company-complete-selection)
-   ("M-H" . company-complete-common)
+   ;; ("M-h" . company-complete-selection)
+   ("M-h" . company-complete-common)
+   ;; ("M-H" . company-complete-common)
    ("M-w" . company-show-location)
    ("M-s" . company-search-candidates)
    ("M-S" . company-filter-candidates)

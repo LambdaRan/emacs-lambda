@@ -491,11 +491,11 @@
  "init-git")
 
 ;; M-x enhancement,列出最近、常用、其他命令
-(lazy-load-global-keys
- '(
-   ("M-x" . smex)
-   ("C-c C-c M-x" . execute-extended-command)
-   )
- "init-smex")
+;; (lazy-load-global-keys
+;;  '(
+;;    ("M-x" . smex)
+;;    ("C-c C-c M-x" . execute-extended-command)
+;;    )
+;;  "init-smex")
 
 (provide 'init-key)

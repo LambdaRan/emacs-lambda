@@ -96,7 +96,7 @@
 This lets us fix any errors as quickly as possible, but in a
 clean buffer we're an order of magnitude laxer about checking."
   (setq flycheck-idle-change-delay
-        (if flycheck-current-errors 0.5 30.0)))
+        (if flycheck-current-errors 0.5 4.0)))
 
 
 ;; (dolist (hook (list
@@ -108,10 +108,10 @@ clean buffer we're an order of magnitude laxer about checking."
 ;;                ))
 ;; I don't like `global-flycheck-mode', some mode, such as elisp mode don't need.
 (dolist (hook (list
-               'php-mode-hook
                'c-mode-hook
                'c++-mode-hook
-               'go-mode-hook
+               ;; 'go-mode-hook
+               'php-mode-hook
                ))
   (add-hook
    hook
@@ -134,7 +134,7 @@ clean buffer we're an order of magnitude laxer about checking."
       ;;                       '(javascript-jshint)))
 
       ;; (flycheck-add-mode 'javascript-eslint 'web-mode) ;use eslint with web-mode for jsx files
-     
+
 
      ;; Each buffer gets its own idle-change-delay because of the
      ;; buffer-sensitive adjustment above.
@@ -142,34 +142,41 @@ clean buffer we're an order of magnitude laxer about checking."
 
      (add-hook 'flycheck-after-syntax-check-hook
       'magnars/adjust-flycheck-automatic-syntax-eagerness)
-     
+
      ;; (setq flycheck-idle-change-delay 2)
      (setq flycheck-check-syntax-automatically '(idle-change
-                                                  mode-enabled))
-     
-     (setq flycheck-emacs-lisp-load-path 'inherit)          
-     
-      (setq-default flycheck-temp-prefix ".flycheck")
+                                                 mode-enabled))
+
+     (setq flycheck-emacs-lisp-load-path 'inherit)
+     ;; (setq flycheck-indication-mode nil)
+     (setq-default flycheck-temp-prefix ".flycheck")
 
       (with-eval-after-load 'flycheck
         (require 'flycheck-posframe)
         (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
         (setq flycheck-posframe-border-width 1
               flycheck-posframe-inhibit-functions
-              '((lambda (&rest _) (bound-and-true-p company-backend))))
-        )
-      (flycheck-mode 1))))
+              '((lambda (&rest _) (bound-and-true-p company-backend)))))
+
+     (flycheck-mode 1))))
 
 
 ;; 设置flycheck参数，推荐使用本地文件方式 .dir-locals.el
 ;; https://stackoverflow.com/questions/30949847/configuring-flycheck-to-work-with-c11
 ;; Open the root directory of your project in Dired with C-x d,
 ;; and then type M-x add-dir-local-variable RET c++-mode RET flycheck-gcc-language-standard RET "c++11".
-;; This will create a .dir-locals.el file in the root directory of your project. 
+;; This will create a .dir-locals.el file in the root directory of your project.
 (add-hook 'c++-mode-hook
           (lambda ()
-            (setq flycheck-gcc-language-standard "c++11")
-            (setq flycheck-clang-language-standard "c++11")
+            (setq-default flycheck-gcc-language-standard "c++11")
+            (setq-default flycheck-clang-language-standard "c++11")
+            (setq-default flycheck-cppcheck-standards "c++11")
+            (setq include-path '(;;"/usr/local/opt/llvm/include"
+                                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"))
+
+            (setq-default flycheck-clang-include-path include-path)
+            (setq-default flycheck-gcc-include-path include-path)
+            (setq-default flycheck-cppcheck-include-path include-path)
             ))
 
 

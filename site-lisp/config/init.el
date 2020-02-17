@@ -53,6 +53,7 @@
     (require 'init-performance)
     (require 'init-ivy)
 
+    (require 'ran-toolkit)
     ;; 可以延后加载的
     (run-with-idle-timer
      1 nil

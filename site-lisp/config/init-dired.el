@@ -84,7 +84,7 @@
 (setq dired-recursive-deletes 'always)  ;删除东西时不提示
 (setq dired-recursive-copies 'always)   ;拷贝东西时不提示
 (setq dired-listing-switches "-aluh")   ;传给 ls 的参数
-(setq dired-details-hidden-string "") ;设置隐藏dired里面详细信息的字符串
+(setq dired-details-hidden-string "")   ;设置隐藏dired里面详细信息的字符串
 (setq directory-free-space-args "-Pkh") ;目录空间选项
 (setq dired-omit-size-limit nil)        ;dired忽略的上限
 (setq dired-dwim-target t)              ;Dired试着猜处默认的目标目录

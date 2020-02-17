@@ -34,13 +34,14 @@
        (message "not find rg")))
     ;; @see https://oremacs.com/2015/07/23/ivy-multiaction/
     ;; press "M-o" to choose ivy action
-    (ivy-set-actions
-     'counsel-find-file
-     '(("j" find-file-other-frame "other frame")
-       ("b" counsel-find-file-cd-bookmark-action "cd bookmark")
-       ("x" counsel-find-file-extern "open externally")
-       ("d" delete-file "delete")
-       ("r" counsel-find-file-as-root "open as root")))))
+    ;; (ivy-set-actions
+    ;;  'counsel-find-file
+    ;;  '(("j" find-file-other-frame "other frame")
+    ;;    ("b" counsel-find-file-cd-bookmark-action "cd bookmark")
+    ;;    ("x" counsel-find-file-extern "open externally")
+    ;;    ("d" delete-file "delete")
+    ;;    ("r" counsel-find-file-as-root "open as root")))
+    ))
 
 
 ;;; ### Unset key ###

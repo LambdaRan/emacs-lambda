@@ -92,7 +92,7 @@
    '(lambda ()
       (require 'cc-mode)
       ;; (require 'c-eldoc)
-      (require 'modern-cpp-font-lock)
+     (require 'modern-cpp-font-lock)
 
       (defun c-mode-style-setup ()
         (interactive)
