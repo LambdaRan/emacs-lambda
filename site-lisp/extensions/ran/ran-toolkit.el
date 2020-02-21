@@ -9,6 +9,16 @@
         (message "ffname : %s" buffer-file-name))
     (message "empty buffer file name")))
 
+;; https://emacs.stackexchange.com/questions/39105/insert-file-path-via-counsel
+(defun ran-counsel-insert-file-path ()
+  "Insert file path."
+  (interactive)
+  (unless (featurep 'counsel) (require 'counsel))
+  (ivy-read "Find file: " 'read-file-name-internal
+            :matcher #'counsel--find-file-matcher
+            :action
+            (lambda (x)
+              (insert x))))
 
 (provide 'ran-toolkit)
 

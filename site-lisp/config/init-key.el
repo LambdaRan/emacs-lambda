@@ -498,4 +498,8 @@
 ;;    )
 ;;  "init-smex")
 
+;; (lazy-load-set-keys
+;;  '(
+;;    ("C-x C-b" . ibuffer)))
+
 (provide 'init-key)

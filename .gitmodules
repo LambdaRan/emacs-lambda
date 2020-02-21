@@ -202,3 +202,9 @@
 [submodule "find-file-in-project"]
 	path = site-lisp/extensions/find-file-in-project
 	url = https://github.com/technomancy/find-file-in-project.git
+[submodule "hydra"]
+	path = site-lisp/extensions/hydra
+	url = https://github.com/abo-abo/hydra.git
+[submodule "ibuffer-vc"]
+	path = site-lisp/extensions/ibuffer-vc
+	url = https://github.com/purcell/ibuffer-vc.git

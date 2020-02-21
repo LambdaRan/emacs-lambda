@@ -168,6 +168,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
                     ("\\.h$" . c++-mode)
                     ("\\.ll$" . llvm-mode)
                     ("\\.bc$" . hexl-mode)
+                    ("\\.proto$" . protobuf-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 
@@ -199,6 +200,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
 (autoload 'bison-mode "bison")
 (autoload 'pdf-view-mode "init-pdf-tools")
 (autoload 'llvm-mode "llvm-mode")
+(autoload 'protobuf-mode "protobuf-mode")
 
 ;;; ### Auto-fill ###
 ;;; --- 自动换行

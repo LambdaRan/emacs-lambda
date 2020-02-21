@@ -20,6 +20,7 @@
 ;; @see https://github.com/abo-abo/swiper/issues/828
 (setq ivy-display-style 'fancy)
 
+;; (setq counsel-find-file-at-point t)
 (eval-after-load 'counsel
   '(progn
     ;; automatically pick up cygwin cli tools for counsel
@@ -31,7 +32,7 @@
              (concat (executable-find "rg")
                      " -n -M 512 --no-heading --color never -i \"%s\" %s")))
       ('t
-       (message "not find rg")))
+       (message "Not find rg")))
     ;; @see https://oremacs.com/2015/07/23/ivy-multiaction/
     ;; press "M-o" to choose ivy action
     ;; (ivy-set-actions

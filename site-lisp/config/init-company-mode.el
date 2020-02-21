@@ -165,7 +165,7 @@
 ;; TabNine
 ;; (add-to-list 'company-backends #'company-tabnine)
 (add-to-list 'company-backends '(company-tabnine
-                                 company-etags))
+                                 :separate company-etags))
 
 ;; (add-to-list 'company-backends 'company-etags)
 ;; company-ctags is much faster out of box. No further optimiation needed

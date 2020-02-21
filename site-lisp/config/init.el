@@ -92,6 +92,7 @@
 
         (require 'init-etags)
         (require 'init-doxymacs)
+        (require 'init-ibuffer)
         ;; Restore session at last.
         (require 'init-session)
         (emacs-session-restore)

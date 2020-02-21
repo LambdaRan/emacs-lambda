@@ -173,7 +173,6 @@ clean buffer we're an order of magnitude laxer about checking."
             (setq-default flycheck-cppcheck-standards "c++11")
             (setq include-path '(;;"/usr/local/opt/llvm/include"
                                  "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"))
-
             (setq-default flycheck-clang-include-path include-path)
             (setq-default flycheck-gcc-include-path include-path)
             (setq-default flycheck-cppcheck-include-path include-path)
