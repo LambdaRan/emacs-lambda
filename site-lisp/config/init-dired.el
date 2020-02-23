@@ -104,6 +104,7 @@
    (require 'dired+)
    (toggle-dired-find-file-reuse-dir 1) ;使用单一模式浏览Dired
    ))
+
 (setq dired-guess-shell-alist-user      ;设置文件默认打开的模式
       '(
         ;; 压缩包
@@ -138,13 +139,14 @@
    ("F" . one-key-menu-dired-filter)         ;过滤
    ;; ("W" . wdired-change-to-wdired-mode)      ;切换到dired编辑模式
    )
- dired-mode-map
- )
+ dired-mode-map)
+
 (lazy-load-local-keys
  '(
    ("W" . wdired-change-to-wdired-mode))
  dired-mode-map
  "wdired")
+
 (lazy-load-local-keys
  '(
    ("C-s" . dired-isearch-forward)             ;向后搜索
@@ -208,11 +210,11 @@
  dired-mode-map
  "dired-open")
 
-(lazy-load-local-keys
- '(
-   ("]" . dired-show-file-qrcode))
- dired-mode-map
- "eaf.el")
+;; (lazy-load-local-keys
+;;  '(
+;;    ("]" . dired-show-file-qrcode))
+;;  dired-mode-map
+;;  "eaf.el")
 
 ;;; ### Wdired ###
 ;;; --- Dired 的编辑模式
@@ -224,48 +226,48 @@
        '(
          ("C-c C-e" . wdired-format-filename) ;格式化文件名
          )
-       wdired-mode-map
-       ))))
+       wdired-mode-map))))
 
-(defvar one-key-menu-dired-sort-alist nil
-  "The `one-key' menu alist for DIRED-SORT.")
 
-(setq one-key-menu-dired-sort-alist
-      '(
-        (("s" . "Size") . dired-sort-size)
-        (("x" . "Extension") . dired-sort-extension)
-        (("n" . "Name") . dired-sort-name)
-        (("t" . "Modified Time") . dired-sort-time)
-        (("u" . "Access Time") . dired-sort-utime)
-        (("c" . "Create Time") . dired-sort-ctime)))
+;; (defvar one-key-menu-dired-sort-alist nil
+;;   "The `one-key' menu alist for DIRED-SORT.")
 
-(defun one-key-menu-dired-sort ()
-  "The `one-key' menu for DIRED-SORT."
-  (interactive)
-  (require 'one-key)
-  (require 'dired-sort)                 ;排序 dired 文件
-  (one-key-menu "DIRED-SORT" one-key-menu-dired-sort-alist t))
+;; (setq one-key-menu-dired-sort-alist
+;;       '(
+;;         (("s" . "Size") . dired-sort-size)
+;;         (("x" . "Extension") . dired-sort-extension)
+;;         (("n" . "Name") . dired-sort-name)
+;;         (("t" . "Modified Time") . dired-sort-time)
+;;         (("u" . "Access Time") . dired-sort-utime)
+;;         (("c" . "Create Time") . dired-sort-ctime)))
 
-(defvar one-key-menu-dired-filter-alist nil
-  "The `one-key' menu alist for DIRED-FILTER.")
+;; (defun one-key-menu-dired-sort ()
+;;   "The `one-key' menu for DIRED-SORT."
+;;   (interactive)
+;;   (require 'one-key)
+;;   (require 'dired-sort)                 ;排序 dired 文件
+;;   (one-key-menu "DIRED-SORT" one-key-menu-dired-sort-alist t))
 
-(setq one-key-menu-dired-filter-alist
-      '(
-        (("x" . "Extension") . dired-filter-by-extension)
-        (("f" . "File") . dired-filter-by-file)
-        (("d" . "Directory") . dired-filter-by-directory)
-        (("e" . "Execute") . dired-filter-by-executable)
-        (("." . "Dot files") . dired-filter-by-dot-files)
-        (("r" . "Regex") . dired-filter-by-regexp)
-        (("s" . "Symlink") . dired-filter-by-symlink)
-        (("n" . "Name") . dired-filter-by-name)
-        ))
+;; (defvar one-key-menu-dired-filter-alist nil
+;;   "The `one-key' menu alist for DIRED-FILTER.")
 
-(defun one-key-menu-dired-filter ()
-  "The `one-key' menu for DIRED-FILTER."
-  (interactive)
-  (require 'dired-filter)
-  (one-key-menu "DIRED-FILTER" one-key-menu-dired-filter-alist t))
+;; (setq one-key-menu-dired-filter-alist
+;;       '(
+;;         (("x" . "Extension") . dired-filter-by-extension)
+;;         (("f" . "File") . dired-filter-by-file)
+;;         (("d" . "Directory") . dired-filter-by-directory)
+;;         (("e" . "Execute") . dired-filter-by-executable)
+;;         (("." . "Dot files") . dired-filter-by-dot-files)
+;;         (("r" . "Regex") . dired-filter-by-regexp)
+;;         (("s" . "Symlink") . dired-filter-by-symlink)
+;;         (("n" . "Name") . dired-filter-by-name)
+;;         ))
+
+;; (defun one-key-menu-dired-filter ()
+;;   "The `one-key' menu for DIRED-FILTER."
+;;   (interactive)
+;;   (require 'dired-filter)
+;;   (one-key-menu "DIRED-FILTER" one-key-menu-dired-filter-alist t))
 
 (provide 'init-dired)
 

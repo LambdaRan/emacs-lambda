@@ -72,9 +72,9 @@
 ;;
 
 ;;; Require
-(require 'emms)
-(require 'chm-view)
-(require 'doc-view)
+;; (require 'emms)
+;; (require 'chm-view)
+;; (require 'doc-view)
 
 ;;; Code:
 

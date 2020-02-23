@@ -137,9 +137,8 @@
 (prefer-coding-system 'gb18030)
 ;; (prefer-coding-system 'utf-16)
 (prefer-coding-system 'utf-8-dos)
+;; (prefer-coding-system 'utf-8-mac)
 (prefer-coding-system 'utf-8-unix)
-(prefer-coding-system 'utf-8-mac)
-
 
 (defun no-junk-please-were-unixish ()
   (let ((coding-str (symbol-name buffer-file-coding-system)))

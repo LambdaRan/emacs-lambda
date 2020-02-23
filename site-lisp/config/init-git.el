@@ -105,39 +105,39 @@
         ("B"   3 magit-repolist-column-branches                 ((:right-align t)))
         ("S"   3 magit-repolist-column-stashes                  ((:right-align t)))))
 
-(defvar one-key-menu-magit-alist nil
-  "The `one-key' menu alist for MAGIT.")
+;; (defvar one-key-menu-magit-alist nil
+;;   "The `one-key' menu alist for MAGIT.")
 
-(setq one-key-menu-magit-alist
-      '(
-        (("s" . "Magit status") . magit-status+)
-        (("c" . "Magit checkout") . magit-checkout)
-        (("C" . "Magit commit") . magit-commit)
-        (("u" . "Magit push to remote") . magit-push-current-to-pushremote)
-        (("p" . "Magit delete remote branch") . magit-delete-remote-branch)
-        (("i" . "Magit pull") . magit-pull-from-upstream)
-        (("r" . "Magit rebase") . magit-rebase)
-        (("e" . "Magit merge") . magit-merge)
-        (("l" . "Magit log") . magit-log-all)
-        (("L" . "Magit blame") . magit-blame+)
-        (("b" . "Magit branch") . magit-branch)
-        (("B" . "Magit buffer") . magit-process-buffer)
-        (("m" . "Magit submodule add") . magit-submodule-add+)
-        (("d" . "Magit submodule remove") . magit-submodule-remove+)
-        (("M" . "Magit submodule list") . magit-list-submodules)
-        (("D" . "Magit discarded") . magit-discard)
-        (("," . "Magit init") . magit-init)
-        (("." . "Magit add remote") . magit-remote-add)
-        (("h" . "Magithub menu") . one-key-menu-magithub)
-        ))
+;; (setq one-key-menu-magit-alist
+;;       '(
+;;         (("s" . "Magit status") . magit-status+)
+;;         (("c" . "Magit checkout") . magit-checkout)
+;;         (("C" . "Magit commit") . magit-commit)
+;;         (("u" . "Magit push to remote") . magit-push-current-to-pushremote)
+;;         (("p" . "Magit delete remote branch") . magit-delete-remote-branch)
+;;         (("i" . "Magit pull") . magit-pull-from-upstream)
+;;         (("r" . "Magit rebase") . magit-rebase)
+;;         (("e" . "Magit merge") . magit-merge)
+;;         (("l" . "Magit log") . magit-log-all)
+;;         (("L" . "Magit blame") . magit-blame+)
+;;         (("b" . "Magit branch") . magit-branch)
+;;         (("B" . "Magit buffer") . magit-process-buffer)
+;;         (("m" . "Magit submodule add") . magit-submodule-add+)
+;;         (("d" . "Magit submodule remove") . magit-submodule-remove+)
+;;         (("M" . "Magit submodule list") . magit-list-submodules)
+;;         (("D" . "Magit discarded") . magit-discard)
+;;         (("," . "Magit init") . magit-init)
+;;         (("." . "Magit add remote") . magit-remote-add)
+;;         (("h" . "Magithub menu") . one-key-menu-magithub)
+;;         ))
 
-(defun one-key-menu-magit ()
-  "The `one-key' menu for MAGIT."
-  (interactive)
-  (one-key-menu "MAGIT" one-key-menu-magit-alist t))
+;; (defun one-key-menu-magit ()
+;;   "The `one-key' menu for MAGIT."
+;;   (interactive)
+;;   (one-key-menu "MAGIT" one-key-menu-magit-alist t))
 
-(defvar one-key-menu-magithub-alist nil
-  "The `one-key' menu alist for MAGITHUB.")
+;; (defvar one-key-menu-magithub-alist nil
+;;   "The `one-key' menu alist for MAGITHUB.")
 
 ;; (setq one-key-menu-magithub-alist
 ;;       '(

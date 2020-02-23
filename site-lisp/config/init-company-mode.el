@@ -198,7 +198,7 @@
 (add-hook 'emacs-lisp-mode-hook
           '(lambda ()
              (require 'company-elisp)
-            (make-local-variable 'company-backends)
+             (make-local-variable 'company-backends)
              (push 'company-elisp company-backends)))
 
 
