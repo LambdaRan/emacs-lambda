@@ -10,10 +10,10 @@
 
 (defhydra hydra-dired-shortkey (:hint nil)
   "
-SortFile                  FilterFile            Ace Jump - xxxxx
-[_s_] Size                 [_S_] Symlink        [_jw_] word mode
-[_x_] Extension            [_X_] Extension      [_jc_] char mode
-[_n_] Name                 [_N_] Name           [_jl_] line mode
+SortFile                  FilterFile
+[_s_] Size                 [_S_] Symlink
+[_x_] Extension            [_X_] Extension
+[_n_] Name                 [_N_] Name
 [_t_] Modified Time        [_e_] Execute
 [_u_] Access Time          [_f_] File
 [_c_] Create Time          [_._] Dot files
@@ -198,18 +198,19 @@ _SPC_ cancel _o_nly this     _d_elete
   ("Z" winner-redo)
   ("SPC" nil))
 ;; (global-set-key (kbd "C-c C-w") 'hydra-window/body)
+(lazy-load-unset-keys '("C-c C-w" ))
 (lazy-load-set-keys
- '(("C-c C-w" . hydra-window/body)))
+ '(("C-c C-f" . hydra-window/body)))
 ;; }}
 
 ;; {{
 (defhydra hydra-git (:hint nil)
 "
 Git:
-[_s_] Magit status         [_u_] Magit push to remote          [_vv_] diff-hl-diff-goto-hunk
-[_c_] Magit checkout       [_p_] Magit delete remote branch    [_vn_] diff-hl-revert-hunk
-[_C_] Magit commit         [_m_] Magit submodule add           [_vj_] diff-hl-next-hunk
-[_i_] Magit pull           [_d_] Magit submodule remove        [_vk_] diff-hl-previous-hunk
+[_s_] Magit status         [_u_] Magit push to remote          [_v_] diff-hl-diff-goto-hunk
+[_c_] Magit checkout       [_p_] Magit delete remote branch    [_n_] diff-hl-revert-hunk
+[_C_] Magit commit         [_m_] Magit submodule add           [_j_] diff-hl-next-hunk
+[_i_] Magit pull           [_d_] Magit submodule remove        [_k_] diff-hl-previous-hunk
 [_r_] Magit rebase         [_M_] Magit submodule list
 [_e_] Magit merge          [_D_] Magit discarded
 [_l_] Magit log            [_,_] Magit init
@@ -235,15 +236,15 @@ Git:
   ("," magit-init)
   ("." magit-remote-add)
 
-  ("vv" diff-hl-diff-goto-hunk)
-  ("vn" diff-hl-revert-hunk)
-  ("vj" diff-hl-next-hunk)
-  ("vk" diff-hl-previous-hunk)
+  ("v" diff-hl-diff-goto-hunk)
+  ("n" diff-hl-revert-hunk)
+  ("j" diff-hl-next-hunk)
+  ("k" diff-hl-previous-hunk)
 
   ("q" nil))
 ;; (global-set-key (kbd "C-c C-g") 'hydra-git/body)
 (lazy-load-set-keys
- '(("C-c C-g" . (lambda ()
+ '(("C-c C-v" . (lambda ()
                   (interactive)
                   (require 'init-git)
                   (hydra-git/body)))))

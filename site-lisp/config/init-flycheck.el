@@ -108,8 +108,8 @@ clean buffer we're an order of magnitude laxer about checking."
 ;;                ))
 ;; I don't like `global-flycheck-mode', some mode, such as elisp mode don't need.
 (dolist (hook (list
-               'c-mode-hook
-               'c++-mode-hook
+               ;; 'c-mode-hook
+               ;; 'c++-mode-hook
                ;; 'go-mode-hook
                'php-mode-hook
                ))
