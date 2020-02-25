@@ -393,14 +393,14 @@
 ;;  "init-dired")
 
 
-;;; ### Ace jump ###
+;;; ### Avy jump ###
 (lazy-load-global-keys
  '(
-   ("s-<" . ace-jump-word-mode)
-   ("s->" . ace-jump-char-mode)
-   ("s-?" . ace-jump-line-mode)
+   ("C-c n" . avy-goto-word-or-subword-1)
+   ("C-c p" . avy-goto-char-2)
+   ("C-c l" . avy-goto-line)
    )
- "ace-jump-mode")
+ "avy")
 
 ;;; ### Ielm ###
 ;;; --- Emacs Lisp 解释模式

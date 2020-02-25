@@ -1,6 +1,6 @@
 [submodule "auto-save"]
 	path = site-lisp/extensions/auto-save
-	url = https://github.com/manateelazycat/auto-save.git   
+	url = https://github.com/manateelazycat/auto-save.git
 [submodule "aweshell"]
 	path = site-lisp/extensions/aweshell
 	url = https://github.com/manateelazycat/aweshell.git
@@ -37,12 +37,12 @@
 [submodule "flycheck"]
 	 path = site-lisp/extensions/flycheck
 	 url = https://github.com/flycheck/flycheck.git
-[submodule "flycheck-posframe"] 
+[submodule "flycheck-posframe"]
 	 path = site-lisp/extensions/flycheck-posframe
 	 url = https://github.com/alexmurray/flycheck-posframe.git
 [submodule "goto-line-preview"]
 	path = site-lisp/extensions/goto-line-preview
-	url = https://github.com/jcs090218/goto-line-preview.git 
+	url = https://github.com/jcs090218/goto-line-preview.git
 [submodule "site-lisp/extensions/magit"]
 	path = site-lisp/extensions/magit
 	url = https://github.com/magit/magit
@@ -51,7 +51,7 @@
 	 url = https://github.com/aspiers/smooth-scrolling.git
 [submodule "site-lisp/extensions/unicode-escape"]
 	path = site-lisp/extensions/unicode-escape
-	url = https://github.com/kosh04/unicode-escape.el.git	 
+	url = https://github.com/kosh04/unicode-escape.el.git
 [submodule "lazycat-theme"]
 	path = site-lisp/extensions/lazycat-theme
 	url = https://github.com/manateelazycat/lazycat-theme.git
@@ -169,9 +169,6 @@
 [submodule "site-lisp/extensions/all-the-icons"]
 	path = site-lisp/extensions/all-the-icons
 	url = https://github.com/domtronn/all-the-icons.el.git
-[submodule "site-lisp/extensions/ace-jump-mode"]
-	path = site-lisp/extensions/ace-jump-mode
-	url = https://github.com/winterTTr/ace-jump-mode.git
 [submodule "site-lisp/extensions/emacs-memoize"]
 	path = site-lisp/extensions/emacs-memoize
 	url = https://github.com/skeeto/emacs-memoize.git
