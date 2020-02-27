@@ -55,6 +55,10 @@
    ("C-x C-f" . counsel-find-file)
    ("M-x" . counsel-M-x)
    ("C-x b" . ivy-switch-buffer)
+
+   ("C-c C-l" . counsel-locate)
+   ("C-c d" . counsel-dired-jump)
+   ("C-c C-e" . counsel-find-file-extern)
    ))
 
 ;; Integration with `projectile'

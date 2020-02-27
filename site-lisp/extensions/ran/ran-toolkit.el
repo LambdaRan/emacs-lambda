@@ -27,7 +27,7 @@
   "git push origin HEAD:refs/for/[branch] "
   (interactive)
   (require 'magit)
-  (let ((git-refs-command "push origin HEAD:refs/for/")
+  (let ((git-refs-command " push origin HEAD:refs/for/")
         (branch (magit-read-other-branch-or-commit "Checkout" "origin/master")))
     (setq git-refs-command (concat git-refs-command branch))
     (when (y-or-n-p (concat "Next run : git" git-refs-command))

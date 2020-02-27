@@ -72,45 +72,40 @@
 ;;
 
 ;;; Require
-(require 'yasnippet)
+(add-hook 'prog-mode-hook
+          '(lambda ()
+             (require 'yasnippet)
 
-;;; Code:
+             (defun get-git-user-name ()
+               (interactive)
+               (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.name")))
 
-(defun get-git-user-name ()
-  (interactive)
-  (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.name")))
+             (defun get-git-user-email ()
+               (interactive)
+               (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.email")))
 
-(defun get-git-user-email ()
-  (interactive)
-  (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.email")))
+            (add-to-list `yas-snippet-dirs (concat lazycat-emacs-extension-dir "/yasnippet-snippets/snippets"))
+            (add-to-list 'yas-snippet-dirs (concat lazycat-emacs-extension-dir "/yasnippet-php-mode"))
 
-(add-to-list `yas-snippet-dirs (concat lazycat-emacs-extension-dir "/yasnippet-snippets/snippets"))
-(add-to-list 'yas-snippet-dirs (concat lazycat-emacs-extension-dir "/yasnippet-php-mode"))
+            ;; my private snippets, should be placed before enabling yasnippet
+            (setq my-yasnippets (expand-file-name "~/my-yasnippets"))
 
-;; my private snippets, should be placed before enabling yasnippet
-(setq my-yasnippets (expand-file-name "~/my-yasnippets"))
+            ;; http://stackoverflow.com/questions/7619640/emacs-latex-yasnippet-why-are-newlines-inserted-after-a-snippet
+            (setq-default mode-require-final-newline nil)
 
-;; http://stackoverflow.com/questions/7619640/emacs-latex-yasnippet-why-are-newlines-inserted-after-a-snippet
-(setq-default mode-require-final-newline nil)
+            ;; 添加自己的模板
+            (when (and  (file-exists-p my-yasnippets)
+                        (not (member my-yasnippets yas-snippet-dirs)))
+              (add-to-list 'yas-snippet-dirs my-yasnippets))
 
-;; 添加自己的模板
-(when (and  (file-exists-p my-yasnippets)
-            (not (member my-yasnippets yas-snippet-dirs)))
-  (add-to-list 'yas-snippet-dirs my-yasnippets))
+            (yas-global-mode 1)
 
-
-(yas-global-mode 1)
-
-;; Disable yasnippet mode on some mode.
-(dolist (hook (list
-               'term-mode-hook
-               ))
-  (add-hook hook '(lambda () (yas-minor-mode -1))))
-
-
-
-    
-
+            ;; Disable yasnippet mode on some mode.
+            (dolist (hook (list
+                           'term-mode-hook
+                           ))
+              (add-hook hook '(lambda () (yas-minor-mode -1))))
+            ))
 
 ;; ;; Jump to end of snippet definition
 ;; (define-key yas-keymap (kbd "<return>") 'yas-exit-all-snippets)
