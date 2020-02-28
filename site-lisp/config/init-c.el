@@ -86,23 +86,48 @@
 
 (defun c-mode-style-setup ()
   (interactive)
-  "Set up c-mode and related modes.
-Includes support for Qt code (signal, slots and alikes)."
+  "Set up C/C++ mode"
+  (unless (eq major-mode 'java-mode)
 
-  ;; (setq c-eldoc-cpp-command "/usr/bin/clang")
-  ;; (setq c-eldoc-includes "/usr/local/include")
-  ;; eldoc.
-  ;; (c-turn-on-eldoc-mode)
+    ;; @see http://stackoverflow.com/questions/3509919/ \
+    ;; emacs-c-opening-corresponding-header-file
+    (local-set-key (kbd "C-x C-o") 'ff-find-other-file)
+    ;; 找不到同名文件时不创建
+    (setq ff-always-try-to-create nil)
+    (setq cc-search-directories '("."
+                                  "/usr/include"
+                                  "/usr/local/include/*"
+                                  "../*/include"
+                                  "../*/src"
+                                  "$PROJECT/include"
+                                  "$PROJECT/src"
+                                  "/usr/local/opt/llvm/include/c++/v1"
+                                  ))
+    ;; make a #define be left-aligned
+    (setq c-electric-pound-behavior (quote (alignleft)))
 
-  ;; cpp font lock.
-  (modern-c++-font-lock-global-mode t)
+    ;; cpp font lock.
+    (modern-c++-font-lock-global-mode t)
 
-  ;; base-style
-  (c-set-style "stroustrup")
-  
-  ;; (setq c-electric-flag nil)
-  ;; (electric-indent-mode -1)
-  (setq c-syntactic-indentation nil))
+    ;; google-c-style
+    (google-set-c-style)
+    (google-make-newline-indent)
+    ;; base-style
+    ;; (c-set-style "stroustrup")
+    (setq c-electric-flag nil)
+    ;; (setq-default c-electric-flag nil)
+    ;; 回车自动缩进,默认打开
+    ;; (electric-indent-mode -1)
+
+    ;; https://www.gnu.org/software/emacs/manual/html_node/ccmode/Syntactic-Symbols.html#Syntactic-Symbols
+    (setq c-syntactic-indentation t)
+    (c-set-offset 'access-label -2)
+
+    (subword-mode)
+
+
+    ))
+
 
 (dolist (hook (list
                'c-mode-hook
@@ -116,7 +141,8 @@ Includes support for Qt code (signal, slots and alikes)."
      ;; (require 'c-eldoc)
      (require 'modern-cpp-font-lock)
      (require 'google-c-style)
-     (google-set-c-style)
+
+
      (c-mode-style-setup)
      )))
 

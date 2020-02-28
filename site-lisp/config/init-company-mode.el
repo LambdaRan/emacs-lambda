@@ -225,6 +225,7 @@
                 ("M-n" . company-select-next)
                 ("M-p" . company-select-previous)
                 ("M-i" . yas-expand)
+                ("RET" . company-complete-selection)
                 )
               company-active-map)
 
