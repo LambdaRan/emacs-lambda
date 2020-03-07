@@ -44,10 +44,40 @@
     ;;    ("r" counsel-find-file-as-root "open as root")))
     ))
 
+(defun counsel-dired-jump@override (orig &optional initial-input initial-directory)
+  "Jump to a directory (see `dired-jump') below the current directory.
+List all sub-directories within the current directory.
+INITIAL-INPUT can be given as the initial minibuffer input.
+INITIAL-DIRECTORY, if non-nil, is used as the root directory for search.
+if nil, is used as the project root directory for search."
+  (interactive
+   (list nil
+         (when current-prefix-arg
+           (counsel-read-directory-name "From directory: "))))
+  ;; 默认在工程中搜索目录
+  (unless initial-directory
+    (let ((project (project-current)))
+      (when project
+          (setq initial-directory (expand-file-name (cdr project))))))
+
+  (counsel-require-program find-program)
+  (let ((default-directory (or initial-directory default-directory)))
+    (ivy-read "Find directory: "
+              (cdr
+               (counsel--find-return-list counsel-dired-jump-args))
+              :matcher #'counsel--find-file-matcher
+              :initial-input initial-input
+              :action (lambda (d) (dired-jump nil (expand-file-name d)))
+              :history 'file-name-history
+              :keymap counsel-find-file-map
+              :caller 'counsel-dired-jump)))
+
+(advice-add 'counsel-dired-jump :override #'counsel-dired-jump@override)
 
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
+
                       '("C-x C-f" "M-x" "C-x b"))
 
 (lazy-load-set-keys
@@ -56,9 +86,9 @@
    ("M-x" . counsel-M-x)
    ("C-x b" . ivy-switch-buffer)
 
-   ("C-c C-l" . counsel-locate)
-   ("C-c d" . counsel-dired-jump)
-   ("C-c C-e" . counsel-find-file-extern)
+   ("C-c M-l" . counsel-locate)
+   ("C-c M-d" . counsel-dired-jump)
+   ("C-c M-e" . counsel-find-file-extern)
    ))
 
 ;; Integration with `projectile'

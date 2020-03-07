@@ -72,8 +72,8 @@
 ;;
 
 ;;; Require
-(add-hook 'prog-mode-hook
-          '(lambda ()
+;; (add-hook 'prog-mode-hook
+          ;; '(lambda ()
              (require 'yasnippet)
 
              (defun get-git-user-name ()
@@ -105,7 +105,7 @@
                            'term-mode-hook
                            ))
               (add-hook hook '(lambda () (yas-minor-mode -1))))
-            ))
+            ;; ))
 
 ;; ;; Jump to end of snippet definition
 ;; (define-key yas-keymap (kbd "<return>") 'yas-exit-all-snippets)
