@@ -294,6 +294,6 @@ _v_ variable                          _w_ where is something defined
   ("w" where-is))
 ;; (global-set-key (kbd "C-c C-q") 'hydra-describe/body)
 (lazy-load-set-keys
- '(("C-c C-q" . hydra-describe/body)))
+ '(("C-c M-q" . hydra-describe/body)))
 
 (provide 'init-hydra)

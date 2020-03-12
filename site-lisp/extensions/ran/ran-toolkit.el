@@ -33,6 +33,35 @@
     (when (y-or-n-p (concat "Next run : " git-refs-command))
       (magit-git-command git-refs-command))))
 
+;; https://github.com/manateelazycat/smart-align
+;; 增加选择区域
+(defun smart-align ()
+  (interactive)
+  (with-demoted-errors
+      "Something wrong when align."
+
+    ;; (let ((align-start
+    ;;        (save-excursion
+    ;;          (backward-up-list)
+    ;;          (point)
+    ;;          ))
+    ;;       (align-end
+    ;;        (save-excursion
+    ;;          (up-list)
+    ;;          (point))))
+    ;;   (align-regexp align-start align-end "\\(\\s-*\\)\\(=\\|:\\)" 1 1))
+    (let ((align-start) (align-end))
+      (if (use-region-p)
+        (setq align-start (region-beginning)
+              align-end (region-end))
+        (setq align-start (save-excursion
+                            (backward-up-list)
+                            (point))
+              align-end (save-excursion
+                          (up-list)
+                          (point))))
+      (align-regexp align-start align-end "\\(\\s-*\\)\\(=\\|:\\)" 1 1))))
+
 (provide 'ran-toolkit)
 
 ;;; basic-toolkit.el ends here

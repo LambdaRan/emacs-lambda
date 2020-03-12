@@ -114,6 +114,8 @@
     (google-make-newline-indent)
     ;; base-style
     ;; (c-set-style "stroustrup")
+
+    ;; 输入标点符号时自动缩进，禁止
     (setq c-electric-flag nil)
     ;; (setq-default c-electric-flag nil)
     ;; 回车自动缩进,默认打开
@@ -124,8 +126,6 @@
     (c-set-offset 'access-label -2)
 
     (subword-mode)
-
-
     ))
 
 
@@ -141,7 +141,6 @@
      ;; (require 'c-eldoc)
      (require 'modern-cpp-font-lock)
      (require 'google-c-style)
-
 
      (c-mode-style-setup)
      )))

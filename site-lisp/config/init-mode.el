@@ -217,7 +217,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
                ))
   (add-hook hook
             '(lambda ()
-            ;; Elisp 缩进
+              ;; Elisp 缩进
               (require 'sly-el-indent)
               (sly-el-indent-setup)
               )))
@@ -229,11 +229,17 @@ The test for presence of the car of ELT-CONS is done with `equal'."
 ;; 安装php-mode
 ;; https://github.com/emacs-php/php-mode
 (add-hook 'php-mode-hook
-            '(lambda ()
+          '(lambda ()
             ;; 关闭对HTML的支持
-              (setq php-template-compatibility nil)
-              ;; (php-enable-psr2-coding-style)
-              ))
+            (setq php-template-compatibility nil)
+
+            (setq tab-width 4
+             c-basic-offset 4
+             c-hanging-comment-ender-p nil
+             indent-tabs-mode nil)
+            (php-enable-pear-coding-style)
+            ;; (php-enable-default-coding-style)
+            ))
 
 
 (provide 'init-mode)

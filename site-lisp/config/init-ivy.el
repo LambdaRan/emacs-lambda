@@ -89,6 +89,7 @@ if nil, is used as the project root directory for search."
    ("C-c M-l" . counsel-locate)
    ("C-c M-d" . counsel-dired-jump)
    ("C-c M-e" . counsel-find-file-extern)
+   ("C-c M-i" . counsel-semantic-or-imenu)
    ))
 
 ;; Integration with `projectile'
