@@ -94,8 +94,8 @@
             (setq-default mode-require-final-newline nil)
 
             ;; 添加自己的模板
-            (when (and  (file-exists-p my-yasnippets)
-                        (not (member my-yasnippets yas-snippet-dirs)))
+            (when (and (file-exists-p my-yasnippets)
+                       (not (member my-yasnippets yas-snippet-dirs)))
               (add-to-list 'yas-snippet-dirs my-yasnippets))
 
             (yas-global-mode 1)
@@ -106,6 +106,11 @@
                            ))
               (add-hook hook '(lambda () (yas-minor-mode -1))))
             ;; ))
+(defun ran-yas-reload-all ()
+  "Reload yasnippets."
+  (interactive)
+  (yas-reload-all)
+  (yas-minor-mode 1))
 
 ;; ;; Jump to end of snippet definition
 ;; (define-key yas-keymap (kbd "<return>") 'yas-exit-all-snippets)
