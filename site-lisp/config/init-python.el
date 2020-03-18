@@ -91,8 +91,13 @@
  python-mode-map
  "python-extension")
 
+;; Disable readline based native completion
+(setq python-shell-completion-native-enable nil)
+;; default python3
+(when (and (executable-find "python3")
+           (string= python-shell-interpreter "python"))
+  (setq python-shell-interpreter "python3"))
+
 (provide 'init-python)
 
 ;;; init-python.el ends here
-
-
