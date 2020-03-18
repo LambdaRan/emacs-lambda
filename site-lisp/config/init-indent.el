@@ -121,8 +121,8 @@
                'scss-mode-hook
                'coffee-mode-hook
                'js-mode-hook
-               'protobuf-mode
-               'php-mode
+               'protobuf-mode-hook
+               'php-mode-hook
                ))
   (add-hook hook '(lambda ()
                     (setq indent-tabs-mode nil)
