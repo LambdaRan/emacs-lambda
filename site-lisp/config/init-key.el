@@ -114,8 +114,8 @@
 (lazy-load-global-keys
  '(
    ("C-z l" . display-line-numbers-mode) ;行号模式切换
-   ("M-s-n" . comment-part-move-down)    ;向下移动注释
-   ("M-s-p" . comment-part-move-up)      ;向上移动注释
+   ;; ("M-s-n" . comment-part-move-down)    ;向下移动注释
+   ;; ("M-s-p" . comment-part-move-up)      ;向上移动注释
    ("C-s-n" . comment-dwim-next-line)    ;移动到上一行并注释x
    ("C-s-p" . comment-dwim-prev-line)    ;移动到下一行并注释x
    ("M-2" . indent-buffer)               ;自动格式化当前Buffer
@@ -139,7 +139,12 @@
  "basic-toolkit")
 
 
-
+(lazy-load-global-keys
+ '(
+   ("M-s-n" . ran-comment-line-next-line) ; 向下移动注释
+   ("M-s-p" . ran-comment-line-prev-line) ; 向上移动注释
+   )
+ "ran-toolkit")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (lazy-load-global-keys

@@ -62,6 +62,17 @@
                           (point))))
       (align-regexp align-start align-end "\\(\\s-*\\)\\(=\\|:\\)" 1 1))))
 
+
+(defun ran-comment-line-next-line ()
+  "Comment line and move to the next line."
+  (interactive)
+  (comment-line 1))
+
+(defun ran-comment-line-prev-line ()
+  "Comment line and move to previous line. "
+  (interactive)
+  (comment-line -1))
+
 (provide 'ran-toolkit)
 
 ;;; basic-toolkit.el ends here
