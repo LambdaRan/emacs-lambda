@@ -88,9 +88,10 @@
 ;;; Code:
 (awesome-tab-mode t)
 (setq awesome-tab-height 130)
-(setq awesome-tab-icon-v-adjust -0.1)
+;; (setq awesome-tab-icon-v-adjust 0)
 (setq awesome-tab-icon-height 0.8)
-
+;; (setq awesome-tab-label-fixed-length 14)
+(setq awesome-tab-active-bar-height 22)
 (provide 'init-awesome-tab)
 
 ;;; init-awesome-tab.el ends here
