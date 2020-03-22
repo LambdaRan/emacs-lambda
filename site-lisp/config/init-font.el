@@ -90,10 +90,34 @@
      ((featurep 'cocoa)
       (setq emacs-font-name "Monaco"))
      ((string-equal system-type "gnu/linux")
-      (setq emacs-font-name "WenQuanYi Micro Hei Mono")))
+      ;; (setq emacs-font-name "WenQuanYi Micro Hei Mono")
+      (setq emacs-font-name "Source Code Pro")))
     (when (display-grayscale-p)
       (set-frame-font (format "%s-%s" (eval emacs-font-name) (eval emacs-font-size)))
       (set-fontset-font (frame-parameter nil 'font) 'unicode (eval emacs-font-name))))
+
+;; Use better titlebar for MacOS.
+(when (featurep 'cocoa)
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . dark))
+  )
+
+;; Set default face.
+(cond
+  ((featurep 'cocoa)
+   (custom-set-faces
+    '(default ((t (:inherit nil :stipple nil :background "black" :foreground "#30A339"
+                   :inverse-video nil :box nil :strike-through nil :overline nil
+                   :underline nil :slant normal :weight normal :height 130
+                   :width normal :family "Monaco"))))
+    ))
+  ((string-equal system-type "gnu/linux")
+   (custom-set-faces
+    '(default ((t (:inherit nil :stipple nil :background "black" :foreground "#30A339"
+                   :inverse-video nil :box nil :strike-through nil :overline nil
+                   :underline nil :slant normal :weight normal :height 130
+                   :width normal :family "WenQuanYi Micro Hei Mono"))))
+    )))
 
 (provide 'init-font)
 

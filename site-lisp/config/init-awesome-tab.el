@@ -87,9 +87,9 @@
 ;; (set-face-attribute 'header-line nil  :height 160)
 ;;; Code:
 (awesome-tab-mode t)
-(setq awesome-tab-height 160)
-;; (setq awesome-tab-icon-v-adjust 0)
-;; (setq awesome-tab-icon-height 0.6)
+(setq awesome-tab-height 130)
+(setq awesome-tab-icon-v-adjust -0.1)
+(setq awesome-tab-icon-height 0.8)
 
 (provide 'init-awesome-tab)
 
