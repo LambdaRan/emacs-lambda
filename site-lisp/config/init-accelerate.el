@@ -1,17 +1,17 @@
-;;; init-awesome-tab.el --- Configuration for awesome-tab.el
+;;; init-accelerate.el --- Accelerate the start Emacs
 
-;; Filename: init-awesome-tab.el
-;; Description: Configuration for awesome-tab.el
+;; Filename: init-accelerate.el
+;; Description: Accelerate the start Emacs
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2018, Andy Stewart, all rights reserved.
-;; Created: 2018-09-25 19:31:19
+;; Copyright (C) 2020, Andy Stewart, all rights reserved.
+;; Created: 2020-03-22 11:17:30
 ;; Version: 0.1
-;; Last-Updated: 2018-09-25 19:31:19
+;; Last-Updated: 2020-03-22 11:17:30
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-awesome-tab.el
+;; URL: http://www.emacswiki.org/emacs/download/init-accelerate.el
 ;; Keywords:
-;; Compatibility: GNU Emacs 27.0.50
+;; Compatibility: GNU Emacs 26.3
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Configuration for awesome-tab.el
+;; Accelerate the start Emacs
 ;;
 
 ;;; Installation:
 ;;
-;; Put init-awesome-tab.el to your load-path.
+;; Put init-accelerate.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-awesome-tab)
+;; (require 'init-accelerate)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-awesome-tab RET
+;;      M-x customize-group RET init-accelerate RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2018/09/25
+;; 2020/03/22
 ;;      * First released.
 ;;
 
@@ -80,17 +80,18 @@
 ;;
 
 ;;; Require
-(require 'awesome-tab)
-(require 'all-the-icons)
-;; (header-line :inherit 'default :height (face-attribute 'default :height))
-;; (set-face-attribute 'mode-line nil  :height 100)
-;; (set-face-attribute 'header-line nil  :height 160)
+
+
 ;;; Code:
-(awesome-tab-mode t)
-(setq awesome-tab-height 160)
-;; (setq awesome-tab-icon-v-adjust 0)
-;; (setq awesome-tab-icon-height 0.6)
+(setq
+ ;; 不要缩放frame.
+ frame-inhibit-implied-resize t
+ ;; 默认用最简单的模式
+ initial-major-mode 'fundamental-mode
+ ;; 不要自动启用package
+ package-enable-at-startup nil
+ package--init-file-ensured t)
 
-(provide 'init-awesome-tab)
+(provide 'init-accelerate)
 
-;;; init-awesome-tab.el ends here
+;;; init-accelerate.el ends here

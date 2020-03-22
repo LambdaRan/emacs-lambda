@@ -1,17 +1,17 @@
-;;; init-awesome-tab.el --- Configuration for awesome-tab.el
+;;; init-font.el --- Font configuration
 
-;; Filename: init-awesome-tab.el
-;; Description: Configuration for awesome-tab.el
+;; Filename: init-font.el
+;; Description: Font configuration
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2018, Andy Stewart, all rights reserved.
-;; Created: 2018-09-25 19:31:19
+;; Copyright (C) 2020, Andy Stewart, all rights reserved.
+;; Created: 2020-03-22 11:16:26
 ;; Version: 0.1
-;; Last-Updated: 2018-09-25 19:31:19
+;; Last-Updated: 2020-03-22 11:16:26
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-awesome-tab.el
+;; URL: http://www.emacswiki.org/emacs/download/init-font.el
 ;; Keywords:
-;; Compatibility: GNU Emacs 27.0.50
+;; Compatibility: GNU Emacs 26.3
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Configuration for awesome-tab.el
+;; Font configuration
 ;;
 
 ;;; Installation:
 ;;
-;; Put init-awesome-tab.el to your load-path.
+;; Put init-font.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-awesome-tab)
+;; (require 'init-font)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-awesome-tab RET
+;;      M-x customize-group RET init-font RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2018/09/25
+;; 2020/03/22
 ;;      * First released.
 ;;
 
@@ -80,17 +80,21 @@
 ;;
 
 ;;; Require
-(require 'awesome-tab)
-(require 'all-the-icons)
-;; (header-line :inherit 'default :height (face-attribute 'default :height))
-;; (set-face-attribute 'mode-line nil  :height 100)
-;; (set-face-attribute 'header-line nil  :height 160)
+
+
 ;;; Code:
-(awesome-tab-mode t)
-(setq awesome-tab-height 160)
-;; (setq awesome-tab-icon-v-adjust 0)
-;; (setq awesome-tab-icon-height 0.6)
 
-(provide 'init-awesome-tab)
+(let ((emacs-font-size 13)
+        emacs-font-name)
+    (cond
+     ((featurep 'cocoa)
+      (setq emacs-font-name "Monaco"))
+     ((string-equal system-type "gnu/linux")
+      (setq emacs-font-name "WenQuanYi Micro Hei Mono")))
+    (when (display-grayscale-p)
+      (set-frame-font (format "%s-%s" (eval emacs-font-name) (eval emacs-font-size)))
+      (set-fontset-font (frame-parameter nil 'font) 'unicode (eval emacs-font-name))))
 
-;;; init-awesome-tab.el ends here
+(provide 'init-font)
+
+;;; init-font.el ends here
