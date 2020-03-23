@@ -5,6 +5,9 @@
 (load-theme 'lazycat-dark t)
 ;; (load-theme 'lazycat-light t)
 
+;; (setq mode-line-format nil)
+(setq-default mode-line-format (remove 'mode-line-buffer-identification mode-line-format))
+
 (let ((bg-mode (frame-parameter nil 'background-mode)))
   (if (eq bg-mode 'dark)
       (custom-set-faces
@@ -25,16 +28,4 @@
        '(hl-line ((t (:background "gray84"))))))))
 (advice-add 'lazycat-theme-toggle :after 'ran-custom-theme)
 
-;; (lazycat-themes-set-faces 'lazycat-dark
-;;     '(mode-line-buffer-id :weight 'bold  :height 1))
-  ;; (set-face-attribute 'mode-line-buffer-id nil
-  ;;                     :height 0.1
-  ;;                     :box nil)
-  ;; (set-face-attribute 'mode-line nil
-  ;;                     :height 1
-  ;;                     :box nil)
-  ;; (set-face-attribute 'mode-line-inactive nil
-  ;;                     :height 1
-  ;;                     :box nil
-  ;;                     :inherit 'unspecified)
 (provide 'init-theme)
