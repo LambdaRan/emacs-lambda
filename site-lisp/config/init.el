@@ -2,7 +2,7 @@
 (require 'init-accelerate)
 
 ;; 字体设置
-;; (require 'init-font)
+(require 'init-font)
 
 (let (
       ;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
@@ -23,8 +23,8 @@
     (benchmark-init/activate)
 
     ;; 先设置背景，避免闪烁。
-    (custom-set-faces
-        '(default ((t (:background "black" :foreground "#137D11")))))
+    ;; (custom-set-faces
+        ;; '(default ((t (:background "black" :foreground "#137D11")))))
 
     (require 'init-startup)
     (require 'init-generic)

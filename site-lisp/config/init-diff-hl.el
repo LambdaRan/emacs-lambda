@@ -18,6 +18,23 @@
 (setq diff-hl-margin-side 'right)
 
 (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+
+(dolist (hook (list
+               'prog-mode-hook
+               ;; conf
+               'conf-mode-hook
+               ;; 'conf-unix-mode-hook
+               ;; 'conf-windows-mode-hook
+               ;; 'conf-javaprop-mode-hook
+               ;; 'conf-space-mode-hook
+               ;; 'conf-colon-mode-hook
+               ;; 'conf-ppd-mode-hook
+               ;; 'conf-toml-mode-hook
+               ;; 'conf-windows-mode-hook
+               ;; 'conf-xdefaults-mode-hook
+               ))
+  (add-hook hook 'turn-on-diff-hl-mode))
+
 (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
 
 (add-hook 'dired-mode-hook 'diff-hl-dired-mode-unless-remote)

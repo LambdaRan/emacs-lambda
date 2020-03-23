@@ -1,10 +1,40 @@
 
 (require 'lazycat-theme)
 ;; (require 'lazycat-dark-theme)
-;; (setq lazycat-dark-padded-modeline 1)
 
-;; (load-theme 'lazycat-dark t)
-    ;; (require 'lazycat-theme)
-    ;; (load-theme 'lazycat-dark t)
+(load-theme 'lazycat-dark t)
+;; (load-theme 'lazycat-light t)
 
+(let ((bg-mode (frame-parameter nil 'background-mode)))
+  (if (eq bg-mode 'dark)
+      (custom-set-faces
+       '(hl-line ((t (:background "gray22"))))
+       '(font-lock-keyword-face ((((class color) (min-colors 88) (background dark)) (:foreground "#EE8822")))))
+    (custom-set-faces
+     '(hl-line ((t (:background "gray84")))))))
+
+;; 切换主题后更改行高亮颜色
+(defun ran-custom-theme ()
+  "Toggle lazycat-theme after custom some face. "
+  ;; (interactive)
+  (let ((bg-mode (frame-parameter nil 'background-mode)))
+    (if (eq bg-mode 'dark)
+        (custom-set-faces
+         '(hl-line ((t (:background "gray22")))))
+      (custom-set-faces
+       '(hl-line ((t (:background "gray84"))))))))
+(advice-add 'lazycat-theme-toggle :after 'ran-custom-theme)
+
+;; (lazycat-themes-set-faces 'lazycat-dark
+;;     '(mode-line-buffer-id :weight 'bold  :height 1))
+  ;; (set-face-attribute 'mode-line-buffer-id nil
+  ;;                     :height 0.1
+  ;;                     :box nil)
+  ;; (set-face-attribute 'mode-line nil
+  ;;                     :height 1
+  ;;                     :box nil)
+  ;; (set-face-attribute 'mode-line-inactive nil
+  ;;                     :height 1
+  ;;                     :box nil
+  ;;                     :inherit 'unspecified)
 (provide 'init-theme)
