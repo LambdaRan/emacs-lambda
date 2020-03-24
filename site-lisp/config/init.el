@@ -39,7 +39,7 @@
     (require 'display-line-numbers)
     (require 'basic-toolkit)
     (require 'redo)
-    (require 'highlight-parentheses)
+    (require 'init-highlight-parentheses)
     (require 'awesome-pair)
     (require 'init-awesome-pair)
     (require 'init-awesome-tray)
