@@ -77,8 +77,7 @@ if nil, is used as the project root directory for search."
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
-
-                      '("C-x C-f" "M-x" "C-x b"))
+                      '("C-x C-f" "M-x" "C-x b" "M-y"))
 
 (lazy-load-set-keys
  '(
@@ -86,6 +85,7 @@ if nil, is used as the project root directory for search."
    ("M-x" . counsel-M-x)
    ("C-x b" . ivy-switch-buffer)
 
+   ("M-y" . counsel-yank-pop)
    ("C-c M-l" . counsel-locate)
    ("C-c M-d" . counsel-dired-jump)
    ("C-c M-e" . counsel-find-file-extern)

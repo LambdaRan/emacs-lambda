@@ -13,9 +13,6 @@
 [submodule "awesome-tray"]
 	path = site-lisp/extensions/awesome-tray
 	url = https://github.com/manateelazycat/awesome-tray.git
-[submodule "c-eldoc"]
-        path = site-lisp/extensions/c-eldoc
-	url = https://github.com/mooz/c-eldoc.git
 [submodule "company-mode"]
         path = site-lisp/extensions/company-mode
 	url = https://github.com/company-mode/company-mode.git
@@ -64,9 +61,6 @@
 [submodule "vi-navigate"]
 	path = site-lisp/extensions/vi-navigate
 	url = https://github.com/manateelazycat/vi-navigate.git
-[submodule "grep-dired"]
-	path = site-lisp/extensions/grep-dired
-	url = https://github.com/manateelazycat/grep-dired.git
 [submodule "go-mode"]
 	path = site-lisp/extensions/go-mode
 	url = https://github.com/dominikh/go-mode.el.git
