@@ -86,6 +86,7 @@ if nil, is used as the project root directory for search."
    ("C-x b" . ivy-switch-buffer)
 
    ("M-y" . counsel-yank-pop)
+   ;; ("")
    ("C-c M-l" . counsel-locate)
    ("C-c M-d" . counsel-dired-jump)
    ("C-c M-e" . counsel-find-file-extern)

@@ -111,8 +111,7 @@
             (require 'company-yasnippet)
             (require 'company-dabbrev)
             (require 'company-files)
-            (require 'company-tabnine)
-            (require 'company-tng)
+            (require 'init-company-tabnine)
             (require 'company-ctags)
 
 ;;; Code:
@@ -133,6 +132,15 @@
              ;; @see https://github.com/company-mode/company-mode/issues/146
              company-tooltip-align-annotations t)
 
+            ;; NOT to load company-mode for certain major modes.
+            ;; Ironic that I suggested this feature but I totally forgot it
+            ;; until two years later.
+            ;; https://github.com/company-mode/company-mode/issues/29
+            (setq company-global-modes
+             '(not
+               eshell-mode comint-mode erc-mode gud-mode rcirc-mode
+               minibuffer-inactive-mode))
+
             ;; config company-ctags
             (setq company-ctags-ignore-case t)  ; I use company-ctags instead
 
@@ -150,21 +158,6 @@
 
             (add-to-list 'company-backends 'company-files)
 
-            ;; NOT to load company-mode for certain major modes.
-            ;; Ironic that I suggested this feature but I totally forgot it
-            ;; until two years later.
-            ;; https://github.com/company-mode/company-mode/issues/29
-            (setq company-global-modes
-             '(not
-               eshell-mode comint-mode erc-mode gud-mode rcirc-mode
-               minibuffer-inactive-mode))
-
-            ;; @see https://github.com/redguardtoo/emacs.d/commit/2ff305c1ddd7faff6dc9fa0869e39f1e9ed1182d
-            (defadvice company-in-string-or-comment (around company-in-string-or-comment-hack activate)
-              (if (memq major-mode '(php-mode html-mode web-mode nxml-mode))
-                  (setq ad-return-value nil)
-                ad-do-it))
-
             ;; TabNine
             ;; (add-to-list 'company-backends #'company-tabnine)
             (add-to-list 'company-backends '(company-tabnine
@@ -175,24 +168,6 @@
             ;; (require 'company-ctags)
             ;; "Replace `company-etags' with `company-ctags' in BACKENDS."
             (company-ctags-auto-setup)
-
-            ;; The free version of TabNine is good enough,
-            ;; and below code is recommended that TabNine not always
-            ;; prompt me to purchase a paid version in a large project.
-            (defadvice company-echo-show (around disable-tabnine-upgrade-message activate)
-              (let ((company-message-func (ad-get-arg 0)))
-                (when (and company-message-func
-                           (stringp (funcall company-message-func)))
-                  (unless (string-match "The free version of TabNine only indexes up to" (funcall company-message-func))
-                    ad-do-it))))
-
-            ;; Use the tab-and-go frontend.
-            ;; Allows TAB to select and complete at the same time.
-            (company-tng-configure-default)
-            (setq company-frontends
-             '(company-tng-frontend
-               company-pseudo-tooltip-frontend
-               company-echo-metadata-frontend))
 
             ;; Enable global.
             (global-company-mode)

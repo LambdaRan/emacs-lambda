@@ -79,21 +79,13 @@
         (require 'init-cursor-chg)
         ;; 保存窗口位置与内容，下次启动时直接恢复到上次窗口状态
         (require 'init-winpoint)
-
         (require 'init-info)
-
         (require 'init-c)
         (require 'init-flycheck)
         ;; 中文字体配置工具
         (require 'init-cnfonts)
-
         (require 'init-idle)
-
-        ;; 问题：打开PHP大文件很卡
-        ;; (require 'init-highlight-indent-guides)
-
         (require 'init-diff-hl)
-        ;; (require 'init-projectile)
         (require 'init-ffip)
 
         (require 'init-etags)
