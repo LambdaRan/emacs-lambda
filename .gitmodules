@@ -22,9 +22,6 @@
 [submodule "diff-hl"]
 	path = site-lisp/extensions/diff-hl
 	url = https://github.com/dgutov/diff-hl.git
-[submodule "dumb-jump"]
-	 path = site-lisp/extensions/dumb-jump
-	 url = https://github.com/jacktasia/dumb-jump.git
 [submodule "exec-path-from-shell"]
 	path = site-lisp/extensions/exec-path-from-shell
 	url = https://github.com/purcell/exec-path-from-shell.git
@@ -64,18 +61,12 @@
 [submodule "go-mode"]
 	path = site-lisp/extensions/go-mode
 	url = https://github.com/dominikh/go-mode.el.git
-[submodule "find-define"]
-	path = site-lisp/extensions/find-define
-	url = https://github.com/manateelazycat/find-define.git
 [submodule "color-rg"]
 	path = site-lisp/extensions/color-rg
 	url = https://github.com/manateelazycat/color-rg.git
 [submodule "thing-edit"]
 	path = site-lisp/extensions/thing-edit
 	url = https://github.com/manateelazycat/thing-edit.git
-[submodule "company-lsp"]
-	path = site-lisp/extensions/company-lsp
-	url = https://github.com/tigersoldier/company-lsp.git
 [submodule "lazy-search"]
 	path = site-lisp/extensions/lazy-search
 	url = https://github.com/manateelazycat/lazy-search.git
@@ -196,3 +187,6 @@
 [submodule "ibuffer-vc"]
 	path = site-lisp/extensions/ibuffer-vc
 	url = https://github.com/purcell/ibuffer-vc.git
+[submodule "nox"]
+	path = site-lisp/extensions/nox
+	url = https://github.com/manateelazycat/nox.git

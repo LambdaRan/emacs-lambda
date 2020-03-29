@@ -85,6 +85,7 @@
         ;; 中文字体配置工具
         (require 'init-cnfonts)
         (require 'init-idle)
+        ;; (require 'init-nox)
         (require 'init-diff-hl)
         (require 'init-ffip)
 

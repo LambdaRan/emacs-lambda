@@ -300,13 +300,24 @@
    )
  "lazycat-toolkit")
 
+;; (lazy-load-global-keys
+;;  '(
+;;    ("C-7" . find-define-back)           ;返回查找符号的定义之前的位置
+;;    ("C-8" . find-define)                ;查找符号的定义
+;;    ("C-c 7" . dumb-jump-back)           ;dumb-jump 返回之前位置
+;;    )
+;;  "find-define")
+
 (lazy-load-global-keys
  '(
-   ("C-7" . find-define-back)           ;返回查找符号的定义之前的位置
-   ("C-8" . find-define)                ;查找符号的定义
-   ("C-c 7" . dumb-jump-back)           ;dumb-jump 返回之前位置
+   ("C-7" . xref-pop-marker-stack)
+   ("C-8" . xref-find-definitions)
+   ("C-9" . xref-find-definitions-other-window)
+   ("M-k" . xref-find-references)
+   ("M-," . nox-rename)
+   ("M-." . nox-show-doc)
    )
- "find-define")
+ "init-nox.el")
 
 ;;; ### Awesome-Pair ###
 ;;; --- 结构化编程

@@ -111,6 +111,7 @@
             (require 'company-yasnippet)
             (require 'company-dabbrev)
             (require 'company-files)
+            (require 'company-tng)
             (require 'init-company-tabnine)
             (require 'company-ctags)
 
@@ -167,7 +168,16 @@
             ;; company-ctags is much faster out of box. No further optimiation needed
             ;; (require 'company-ctags)
             ;; "Replace `company-etags' with `company-ctags' in BACKENDS."
+            ;; (unless (featurep 'company-ctags) (local-require 'company-ctags))
             (company-ctags-auto-setup)
+
+            ;; Use the tab-and-go frontend.
+            ;; Allows TAB to select and complete at the same time.
+            (company-tng-configure-default)
+            (setq company-frontends
+             '(company-tng-frontend
+               company-pseudo-tooltip-frontend
+               company-echo-metadata-frontend))
 
             ;; Enable global.
             (global-company-mode)
