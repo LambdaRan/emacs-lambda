@@ -57,18 +57,6 @@
 
 ;;; ### Color-Rg ###
 ;;; --- 搜索重构
-;; (lazy-load-global-keys
-;;  '(
-;;    ("s-x g" . color-rg-search-symbol)
-;;    ("s-x h" . color-rg-search-input)
-;;    ("s-x j" . color-rg-search-symbol-in-project)
-;;    ("s-x k" . color-rg-search-input-in-project)
-;;    ("s-x ," . color-rg-search-symbol-in-current-file)
-;;    ("s-x ." . color-rg-search-input-in-current-file)
-;;    ("s-x o" . color-rg-search-symbol-with-type)
-;;    ("s-x p" . color-rg-search-project-with-type)
-;;    )
-;;  "color-rg")
 (lazy-load-global-keys
  '(
    ("g" . color-rg-search-symbol)
@@ -210,11 +198,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ### Window Operation ###
-(lazy-load-global-keys
- '(
-   ("s-;" . one-key-menu-window-navigation) ;快速窗口导航
-   )
- "init-window")
+;; (lazy-load-global-keys
+;;  '(
+;;    ("s-;" . one-key-menu-window-navigation) ;快速窗口导航
+;;    )
+;;  "init-window")
 (lazy-load-global-keys
  '(
    ("C-c j" . ace-window)
@@ -300,22 +288,14 @@
    )
  "lazycat-toolkit")
 
-;; (lazy-load-global-keys
-;;  '(
-;;    ("C-7" . find-define-back)           ;返回查找符号的定义之前的位置
-;;    ("C-8" . find-define)                ;查找符号的定义
-;;    ("C-c 7" . dumb-jump-back)           ;dumb-jump 返回之前位置
-;;    )
-;;  "find-define")
-
 (lazy-load-global-keys
  '(
    ("C-7" . xref-pop-marker-stack)
    ("C-8" . xref-find-definitions)
    ("C-9" . xref-find-definitions-other-window)
    ("M-k" . xref-find-references)
-   ("M-," . nox-rename)
-   ("M-." . nox-show-doc)
+   ;; ("M-," . nox-rename)
+   ;; ("M-." . nox-show-doc)
    )
  "init-nox.el")
 
@@ -393,21 +373,12 @@
 
 
 ;; ### Dired;;  ###
-;; --- Dired
 (lazy-load-global-keys
  '(
    ("C-x d" . dired-jump)
    ("C-x C-f" . find-file)
    )
  "init-dired")
-
-;; (lazy-load-global-keys
-;;  '(
-;;    ("C-c ," . grep-dired-dwim)
-;;    ("C-c ." . grep-dired)
-;;    )
-;;  "init-dired")
-
 
 ;;; ### Avy jump ###
 (lazy-load-global-keys

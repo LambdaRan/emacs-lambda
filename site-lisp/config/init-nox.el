@@ -80,24 +80,28 @@
 ;;
 
 ;;; Require
-(require 'nox)
+
+(require 'xref)
+
 
 ;;; Code:
 
 (dolist (hook (list
-               'js-mode-hook
+               ;; 'js-mode-hook
                ;; 'rust-mode-hook
-               'python-mode-hook
+               ;; 'python-mode-hook
                ;; 'ruby-mode-hook
                ;; 'java-mode-hook
                'sh-mode-hook
-               'php-mode-hook
-               'c-mode-common-hook
-               'c-mode-hook
-               'c++-mode-hook
+               ;; 'php-mode-hook
+               ;; 'c-mode-common-hook
+               ;; 'c-mode-hook
+               ;; 'c++-mode-hook
                ;; 'haskell-mode-hook
                ))
-  (add-hook hook '(lambda () (nox-ensure))))
+  (add-hook hook '(lambda ()
+                   (require 'nox)
+                   (nox-ensure))))
 
 (lazy-load-set-keys
  '(
@@ -108,6 +112,30 @@
  )
 
 ;; (add-to-list 'nox-stay-out-of 'company)
+
+
+;; (defun company-ctags-replace-backend (backends)
+;;   "Replace `company-etags' with `company-ctags' in BACKENDS."
+;;   (let* (rlt)
+;;     (dolist (b backends)
+;;       (cond
+;;        ((eq b 'company-etags)
+;;         (push 'company-ctags rlt))
+;;        ((listp b)
+;;         (let* (children)
+;;           (dolist (c b)
+;;             (cond
+;;              ((eq c 'company-etags)
+;;               (push 'company-ctags children))
+;;              (t
+;;               (push c children))))
+;;           (push (nreverse children) rlt)))
+;;        (t
+;;         (push b rlt))))
+;;     (nreverse rlt)))
+
+;; (setq company-backends
+;;         (company-ctags-replace-backend company-backends))
 
 (provide 'init-nox)
 

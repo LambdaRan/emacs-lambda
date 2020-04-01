@@ -96,7 +96,7 @@
 This lets us fix any errors as quickly as possible, but in a
 clean buffer we're an order of magnitude laxer about checking."
   (setq flycheck-idle-change-delay
-        (if flycheck-current-errors 0.5 4.0)))
+        (if flycheck-current-errors 1 4.0)))
 
 
 ;; (dolist (hook (list
@@ -108,8 +108,8 @@ clean buffer we're an order of magnitude laxer about checking."
 ;;                ))
 ;; I don't like `global-flycheck-mode', some mode, such as elisp mode don't need.
 (dolist (hook (list
-               'c-mode-hook
-               'c++-mode-hook
+               ;; 'c-mode-hook
+               ;; 'c++-mode-hook
                ;; 'go-mode-hook
                'php-mode-hook
                ))
@@ -158,7 +158,7 @@ clean buffer we're an order of magnitude laxer about checking."
               flycheck-posframe-inhibit-functions
               '((lambda (&rest _) (bound-and-true-p company-backend)))))
 
-     (flycheck-mode -1))))
+     (flycheck-mode 1))))
 
 
 ;; 设置flycheck参数，推荐使用本地文件方式 .dir-locals.el

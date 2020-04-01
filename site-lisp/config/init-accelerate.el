@@ -1,4 +1,4 @@
-;;; init-accelerate.el --- Accelerate the start Emacs
+;; init-accelerate.el --- Accelerate the start Emacs
 
 ;; Filename: init-accelerate.el
 ;; Description: Accelerate the start Emacs
