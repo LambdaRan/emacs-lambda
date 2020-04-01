@@ -42,8 +42,8 @@
     (require 'init-highlight-parentheses)
     (require 'awesome-pair)
     (require 'init-awesome-pair)
-    (require 'init-awesome-tray)
     (require 'init-awesome-tab)
+    (require 'init-awesome-tray)
     ;; 不要自动备份
     (require 'init-backup)
     (require 'init-line-number)
@@ -82,8 +82,6 @@
         (require 'init-info)
         (require 'init-c)
         (require 'init-flycheck)
-        ;; 中文字体配置工具
-        (require 'init-cnfonts)
         (require 'init-idle)
         (require 'init-nox)
         (require 'init-diff-hl)

@@ -109,9 +109,6 @@
 [submodule "posframe"]
 	path = site-lisp/extensions/posframe
 	url = https://github.com/tumashu/posframe.git
-[submodule "cnfonts"]
-	path = site-lisp/extensions/cnfonts
-	url = https://github.com/tumashu/cnfonts.git
 [submodule "site-lisp/extensions/benchmark-init"]
 	path = site-lisp/extensions/benchmark-init
 	url = https://github.com/dholm/benchmark-init-el.git

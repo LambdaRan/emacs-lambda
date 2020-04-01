@@ -1,17 +1,17 @@
-;;; init-cnfonts.el --- Config for cnfonts.
+;;; init-org.el --- Configure for org-mode
 
-;; Filename: init-cnfonts.el
-;; Description: Config for cnfonts.
+;; Filename: init-org.el
+;; Description: Configure for org-mode
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2019, Andy Stewart, all rights reserved.
-;; Created: 2019-07-29 16:29:07
+;; Copyright (C) 2020, Andy Stewart, all rights reserved.
+;; Created: 2020-03-31 22:32:49
 ;; Version: 0.1
-;; Last-Updated: 2019-07-29 16:29:07
+;; Last-Updated: 2020-03-31 22:32:49
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-cnfonts.el
+;; URL: http://www.emacswiki.org/emacs/download/init-org.el
 ;; Keywords:
-;; Compatibility: GNU Emacs 26.2
+;; Compatibility: GNU Emacs 28.0.50
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Config for cnfonts.
+;; Configure for org-mode
 ;;
 
 ;;; Installation:
 ;;
-;; Put init-cnfonts.el to your load-path.
+;; Put init-org.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'init-cnfonts)
+;; (require 'init-org)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET init-cnfonts RET
+;;      M-x customize-group RET init-org RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2019/07/29
+;; 2020/03/31
 ;;      * First released.
 ;;
 
@@ -81,20 +81,26 @@
 
 ;;; Require
 
+
 ;;; Code:
-(add-hook 'org-mode-hook
-          '(lambda ()
-             (require 'cnfonts)
-             (setq fontset-orgtable
-                   (create-fontset-from-ascii-font "Monaco 14"))
-             (dolist (charset '(han symbol cjk-misc))
-               (set-fontset-font fontset-orgtable charset
-                                 (font-spec :family "Hiragino Sans GB W3"
-                                            :size 16)))
-             (set-face-attribute 'org-table nil
-                                 :font "Monaco 14"
-                                 :fontset fontset-orgtable)))
 
-(provide 'init-cnfonts)
+(setq org-odt-preferred-output-format "docx") ;ODT转换格式默认为docx
+(setq org-startup-folded nil)                 ;默认展开内容
+(setq org-startup-indented t)                 ;默认缩进内容
 
-;;; init-cnfonts.el ends here
+(defun org-export-docx ()
+  (interactive)
+  (let ((docx-file (concat (file-name-sans-extension (buffer-file-name)) ".docx"))
+        (template-file (concat (file-name-as-directory lazycat-emacs-root-dir)
+                               (file-name-as-directory "template")
+                               "template.docx")))
+    (shell-command (format "pandoc %s -o %s --reference-doc=%s"
+                           (buffer-file-name)
+                           docx-file
+                           template-file
+                           ))
+    (message "Convert finish: %s" docx-file)))
+
+(provide 'init-org)
+
+;;; init-org.el ends here
