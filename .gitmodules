@@ -1,9 +1,6 @@
 [submodule "auto-save"]
 	path = site-lisp/extensions/auto-save
 	url = https://github.com/manateelazycat/auto-save.git
-[submodule "aweshell"]
-	path = site-lisp/extensions/aweshell
-	url = https://github.com/manateelazycat/aweshell.git
 [submodule "awesome-pair"]
 	path = site-lisp/extensions/awesome-pair
 	url = https://github.com/manateelazycat/awesome-pair.git
@@ -103,9 +100,6 @@
 [submodule "company-tabnine"]
 	path = site-lisp/extensions/company-tabnine
 	url = https://github.com/TommyX12/company-tabnine.git
-[submodule "snails"]
-	path = site-lisp/extensions/snails
-	url = https://github.com/manateelazycat/snails.git
 [submodule "posframe"]
 	path = site-lisp/extensions/posframe
 	url = https://github.com/tumashu/posframe.git
@@ -166,9 +160,6 @@
 [submodule "markdown-mode"]
 	path = site-lisp/extensions/markdown-mode
 	url = git@github.com:jrblevin/markdown-mode.git
-[submodule "site-lisp/extensions/fuz"]
-	path = site-lisp/extensions/fuz
-	url = https://github.com/rustify-emacs/fuz.el.git
 [submodule "yasnippet-php-mode"]
 	path = site-lisp/extensions/yasnippet-php-mode
 	url = https://github.com/barendt/yasnippet-php-mode.git

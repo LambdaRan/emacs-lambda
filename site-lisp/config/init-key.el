@@ -71,12 +71,12 @@
  "color-rg"
  "C-c c")
 ;; 模糊搜索框架
-(lazy-load-global-keys
- '(
-   ("C-c y" . snails)
-   ("C-c u" . snails-search-point)
-   )
- "snails")
+;; (lazy-load-global-keys
+;;  '(
+;;    ("C-c y" . snails)
+;;    ("C-c u" . snails-search-point)
+;;    )
+;;  "snails")
 
 ;;; ### Buffer Move ###
 ;;; --- 缓存移动
@@ -355,13 +355,13 @@
 
 ;;; ### Aweshell ###
 ;;; --- 多标签式的shell
-(lazy-load-global-keys
- '(
-   ("s-n" . aweshell-new)
-   ("s-h" . aweshell-toggle)
-   ("s-x s-x" . aweshell-dedicated-toggle)
-   )
- "init-aweshell")
+;; (lazy-load-global-keys
+;;  '(
+;;    ("s-n" . aweshell-new)
+;;    ("s-h" . aweshell-toggle)
+;;    ("s-x s-x" . aweshell-dedicated-toggle)
+;;    )
+;;  "init-aweshell")
 
 ;;; multi-term`
 (lazy-load-global-keys

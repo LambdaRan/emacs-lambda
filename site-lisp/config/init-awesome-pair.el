@@ -75,6 +75,7 @@
 
 
 ;;; Code:
+(require 'awesome-pair)
 
 (dolist (hook (list
                'c-mode-common-hook
