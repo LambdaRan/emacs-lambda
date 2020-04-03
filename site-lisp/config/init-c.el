@@ -92,6 +92,7 @@
     ;; @see http://stackoverflow.com/questions/3509919/ \
     ;; emacs-c-opening-corresponding-header-file
     (local-set-key (kbd "C-x C-o") 'ff-find-other-file)
+    (setq ff-quiet-mode t)
     ;; 找不到同名文件时不创建
     (setq ff-always-try-to-create nil)
     (setq cc-search-directories '("."
