@@ -90,6 +90,7 @@
 (setq dired-dwim-target t)              ;Dired试着猜处默认的目标目录
 (setq my-dired-omit-status t)           ;设置默认忽略文件
 (setq my-dired-omit-regexp "^\\.?#\\|^\\..*") ;设置忽略文件的匹配正则表达式
+(setq dired-omit-verbose nil)                 ; 不显示message
 (setq my-dired-omit-extensions '(".cache")) ;设置忽略文件的扩展名列表
 (add-hook 'dired-after-readin-hook '(lambda ()
                                      (progn

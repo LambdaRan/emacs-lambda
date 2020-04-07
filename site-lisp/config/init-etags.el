@@ -26,13 +26,13 @@
 ;; (setq counsel-etags-update-interval 180)
 ;; Set up auto-update
 
-(push "TAGS" counsel-etags-ignore-filenames)
+;; (setq counsel-etags-debug nil)
+;; (setq counsel-etags-grep-program (counsel-etags-guess-program "rg"))
 
-(add-hook
- 'prog-mode-hook
- (lambda () (add-hook 'after-save-hook
-                      (lambda ()
-                        (counsel-etags-virtual-update-tags)))))
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (add-hook 'after-save-hook
+              'counsel-etags-virtual-update-tags 'append 'local)))
 
 (lazy-load-set-keys
  '(

@@ -2,8 +2,9 @@
 (require 'lazycat-theme)
 ;; (require 'lazycat-dark-theme)
 
-(load-theme 'lazycat-dark t)
+;; (load-theme 'lazycat-dark t)
 ;; (load-theme 'lazycat-light t)
+(lazycat-theme-load-dark)
 
 ;; (setq mode-line-format nil)
 (setq-default mode-line-format (remove 'mode-line-buffer-identification mode-line-format))

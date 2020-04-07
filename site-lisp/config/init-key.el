@@ -68,7 +68,7 @@
    ("o" . color-rg-search-symbol-with-type)
    ("p" . color-rg-search-project-with-type)
    )
- "color-rg"
+ "init-color-rg"
  "C-c c")
 ;; 模糊搜索框架
 ;; (lazy-load-global-keys
