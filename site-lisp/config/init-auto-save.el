@@ -95,6 +95,8 @@
 (setq auto-save-silent t)
 (setq auto-save-delete-trailing-whitespace t)
 
+;;(add-hook 'kill-buffer-hook #'basic-save-buffer)
+
 (provide 'init-auto-save)
 
 ;; init-auto-save.el ends here

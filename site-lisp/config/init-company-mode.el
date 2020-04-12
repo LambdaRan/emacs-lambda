@@ -118,7 +118,7 @@
 ;;; Code:
             ;; Config for company mode.
             ;; Trigger completion immediately.
-            (setq company-idle-delay 0.2)
+            (setq company-idle-delay 0)
             ;; 补全的最小前缀长度
             (setq company-minimum-prefix-length 1) ; pop up a completion menu by tapping a character
             ;; Number the candidates (use M-1, M-2 etc to select completions).
@@ -183,11 +183,10 @@
             (global-company-mode)
 
             ;; Add `company-elisp' backend for elisp.
-            (add-hook 'emacs-lisp-mode-hook
-             '(lambda ()
-               (require 'company-elisp)
-               (make-local-variable 'company-backends)
-               (push 'company-elisp company-backends)))
+             (add-hook 'emacs-lisp-mode-hook
+                       '(lambda ()
+                          (require 'company-elisp)
+                          (push 'company-elisp company-backends)))
 
              ;; Key settings.
              (lazy-load-unset-keys

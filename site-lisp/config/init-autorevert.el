@@ -4,9 +4,10 @@
 ;; (add-hook 'c-mode-hook #'turn-on-auto-revert-mode)
 (add-hook 'prog-mode-hook
           '(lambda ()
-            ;; (custom-set-variables
+            (custom-set-variables
              ;; '(auto-revert-verbose nil)
-             ;; '(auto-revert-interval 3)) ; 间隔
+             ;; 设置间隔时间
+             '(auto-revert-interval 3)) 
             ;; start auto-revert
             (turn-on-auto-revert-mode)
             ))

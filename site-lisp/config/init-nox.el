@@ -111,32 +111,6 @@
  xref--xref-buffer-mode-map
  )
 
-;; (add-to-list 'nox-stay-out-of 'company)
-
-
-;; (defun company-ctags-replace-backend (backends)
-;;   "Replace `company-etags' with `company-ctags' in BACKENDS."
-;;   (let* (rlt)
-;;     (dolist (b backends)
-;;       (cond
-;;        ((eq b 'company-etags)
-;;         (push 'company-ctags rlt))
-;;        ((listp b)
-;;         (let* (children)
-;;           (dolist (c b)
-;;             (cond
-;;              ((eq c 'company-etags)
-;;               (push 'company-ctags children))
-;;              (t
-;;               (push c children))))
-;;           (push (nreverse children) rlt)))
-;;        (t
-;;         (push b rlt))))
-;;     (nreverse rlt)))
-
-;; (setq company-backends
-;;         (company-ctags-replace-backend company-backends))
-
 (provide 'init-nox)
 
 ;;; init-nox.el ends here

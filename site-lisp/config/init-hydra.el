@@ -201,99 +201,52 @@ _SPC_ cancel _o_nly this     _d_elete
 (lazy-load-unset-keys '("C-c C-w" ))
 (lazy-load-set-keys
  '(("C-c C-f" . hydra-window/body)))
+
 ;; }}
 
-;; {{
-(defhydra hydra-git (:hint nil)
-"
-Git:
-[_s_] Magit status         [_u_] Magit push to remote          [_v_] diff-hl-diff-goto-hunk
-[_c_] Magit checkout       [_p_] Magit delete remote branch    [_n_] diff-hl-revert-hunk
-[_C_] Magit commit         [_m_] Magit submodule add           [_j_] diff-hl-next-hunk
-[_i_] Magit pull           [_d_] Magit submodule remove        [_k_] diff-hl-previous-hunk
-[_r_] Magit rebase         [_M_] Magit submodule list
-[_e_] Magit merge          [_D_] Magit discarded
-[_l_] Magit log            [_,_] Magit init
-[_L_] Magit blame          [_._] Magit add remote
-[_b_] Magit branch         [_B_] Magit buffer
-"
-  ("s" magit-status+)
-  ("c" magit-checkout)
-  ("C" magit-commit)
-  ("u" magit-push-current-to-pushremote)
-  ("p" magit-delete-remote-branch)
-  ("i" magit-pull-from-upstream)
-  ("r" magit-rebase)
-  ("e" magit-merge)
-  ("l" magit-log-all)
-  ("L" magit-blame+)
-  ("b" magit-branch)
-  ("B" magit-process-buffer)
-  ("m" magit-submodule-add+)
-  ("d" magit-submodule-remove+)
-  ("M" magit-list-submodules)
-  ("D" magit-discard)
-  ("," magit-init)
-  ("." magit-remote-add)
 
-  ("v" diff-hl-diff-goto-hunk)
-  ("n" diff-hl-revert-hunk)
-  ("j" diff-hl-next-hunk)
-  ("k" diff-hl-previous-hunk)
 
-  ("q" nil))
-;; (global-set-key (kbd "C-c C-g") 'hydra-git/body)
-(lazy-load-set-keys
- '(("C-c C-v" . (lambda ()
-                  (interactive)
-                  (require 'init-git)
-                  (hydra-git/body)))))
-;; }}
-
-(defhydra hydra-describe (:color blue :hint nil)
+(defhydra hydra-source-insight (:hint nil)
   "
-Describe Something: (q to quit)
-_a_ all help for everything screen    _b_ bindings
-_B_ personal bindings                 _c_ char
-_C_ coding system                     _f_ function
-_F_ flycheck checker                  _i_ input method
-_k_ key briefly                       _K_ key
-_l_ language environment              _L_ mode lineage
-_m_ major mode                        _M_ minor mode
-_n_ current coding system briefly     _N_ current coding system full
-_o_ lighter indicator                 _O_ lighter symbol
-_p_ package                           _P_ text properties
-_s_ symbol                            _t_ theme
-_v_ variable                          _w_ where is something defined
+Windows^^                             ^Switch^           ^Resize^
+------------------------------------------------------------------------------
+_c_ Ace           _v_  vertical      _b_ Buffer          _q_ X left
+_d_ Del windo     _h_  horizontal    _f_ Find files      _w_ X Down
+_D_ Del Other     _C-j_ ace jump     _j_ Next line       _e_ X Top
+_SPC_ cancel                         _k_ Previous line   _r_ X Right
 "
-  ("b" describe-bindings)
-  ("B" describe-personal-keybindings)
-  ("C" describe-categories)
-  ("c" describe-char)
-  ("C" describe-coding-system)
-  ("f" describe-function)
-  ("F" flycheck-describe-checker)
-  ("i" describe-input-method)
-  ("K" describe-key)
-  ("k" describe-key-briefly)
-  ("l" describe-language-environment)
-  ("L" help/parent-mode-display)
-  ("M" describe-minor-mode)
-  ("m" describe-mode)
-  ("N" describe-current-coding-system)
-  ("n" describe-current-coding-system-briefly)
-  ("o" describe-minor-mode-from-indicator)
-  ("O" describe-minor-mode-from-symbol)
-  ("p" describe-package)
-  ("P" describe-text-properties)
-  ("q" nil)
-  ("a" help)
-  ("s" describe-symbol)
-  ("t" describe-theme)
-  ("v" describe-variable)
-  ("w" where-is))
-;; (global-set-key (kbd "C-c C-q") 'hydra-describe/body)
+
+  ("C-j" awesome-tab-ace-jump)
+
+  ("q" hydra-move-splitter-left)
+  ("w" hydra-move-splitter-down)
+  ("e" hydra-move-splitter-up)
+  ("r" hydra-move-splitter-right)
+
+  ("b" ivy-switch-buffer)
+  ("f" counsel-find-file)
+  ("j" next-line)
+  ("k" previous-line)
+
+  ("d" delete-window)
+  ("D" delete-other-windows)
+
+  ("c" (lambda ()
+         (interactive)
+         (ace-window 1)
+         (add-hook 'ace-window-end-once-hook
+                   'hydra-source-insight/body)))
+  ("v" (lambda ()
+         (interactive)
+         (split-window-right)
+         (windmove-right)))
+  ("h" (lambda ()
+         (interactive)
+         (split-window-below)
+         (windmove-down)))
+
+  ("SPC" nil))
 (lazy-load-set-keys
- '(("C-c M-q" . hydra-describe/body)))
+ '(("C-c C-n" . hydra-source-insight/body)))
 
 (provide 'init-hydra)

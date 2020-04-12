@@ -97,25 +97,25 @@ This lets us fix any errors as quickly as possible, but in a
 clean buffer we're an order of magnitude laxer about checking."
   (setq flycheck-idle-change-delay
         (if flycheck-current-errors 1 4.0)))
+(defun ran-enable-flycheck ()
+  "Enable the flycheck manually"
+  (interactive)
 
-
-;; (dolist (hook (list
-;;                'ruby-mode-hook
-;;                'python-mode-hook
-;;                'swift-mode-hook
-;;                'go-mode-hook
-;;                'js-mode-hook
-;;                ))
 ;; I don't like `global-flycheck-mode', some mode, such as elisp mode don't need.
-(dolist (hook (list
+;; (dolist (hook (list
+               ;; 'ruby-mode-hook
+               ;; 'python-mode-hook
+               ;; 'swift-mode-hook
+               ;; 'go-mode-hook
+               ;; 'js-mode-hook
                ;; 'c-mode-hook
                ;; 'c++-mode-hook
                ;; 'go-mode-hook
-               'php-mode-hook
-               ))
-  (add-hook
-   hook
-   '(lambda ()
+               ;; 'php-mode-hook
+               ;; ))
+  ;; (add-hook
+  ;;  hook
+  ;;  '(lambda ()
       ;; OS Config
       (when (featurep 'cocoa)
         ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
@@ -124,7 +124,6 @@ clean buffer we're an order of magnitude laxer about checking."
         (exec-path-from-shell-initialize))
 
       (require 'flycheck)
-
       ;; (setq-default flycheck-disabled-checkers ;disable json-jsonlist checking for json files
       ;;               (append flycheck-disabled-checkers
       ;;                       '(json-jsonlist)))
@@ -132,14 +131,11 @@ clean buffer we're an order of magnitude laxer about checking."
       ;; (setq-default flycheck-disabled-checkers ;disable jshint since we prefer eslint checking
       ;;               (append flycheck-disabled-checkers
       ;;                       '(javascript-jshint)))
-
       ;; (flycheck-add-mode 'javascript-eslint 'web-mode) ;use eslint with web-mode for jsx files
-
 
      ;; Each buffer gets its own idle-change-delay because of the
      ;; buffer-sensitive adjustment above.
      (make-variable-buffer-local 'flycheck-idle-change-delay)
-
      (add-hook 'flycheck-after-syntax-check-hook
       'magnars/adjust-flycheck-automatic-syntax-eagerness)
 
@@ -158,8 +154,9 @@ clean buffer we're an order of magnitude laxer about checking."
               flycheck-posframe-inhibit-functions
               '((lambda (&rest _) (bound-and-true-p company-backend)))))
 
-     (flycheck-mode 1))))
-
+  (flycheck-mode 1)
+  ;; )))
+) ;; end defun ran-enable-flycheck
 
 ;; 设置flycheck参数，推荐使用本地文件方式 .dir-locals.el
 ;; https://stackoverflow.com/questions/30949847/configuring-flycheck-to-work-with-c11
