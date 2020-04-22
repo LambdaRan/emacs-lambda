@@ -75,6 +75,9 @@ if nil, is used as the project root directory for search."
 
 (advice-add 'counsel-dired-jump :override #'counsel-dired-jump@override)
 
+;; 设置zlua脚本路径
+(setq zlua-path "~/lambda/software/zlua/z.lua")
+
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
@@ -87,7 +90,7 @@ if nil, is used as the project root directory for search."
    ("C-x b" . ivy-switch-buffer)
    ("C-c c s" . swiper-isearch)
    ("C-c c z" . zlua-jump-to-directory)
-   
+
    ("M-y" . counsel-yank-pop)
 
    ("C-c M-l" . counsel-locate)

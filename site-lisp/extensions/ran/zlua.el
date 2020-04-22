@@ -11,14 +11,20 @@
 ;; https://emacs-china.org/t/shell-command-to-string-bash-builtin-builtin/7421
 ;; (shell-command-to-string "bash -ic z lambda")
 
-(defvar zlua-path "~/lambda/software/z.lua"
+(defvar zlua-path "z.lua"
   "z.lua script path")
-
-(defvar cache-zlua-command-can-executable-p nil
-  "cache can execute")
 
 (defvar zlua-args ""
   "z.lua arguments")
+
+(defvar zlua-debug nil
+  "Enable debug mode.")
+
+(defvar zlua-sort-directory-candidates t
+  "Enable sort directory candidates")
+
+(defvar cache-zlua-command-can-executable-p nil
+  "cache can executable")
 
 (defun zlua-read-input ()
   "Read directly from minibuffer."
@@ -26,12 +32,14 @@
          (input-string
           (string-trim
            (read-string
-            (format "Z_LUA Jump Dir (%s): " current-symbol)
+            (format "ZLUA Jump Directory (%s): " current-symbol)
             nil
             'color-rg-read-input-history
             ))))
     (when (string-blank-p input-string)
       (setq input-string current-symbol))
+    (when zlua-debug
+      (message "User input : %s" input-string))
     input-string))
 
 (defun zlua-build-command (keywords)
@@ -45,6 +53,8 @@
     (setq command-line (format "%s %s -l %s" (executable-find "lua") zlua-path keywords))
     (when (memq system-type '(cygwin windows-nt ms-dos))
       (setq command-line (encode-coding-string command-line locale-coding-system)))
+    (when zlua-debug
+      (message "zlua command : %s" command-line))
     command-line))
 
 (defun zlua-jump-to-directory (&optional initial-directory)
@@ -56,16 +66,24 @@ INITIAL-DIRECTORY can be given as the initial minibuffer input."
           (split-string
            (shell-command-to-string (zlua-build-command (zlua-read-input)))
            "\n" t "[0-9. ]+")))
-    ;; (message "directory: %s" directory-candidates)
-    (when directory-candidates
-      (ivy-read "Zlua jump directory: "
-                directory-candidates
-                :matcher #'counsel--find-file-matcher
-                :initial-input initial-directory
-                :action (lambda (d) (dired-jump nil (expand-file-name d)))
-                :history 'file-name-history
-                :keymap counsel-find-file-map
-                :caller 'zlua-jump-to-directory))))
+    (if directory-candidates
+        (progn
+          (when zlua-sort-directory-candidates
+            (setq directory-candidates (reverse directory-candidates)))
+          (ivy-read "Zlua jump directory: "
+                    directory-candidates
+                    :matcher #'counsel--find-file-matcher
+                    :initial-input initial-directory
+                    :action (lambda (d) (dired-jump nil (expand-file-name d)))
+                    :history 'file-name-history
+                    :keymap counsel-find-file-map
+                    :caller 'zlua-jump-to-directory))
+      (message "zlua directory candidates empty"))))
+
+(ivy-set-actions
+ 'zlua-jump-to-directory
+ '(("e" counsel-find-file-extern "open externally")
+   ))
 
 (provide 'zlua)
 ;;; zlua.el ends here
