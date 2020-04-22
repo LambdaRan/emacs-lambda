@@ -1,25 +1,18 @@
 
-
-;; Mac平台下交换 Option 和 Command 键。
-;; key bindings
-;;(when (eq system-type 'darwin) ;; mac specific settings
-;;  (setq mac-control-modifier 'super)
-;;  (setq mac-command-modifier 'control)
-;;  (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
-;;  )
-
-;; https://emacs.stackexchange.com/questions/26616/how-to-use-a-macs-command-key-as-a-control-key
 ;; Mac平台下交换 Ctrol 和 Command 键。
-(when (featurep 'cocoa)
+;; key bindings
+(when (eq system-type 'darwin) ;; mac specific settings
   (setq mac-control-modifier 'super)
   (setq mac-command-modifier 'control))
+;; (cond
+;;   ((string= system-type "darwin") "config_mac")
+;;   ((string= system-type "windows-nt") "config_win")
+;;   (t "config_linux"))
 
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
                       '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "s-c" "s-x" "s-v" "C-x d"))
-;;  '("C-x C-f" "C-z" "C-q" "s-W" "M-h" "C-x C-c" "C-\\" "s-c" "s-x"))
-
 
 (lazy-load-global-keys
  '(
@@ -39,6 +32,7 @@
    ("s-[" . eval-expression)                ;执行表达式
    ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
    ("M-h" . set-mark-command) ;Instead C-Space for Chinese input method
+   ("C-c c w" . browse-url-at-point)
    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -163,8 +157,6 @@
    ("M-M" . delete-block-forward))
  "delete-block")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ;;; ### Buffer Edit ###
 ;;; --- 缓存编辑
 (lazy-load-set-keys
@@ -243,7 +235,6 @@
    ("C-M-;" . kill-other-window-buffer) ;关闭其他窗口的buffer
    )
  "buffer-extension")
-
 
 ;; 文件列表 TODO 目录设置
 (lazy-load-global-keys
@@ -414,7 +405,6 @@
        )
       )))
 
-
 ;;; ### Man ###
 ;;; --- Man
 (lazy-load-global-keys
@@ -472,10 +462,6 @@
  "expand-region")
 
 ;;; ### Magit ###
-;; (lazy-load-global-keys
-;;  '(
-;;    ("s-x m" . one-key-menu-magit))
-;;  "init-git")
 (lazy-load-global-keys
  '(
    ("C-c m" . magit-status+))

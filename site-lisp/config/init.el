@@ -73,8 +73,6 @@
           (require 'init-company-mode)
           ;; 平滑滚动，不知道干啥的
           (require 'init-smooth-scrolling)
-          ;; 更改光标类型
-          (require 'init-cursor-chg)
           ;; 保存窗口位置与内容，下次启动时直接恢复到上次窗口状态
           (require 'init-winpoint)
           (require 'init-info)

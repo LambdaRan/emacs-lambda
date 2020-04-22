@@ -2,6 +2,7 @@
 (require 'ivy)
 (require 'counsel)
 (require 'lazy-load)
+(require 'zlua)
 
 (when (featurep 'cocoa)
   ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
@@ -85,7 +86,8 @@ if nil, is used as the project root directory for search."
    ("M-x" . counsel-M-x)
    ("C-x b" . ivy-switch-buffer)
    ("C-c c s" . swiper-isearch)
-
+   ("C-c c z" . zlua-jump-to-directory)
+   
    ("M-y" . counsel-yank-pop)
 
    ("C-c M-l" . counsel-locate)

@@ -1,4 +1,16 @@
 
+;; 使用浏览器打开光标处url
+;; browse-url-at-point
+;; (defun ran-open-url-with-browser ()
+;;   (interactive)
+;;   (thing-copy-url nil)
+;;   (browse-url (car kill-ring-yank-pointer)))
+
+;; 预览markdown
+(defun ran-markdown-to-html ()
+  (interactive)
+  (start-process "grip" "*gfm-to-html*" "grip" (buffer-file-name) "5000")
+  (browse-url (format "http://localhost:5000/%s.%s" (file-name-base) (file-name-extension (buffer-file-name)))))
 
 (defun ran-get-full-path ()
   "copy buffer file full path to kill ring"

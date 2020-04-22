@@ -23,6 +23,7 @@
                'prog-mode-hook
                ;; conf
                'conf-mode-hook
+               'protobuf-mode-hook
                ;; 'conf-unix-mode-hook
                ;; 'conf-windows-mode-hook
                ;; 'conf-javaprop-mode-hook

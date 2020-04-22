@@ -116,6 +116,10 @@
 (setq ad-redefinition-action 'accept)   ;不要烦人的 redefine warning
 (setq frame-resize-pixelwise t) ;设置缩放的模式,避免Mac平台最大化窗口以后右边和下边有空隙
 
+;; (set-cursor-color "Red")           ;更改光标颜色
+(add-to-list 'default-frame-alist '(cursor-color . "Red"))
+(setq-default cursor-type 'bar)    ;更改光标类型
+
 ;; ;; 不显示 *scratch*
 ;; (defun remove-scratch-buffer ()
 ;;  (if (get-buffer "*scratch*")
@@ -152,13 +156,13 @@
 (prefer-coding-system 'utf-8-unix)
 (prefer-coding-system 'utf-8)
 
-(defun no-junk-please-were-unixish ()
-  (let ((coding-str (symbol-name buffer-file-coding-system)))
-    (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
-      (set-buffer-file-coding-system 'unix))))
+;; (defun no-junk-please-were-unixish ()
+;;   (let ((coding-str (symbol-name buffer-file-coding-system)))
+;;     (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
+;;       (set-buffer-file-coding-system 'unix))))
 
-(add-hook 'find-file-hook
-          'no-junk-please-were-unixish)
+;; (add-hook 'find-file-hook
+;;           'no-junk-please-were-unixish)
 
 (provide 'init-generic)
 
