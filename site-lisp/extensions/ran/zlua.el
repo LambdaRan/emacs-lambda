@@ -1,27 +1,35 @@
 
-
 ;; https://github.com/skywind3000/z.lua
 ;; https://github.com/abo-abo/swiper
 
 (require 'ivy)
-
 
 ;; (split-string "0.25 /Users/randegang/plugins\n0.25 /Users/randegang/leetcode/Contents\n" "\n" t "[0-9. ]+")
 ;; (shell-command-to-string "lua ~/lambda/software/z.lua \\-l")
 ;; https://emacs-china.org/t/shell-command-to-string-bash-builtin-builtin/7421
 ;; (shell-command-to-string "bash -ic z lambda")
 
-(defvar zlua-path "z.lua"
-  "z.lua script path")
+(defgroup zlua nil
+  "Use z.lua script jump to some directory"
+  :group 'zlua)
 
-(defvar zlua-args ""
-  "z.lua arguments")
+(defcustom zlua-path "z.lua"
+  "z.lua script path"
+  :type 'string
+  :group 'zlua)
+
+(defcustom zlua-args ""
+  "z.lua script arguments"
+  :type 'string
+  :group 'zlua)
+
+(defcustom zlua-sort-directory-candidates t
+  "Enable sort directory candidates"
+  :type 'boolean
+  :group 'zlua)
 
 (defvar zlua-debug nil
   "Enable debug mode.")
-
-(defvar zlua-sort-directory-candidates t
-  "Enable sort directory candidates")
 
 (defvar cache-zlua-command-can-executable-p nil
   "cache can executable")
@@ -86,4 +94,5 @@ INITIAL-DIRECTORY can be given as the initial minibuffer input."
    ))
 
 (provide 'zlua)
+
 ;;; zlua.el ends here

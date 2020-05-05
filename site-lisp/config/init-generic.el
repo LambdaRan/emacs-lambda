@@ -120,6 +120,9 @@
 (add-to-list 'default-frame-alist '(cursor-color . "Red"))
 (setq-default cursor-type 'bar)    ;更改光标类型
 
+(electric-pair-mode t)                  ;括号自动匹配插入
+
+
 ;; ;; 不显示 *scratch*
 ;; (defun remove-scratch-buffer ()
 ;;  (if (get-buffer "*scratch*")
