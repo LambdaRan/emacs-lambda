@@ -97,7 +97,7 @@
 
 ;; TabNine
 ;; (add-to-list 'company-backends #'company-tabnine)
-
+(setq company-tabnine-always-trigger nil) ; 不要一直触发
 (provide 'init-company-tabnine)
 
 ;;; init-company-tabnine.el ends here
