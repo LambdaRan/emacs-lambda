@@ -142,15 +142,20 @@
            kill-buffer-query-functions))
 
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
-(set-language-environment 'utf-8)
-;; (set-keyboard-coding-system 'utf-8-mac) ; For old Carbon emacs on OS X only
+;; Explicitly set the prefered coding systems to avoid annoying prompt
+;; from emacs (especially on Microsoft Windows)
+(prefer-coding-system 'utf-8)
 (setq locale-coding-system 'utf-8)
+
+(set-language-environment 'utf-8)
 (set-default-coding-systems 'utf-8)
+(set-buffer-file-coding-system 'utf-8)
+(set-clipboard-coding-system 'utf-8)
+(set-file-name-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
-(set-selection-coding-system
- (if (eq system-type 'windows-nt)
-     'utf-16-le  ;; https://rufflewind.com/2014-07-20/pasting-unicode-in-emacs-on-windows
-   'utf-8))
+(set-selection-coding-system 'utf-8)
+(modify-coding-system-alist 'process "*" 'utf-8)
 
 (prefer-coding-system 'gb18030)
 ;; (prefer-coding-system 'utf-16)
@@ -159,13 +164,6 @@
 (prefer-coding-system 'utf-8-unix)
 (prefer-coding-system 'utf-8)
 
-;; (defun no-junk-please-were-unixish ()
-;;   (let ((coding-str (symbol-name buffer-file-coding-system)))
-;;     (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
-;;       (set-buffer-file-coding-system 'unix))))
-
-;; (add-hook 'find-file-hook
-;;           'no-junk-please-were-unixish)
 
 (provide 'init-generic)
 
