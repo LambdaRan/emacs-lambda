@@ -76,7 +76,7 @@ if nil, is used as the project root directory for search."
 (advice-add 'counsel-dired-jump :override #'counsel-dired-jump@override)
 
 ;; 设置zlua脚本路径
-(setq zlua-path "~/lambda/software/zlua/z.lua")
+(setq zlua-path "~/ransysconf/zlua/z.lua")
 
 ;;; ### Unset key ###
 ;;; --- 卸载按键
