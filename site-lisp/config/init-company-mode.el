@@ -182,10 +182,11 @@
             (global-company-mode)
 
             ;; Add `company-elisp' backend for elisp.
-             (add-hook 'emacs-lisp-mode-hook
-                       '(lambda ()
-                          (require 'company-elisp)
-                          (push 'company-elisp company-backends)))
+            (add-hook 'emacs-lisp-mode-hook
+             '(lambda ()
+               (require 'company-elisp)
+               (push 'company-elisp company-backends)
+               ))
 
              ;; Key settings.
              (lazy-load-unset-keys

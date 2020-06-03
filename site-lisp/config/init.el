@@ -79,7 +79,7 @@
           (require 'init-c)
           (require 'init-flycheck)
           (require 'init-idle)
-          (require 'init-nox)
+          ;; (require 'init-nox)
           (require 'init-diff-hl)
           (require 'init-ffip)
 

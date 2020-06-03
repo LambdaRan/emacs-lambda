@@ -166,13 +166,6 @@
 
 (lazy-load-local-keys
  '(
-   (";" . dired-view-minor-mode-toggle) ;字母输入导航模式
-   )
- dired-mode-map
- "dired-view")
-
-(lazy-load-local-keys
- '(
    ("T" . dired-tar-pack-unpack)
    )
  dired-mode-map
@@ -199,23 +192,10 @@
 
 (lazy-load-local-keys
  '(
-   ("\"" . grep-dired-dwim)             ;查找特定的lisp文件
-   )
- dired-mode-map
- "grep-dired")
-
-(lazy-load-local-keys
- '(
    ("K" . dired-open-file)              ;批量打开文件
    )
  dired-mode-map
  "dired-open")
-
-;; (lazy-load-local-keys
-;;  '(
-;;    ("]" . dired-show-file-qrcode))
-;;  dired-mode-map
-;;  "eaf.el")
 
 ;;; ### Wdired ###
 ;;; --- Dired 的编辑模式
