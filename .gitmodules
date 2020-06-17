@@ -178,3 +178,6 @@
 [submodule "nox"]
 	path = site-lisp/extensions/nox
 	url = https://github.com/manateelazycat/nox.git
+[submodule "go-mode"]
+    path = site-lisp/extensions/go-mode
+	url = https://github.com/dominikh/go-mode.el.git

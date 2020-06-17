@@ -130,7 +130,9 @@
                'llvm-mode-hook
                'conf-toml-mode-hook
                ))
-  (add-hook hook (lambda () (display-line-numbers-mode))))
+  (add-hook hook (lambda ()
+                   ;; (display-line-numbers-mode)
+                   (display-line-numbers--turn-on))))
 
 (provide 'init-line-number)
 
