@@ -181,3 +181,6 @@
 [submodule "go-mode"]
     path = site-lisp/extensions/go-mode
 	url = https://github.com/dominikh/go-mode.el.git
+[submodule "site-lisp/extensions/gotest"]
+	path = site-lisp/extensions/gotest
+	url = https://github.com/nlamirault/gotest.el.git
