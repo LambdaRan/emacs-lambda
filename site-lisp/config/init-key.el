@@ -467,6 +467,7 @@
    ("C-c m" . magit-status+))
  "init-git")
 
+
 ;; M-x enhancement,列出最近、常用、其他命令
 ;; (lazy-load-global-keys
 ;;  '(

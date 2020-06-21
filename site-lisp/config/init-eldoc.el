@@ -93,8 +93,8 @@
                       (setq eldoc-argument-case 'eldoc-argument-list) ;高亮函数参数
                       (turn-on-eldoc-mode)))))
 
-(add-hook 'go-mode-hook 'go-eldoc-setup)
-(autoload 'go-eldoc-setup "go-eldoc")
+;; (add-hook 'go-mode-hook 'go-eldoc-setup)
+;; (autoload 'go-eldoc-setup "go-eldoc")
 
 (provide 'init-eldoc)
 

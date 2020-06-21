@@ -98,7 +98,7 @@
  '(
    ("C-c C-c" . go-run-buffer)
    ("C-c C-f" . gofmt)
-   ("C-c C-d" . godoc)
+   ;; ("C-c C-d" . godoc)
    ("C-c C-a" . go-import-add)
    ("C-c t" . go-test-current-test)
    ("C-c f" . go-test-current-file)

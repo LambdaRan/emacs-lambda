@@ -112,6 +112,7 @@
         (list "\\.rar$" "unrar e -ad")
         (list "\\.tar.bz2$" "tar jxvf")
         (list "\\.gz$" "gzip -d")
+        (list "\\.tar.gz$" "tar zxvf")
         ;; 其他
         (list "\\.exe$" "wine")))
 
