@@ -274,7 +274,8 @@
    ))
 (lazy-load-global-keys
  '(
-   ("C-4" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
+   ("s-o" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
+   ("s-p" . insert-standard-date)
    ("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
    )
  "lazycat-toolkit")
@@ -386,7 +387,6 @@
 (lazy-load-global-keys
  '(
    ("M-s-i" . ielm-toggle)              ;切换ielm
-   ("s-p" . insert-standard-date)
    )
  "lazycat-toolkit")
 
