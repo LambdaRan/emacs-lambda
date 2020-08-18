@@ -146,6 +146,10 @@
      (c-mode-style-setup)
      )))
 
+(add-hook 'c-mode-hook '(lambda ()
+                         (setq-local comment-start "// ")
+                         (setq-local comment-end "")
+                         ))
 (provide 'init-c)
 
 ;;; init-qt.el ends here

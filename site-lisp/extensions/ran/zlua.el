@@ -46,6 +46,8 @@
             ))))
     (when (string-blank-p input-string)
       (setq input-string current-symbol))
+    (if (string= input-string "")
+        (setq input-string "/Users/randegang"))
     (when zlua-debug
       (message "User input : %s" input-string))
     input-string))
