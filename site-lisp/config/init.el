@@ -71,6 +71,7 @@
           (require 'init-yasnippet)
           ;; 自动补全
           (require 'init-company-mode)
+          ;; (require 'init-company-tabnine)
           ;; 平滑滚动，不知道干啥的
           (require 'init-smooth-scrolling)
           ;; 保存窗口位置与内容，下次启动时直接恢复到上次窗口状态

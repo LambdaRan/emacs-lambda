@@ -88,7 +88,7 @@
             (add-to-list 'yas-snippet-dirs (concat lazycat-emacs-extension-dir "/yasnippet-php-mode"))
 
             ;; my private snippets, should be placed before enabling yasnippet
-            (setq my-yasnippets (expand-file-name "~/my-yasnippets"))
+            (setq my-yasnippets (expand-file-name "~/ransysconf/yasnippets"))
 
             ;; http://stackoverflow.com/questions/7619640/emacs-latex-yasnippet-why-are-newlines-inserted-after-a-snippet
             (setq-default mode-require-final-newline nil)

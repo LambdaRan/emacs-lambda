@@ -112,7 +112,7 @@
         ;; 默认先最大化。
         (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 
-        (run-at-time "2sec" nil
+        (run-at-time "1sec" nil
                     (lambda ()
                         (toggle-frame-fullscreen)
                         ))
