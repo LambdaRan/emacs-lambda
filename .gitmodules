@@ -187,3 +187,6 @@
 [submodule "site-lisp/extensions/emacs-vdiff"]
 	path = site-lisp/extensions/emacs-vdiff
 	url = https://github.com/justbur/emacs-vdiff.git
+[submodule "grip-mode"]
+	path = site-lisp/extensions/grip-mode
+	url = https://github.com/seagle0128/grip-mode.git
