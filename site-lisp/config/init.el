@@ -1,4 +1,3 @@
-
 ;; 加速配置。
 (require 'init-accelerate)
 
@@ -22,10 +21,6 @@
      (require 'benchmark-init-modes)
      (require 'benchmark-init)
      (benchmark-init/activate)
-
-     ;; 先设置背景，避免闪烁。
-     ;; (custom-set-faces
-         ;; '(default ((t (:background "black" :foreground "#137D11")))))
 
      (require 'init-startup)
      (require 'init-generic)
@@ -71,7 +66,7 @@
           (require 'init-yasnippet)
           ;; 自动补全
           (require 'init-company-mode)
-          ;; (require 'init-company-tabnine)
+          (require 'init-company-tabnine)
           ;; 平滑滚动，不知道干啥的
           (require 'init-smooth-scrolling)
           ;; 保存窗口位置与内容，下次启动时直接恢复到上次窗口状态

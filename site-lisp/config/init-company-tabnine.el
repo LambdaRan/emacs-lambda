@@ -81,7 +81,7 @@
 
 ;;; Require
 (require 'company-tabnine)
-;; (require 'company-ctags)
+(require 'company-ctags)
 ;;; Code:
 
 ;; The free version of TabNine is good enough,
@@ -97,9 +97,9 @@
 
 ;; TabNine
 ;; (add-to-list 'company-backends #'company-tabnine)
-;; (add-to-list 'company-backends '(company-tabnine
-                                 ;; :separate company-etags))
-;; (company-ctags-auto-setup)
+(add-to-list 'company-backends '(company-tabnine
+                                 :separate company-etags))
+(company-ctags-auto-setup)
 
 (setq company-tabnine-always-trigger nil) ; 不要一直触发
 (provide 'init-company-tabnine)

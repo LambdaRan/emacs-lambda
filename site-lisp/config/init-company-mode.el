@@ -102,19 +102,16 @@
 
 ;;; Require
 
+;;; Code:
 (add-hook 'prog-mode-hook
           '(lambda ()
-;;; Code:
             (require 'lazy-load)
             (require 'company)
             (require 'company-yasnippet)
             (require 'company-dabbrev)
             (require 'company-files)
             (require 'company-tng)
-            (require 'init-company-tabnine)
-            (require 'company-ctags)
 
-;;; Code:
             ;; Config for company mode.
             ;; Trigger completion immediately.
             (setq company-idle-delay 0)
@@ -149,26 +146,12 @@
             (setq company-backends (delete 'company-bbdb company-backends))
             (setq company-backends (delete 'company-eclim company-backends))
             (setq company-backends (delete 'company-gtags company-backends))
-            (setq company-backends (delete 'company-etags company-backends))
+            ;; (setq company-backends (delete 'company-etags company-backends))
             (setq company-backends (delete 'company-oddmuse company-backends))
             (setq company-backends (delete 'company-cmake company-backends))
-
             ;; (dolist (backend '(company-xcode company-bbdb company-eclim company-gtags company-etags company-oddmuse company-cmake))
             ;;   (setq company-backends (delete backend company-backends)))
-
             (add-to-list 'company-backends 'company-files)
-
-            ;; TabNine
-            ;; (add-to-list 'company-backends #'company-tabnine)
-            (add-to-list 'company-backends '(company-tabnine
-                                             :separate company-etags))
-
-            ;; (add-to-list 'company-backends 'company-etags)
-            ;; company-ctags is much faster out of box. No further optimiation needed
-            ;; (require 'company-ctags)
-            ;; "Replace `company-etags' with `company-ctags' in BACKENDS."
-            ;; (unless (featurep 'company-ctags) (local-require 'company-ctags))
-            (company-ctags-auto-setup)
 
             ;; Use the tab-and-go frontend.
             ;; Allows TAB to select and complete at the same time.
@@ -185,8 +168,7 @@
             (add-hook 'emacs-lisp-mode-hook
              '(lambda ()
                (require 'company-elisp)
-               (push 'company-elisp company-backends)
-               ))
+               (push 'company-elisp company-backends)))
 
              ;; Key settings.
              (lazy-load-unset-keys
