@@ -129,6 +129,7 @@
              ;; @see https://github.com/company-mode/company-mode/issues/146
              company-tooltip-align-annotations t)
 
+            (add-to-list 'company-transformers 'company-sort-by-backend-importance)
             ;; NOT to load company-mode for certain major modes.
             ;; Ironic that I suggested this feature but I totally forgot it
             ;; until two years later.
