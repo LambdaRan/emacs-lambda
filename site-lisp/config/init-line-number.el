@@ -89,7 +89,7 @@
 (setq line-number-display-limit-width 1000)
 
 ;; 设置超过120字符显示越界指示器
-(setq display-fill-column-indicator-column 120)
+(setq-default display-fill-column-indicator-column 120)
 
 (dolist (hook (list
                'c-mode-common-hook

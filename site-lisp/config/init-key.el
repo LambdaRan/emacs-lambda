@@ -33,6 +33,8 @@
    ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
    ("M-h" . set-mark-command) ;Instead C-Space for Chinese input method
    ("C-c c w" . browse-url-at-point)
+   ("C-z i" . display-fill-column-indicator-mode)
+   ("C-z l" . display-line-numbers-mode) ;行号模式切换
    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -95,8 +97,7 @@
 
 (lazy-load-global-keys
  '(
-   ("C-z l" . display-line-numbers-mode) ;行号模式切换
-   ("C-z i" . display-fill-column-indicator-mode)
+   ;; ("C-z l" . display-line-numbers-mode) ;行号模式切换
    ;; ("M-s-n" . comment-part-move-down)    ;向下移动注释
    ;; ("M-s-p" . comment-part-move-up)      ;向上移动注释
    ("C-s-n" . comment-dwim-next-line)    ;移动到上一行并注释x
