@@ -84,11 +84,11 @@
 
 ;;; Code:
 
-(let ((emacs-font-size 13)
+(let ((emacs-font-size 14)
         emacs-font-name)
     (cond
      ((featurep 'cocoa)
-      (setq emacs-font-name "Monaco"))
+      (setq emacs-font-name "JetBrains Mono"))
      ((string-equal system-type "gnu/linux")
       ;; (setq emacs-font-name "WenQuanYi Micro Hei Mono")
       (setq emacs-font-name "Source Code Pro")))
@@ -97,14 +97,7 @@
       ;; (set-fontset-font (frame-parameter nil 'font) 'unicode (eval emacs-font-name))
       ))
 
-(with-eval-after-load 'org
-  (defun org-buffer-face-mode-variable ()
-    (interactive)
-    (make-face 'width-font-face)
-    (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC 15")
-    (setq buffer-face-mode-face 'width-font-face)
-    (buffer-face-mode))
-  (add-hook 'org-mode-hook 'org-buffer-face-mode-variable))
+;; (setq-default line-spacing 0.2)
 
 (provide 'init-font)
 
