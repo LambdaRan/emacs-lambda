@@ -94,12 +94,16 @@
                'calc-mode-hook            ;计算器模式
                'gnus-article-mode-hook    ;Gnus 文章模式
                'gnus-kill-file-mode       ;Gnus 删除文件模糊
+               'magit-process-mode-hook
+               'magit-diff-mode-hook
+               'magit-status-mode-hook
                ))
   (add-hook
    hook
    '(lambda ()
-      (require 'tempbuf)
-      (turn-on-tempbuf-mode))))         ;加载自动清理临时buffer
+     (require 'tempbuf)
+     (setq timer-max-repeats 2)         ; 先前的调用被延迟时，连续重复调用计时器函数的最大次数。
+     (turn-on-tempbuf-mode))))          ;加载自动清理临时buffer
 
 
 (provide 'init-tempbuf)
