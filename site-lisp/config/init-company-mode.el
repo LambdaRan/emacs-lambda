@@ -103,6 +103,50 @@
 ;;; Require
 
 ;;; Code:
+(defun company-tabnine-sort-by-detail (candidates)
+  "Sort tabnine response by detail value"
+  (sort candidates
+        (lambda (c1 c2)
+          (let ((d1 (get-text-property 0 'detail c1))
+                (d2 (get-text-property 0 'detail c2)))
+            ;; 默认忽略type
+            (when (null d1) (setq d1 "1%"))
+            (when (null d2) (setq d2 "1%"))
+            (>= (string-to-number d1) (string-to-number d2))))))
+
+(defun company-sort-by-tabnine-and-ctags (candidates)
+  "sort company backends response"
+  (when (or (functionp company-backend)
+            (not (and (listp company-backend)
+                      (memq 'company-tabnine company-backend))))
+    candidates)
+  (let (candidates-tabnine candidates-ctags candidates-yas)
+    (setq candidates-max-length (min (length candidates) 20))
+    (dolist (candidate candidates)
+      (setq backend-property (get-text-property 0 'company-backend candidate))
+      (cond
+        ((eq backend-property 'company-ctags)
+         (push candidate candidates-ctags))
+        ((eq backend-property 'company-yasnippet)
+         (push candidate candidates-yas))
+        (t (push candidate candidates-tabnine))))
+    ;; (setq candidates-tabnine (nreverse candidates-tabnine))
+    (setq candidates-tabnine (company-tabnine-sort-by-detail candidates-tabnine))
+
+    (setq candidates-ctags (nreverse candidates-ctags))
+    (setq candidates-yas (nreverse candidates-yas))
+    (setq candidates (nconc (seq-take candidates-tabnine 5)
+                            (seq-take candidates-ctags 3)
+                            (seq-take candidates-yas 2)))
+    (setq candidates-other (nconc (seq-drop candidates-tabnine 5)
+                                  (seq-drop candidates-ctags 3)
+                                  (seq-drop candidates-yas 2)))
+    (let ((len (length candidates)))
+      (when (< len candidates-max-length)
+        (setq candidates (nconc candidates (seq-take candidates-other (- candidates-max-length len))))))
+
+    candidates))
+
 (add-hook 'prog-mode-hook
           '(lambda ()
             (require 'lazy-load)
@@ -129,7 +173,8 @@
              ;; @see https://github.com/company-mode/company-mode/issues/146
              company-tooltip-align-annotations t)
 
-            (add-to-list 'company-transformers 'company-sort-by-backend-importance)
+            ;; (add-to-list 'company-transformers 'company-sort-by-backend-importance)
+            (add-to-list 'company-transformers 'company-sort-by-tabnine-and-ctags t)
             ;; NOT to load company-mode for certain major modes.
             ;; Ironic that I suggested this feature but I totally forgot it
             ;; until two years later.
@@ -169,7 +214,7 @@
             (add-hook 'emacs-lisp-mode-hook
              '(lambda ()
                (require 'company-elisp)
-               (push 'company-elisp company-backends)))
+               (add-to-list 'company-backends 'company-elisp)))
 
              ;; Key settings.
              (lazy-load-unset-keys
