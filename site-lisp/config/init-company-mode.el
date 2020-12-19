@@ -110,8 +110,8 @@
           (let ((d1 (get-text-property 0 'detail c1))
                 (d2 (get-text-property 0 'detail c2)))
             ;; 默认忽略type
-            (when (null d1) (setq d1 "1%"))
-            (when (null d2) (setq d2 "1%"))
+            (or d1 (setq d1 "1%"))
+            (or d2 (setq d2 "1%"))
             (>= (string-to-number d1) (string-to-number d2))))))
 
 (defun company-sort-by-tabnine-and-ctags (candidates)
@@ -132,7 +132,6 @@
         (t (push candidate candidates-tabnine))))
     ;; (setq candidates-tabnine (nreverse candidates-tabnine))
     (setq candidates-tabnine (company-tabnine-sort-by-detail candidates-tabnine))
-
     (setq candidates-ctags (nreverse candidates-ctags))
     (setq candidates-yas (nreverse candidates-yas))
     (setq candidates (nconc (seq-take candidates-tabnine 5)
