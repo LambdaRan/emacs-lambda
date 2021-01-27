@@ -84,6 +84,12 @@
 
 ;;; Code:
 
+;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
+(setq auto-window-vscroll nil)
+;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Scrolling.html
+;; https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doom_emacs/fp392eh/
+(setq fast-but-imprecise-scrolling 't)
+(setq jit-lock-defer-time 0)
 
 ;; Restore emacs session.
 (setq initial-buffer-choice t)
