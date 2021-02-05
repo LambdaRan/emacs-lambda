@@ -87,7 +87,7 @@
   ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
   (require 'exec-path-from-shell)
   (exec-path-from-shell-initialize))
-(load-file (concat lazycat-emacs-extension-dir "/with-editor/with-editor.el"))
+;; (load-file (concat lazycat-emacs-extension-dir "/with-editor/with-editor.el"))
 
 ;; Magit configuration.
 (setq magit-commit-ask-to-stage nil)    ;don't ask stage question
@@ -186,6 +186,20 @@
   (when (y-or-n-p (format "Delete remote branch (%s): " (magit-get-current-branch)))
     (magit-run-git-async "push" "origin" (format ":%s" (magit-get-current-branch)))))
 
+;; 调试模式
+;; (setq magit-refresh-verbose t)
+(setq magit-git-executable "/usr/local/bin/git")
+;; {{ speed up magit, @see https://jakemccrary.com/blog/2020/11/14/speeding-up-magit/
+(defvar my-prefer-lightweight-magit t)
+(with-eval-after-load 'magit
+  (when my-prefer-lightweight-magit
+    (remove-hook 'magit-status-sections-hook 'magit-insert-tags-header)
+    (remove-hook 'magit-status-sections-hook 'magit-insert-status-headers)
+    ;; (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-pushremote)
+    ;; (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
+    ;; (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-upstream)
+    ;; (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-upstream-or-recent)
+    ))
 (provide 'init-git)
 
 ;;; init-git.el ends here

@@ -95,6 +95,7 @@
     (setq ff-quiet-mode t)
     ;; 找不到同名文件时不创建
     (setq ff-always-try-to-create nil)
+    (setq ff-case-fold-search t)
     (setq cc-search-directories '("."
                                   "/usr/include"
                                   "/usr/local/include/*"
