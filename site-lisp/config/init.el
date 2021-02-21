@@ -18,9 +18,9 @@
 
 ;; 统计启动时间
   (with-temp-message ""                 ;抹掉插件启动的输出
-     (require 'benchmark-init-modes)
-     (require 'benchmark-init)
-     (benchmark-init/activate)
+     ;; (require 'benchmark-init-modes)
+     ;; (require 'benchmark-init)
+     ;; (benchmark-init/activate)
 
      (require 'init-startup)
      (require 'init-generic)

@@ -83,6 +83,11 @@
 (require 'symbol-overlay)
 
 ;;; Code:
+(defun ran-push-marker-stack ()
+  "Save current position."
+  (when (fboundp 'xref-push-marker-stack)
+    (xref-push-marker-stack (point-marker))))
+(advice-add #'symbol-overlay-jump-to-definition :before #'ran-push-marker-stack)
 
 (lazy-load-set-keys
  '(
