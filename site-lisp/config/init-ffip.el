@@ -27,10 +27,12 @@
  '(
    ("C-c f p" . find-file-in-project-at-point)
    ("C-c f f" . find-file-in-project-by-selected)
+   ;; ("C-c f F" . find-file-in-project)
    ("C-c f s" . find-file-with-similar-name)
    ("C-c f d" . find-directory-in-project-by-selected)
-   ;; ("C-c f c" . find-file-in-current-directory)
+   ;; ("C-c f D" . find-directory-in-project)
    ("C-c f c" . find-file-in-current-directory-by-selected)
+   ;; ("C-c f C" . find-file-in-current-directory)
    ))
 
 (provide 'init-ffip)

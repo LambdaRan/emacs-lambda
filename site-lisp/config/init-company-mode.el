@@ -194,6 +194,8 @@
             ;; (setq company-backends (delete 'company-etags company-backends))
             (setq company-backends (delete 'company-oddmuse company-backends))
             (setq company-backends (delete 'company-cmake company-backends))
+            ;; TODO: 打开文件时global-company-mode耗时，待优化
+            (setq company-backends (delete 'company-clang company-backends))
             ;; (dolist (backend '(company-xcode company-bbdb company-eclim company-gtags company-etags company-oddmuse company-cmake))
             ;;   (setq company-backends (delete backend company-backends)))
             (add-to-list 'company-backends 'company-files)
