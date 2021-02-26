@@ -84,6 +84,9 @@
 
 ;;; Code:
 
+;; http://bling.github.io/blog/2016/01/18/why-are-you-changing-gc-cons-threshold/
+(setq gc-cons-percentage 0.5)
+
 ;; Disable garbage collection when entering commands.
 (defun max-gc-limit ()
   (setq gc-cons-threshold most-positive-fixnum))
@@ -96,8 +99,6 @@
 
 ;; Improve the performance of rendering long lines.
 (setq-default bidi-display-reordering nil)
-
-(setq gc-cons-percentage 0.5)
 
 ;; @see https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/
 ;; Emacs 25 does gc too frequently
