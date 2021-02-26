@@ -89,13 +89,25 @@
   (setq gc-cons-threshold most-positive-fixnum))
 
 (defun reset-gc-limit ()
-  (setq gc-cons-threshold 800000))
+  (setq gc-cons-threshold (* 1024 1024 32))) ; original value 800000
 
 (add-hook 'minibuffer-setup-hook #'max-gc-limit)
 (add-hook 'minibuffer-exit-hook #'reset-gc-limit)
 
 ;; Improve the performance of rendering long lines.
 (setq-default bidi-display-reordering nil)
+
+(setq gc-cons-percentage 0.5)
+
+;; @see https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/
+;; Emacs 25 does gc too frequently
+;; (setq garbage-collection-messages t) ; for debug
+;; (defun my-cleanup-gc ()
+;;   "Clean up gc."
+;;   (setq gc-cons-threshold  67108864) ; 64M
+;;   (setq gc-cons-percentage 0.1) ; original value
+;;   (garbage-collect))
+;; (run-with-idle-timer 4 nil #'my-cleanup-gc)
 
 (provide 'init-performance)
 
