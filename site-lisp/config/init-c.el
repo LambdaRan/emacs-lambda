@@ -110,6 +110,9 @@
 
     ;; cpp font lock.
     (modern-c++-font-lock-global-mode t)
+    ;; modern-c++-generate-font-lock-keywords
+    ;; modern-c++-generate-font-lock-stl-cstdint
+    ;; 这两个函数耗时
 
     ;; google-c-style
     (google-set-c-style)
