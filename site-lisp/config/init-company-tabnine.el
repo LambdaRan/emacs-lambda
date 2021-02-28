@@ -94,12 +94,51 @@
       (unless (string-match "The free version of TabNine only indexes up to" (funcall company-message-func))
         ad-do-it))))
 
-
 ;; TabNine
-;; (add-to-list 'company-backends #'company-tabnine)
-(add-to-list 'company-backends '(company-tabnine
-                                 :separate company-etags))
-(company-ctags-auto-setup)
+(dolist (mode (list
+               'c-mode-common
+               'c-mode
+               'emacs-lisp-mode
+               'lisp-interaction-mode
+               'lisp-mode
+               'java-mode
+               'asm-mode
+               'haskell-mode
+               'sh-mode
+               'makefile-gmake-mode
+               'python-mode
+               'js-mode
+               'html-mode
+               'css-mode
+               'tuareg-mode
+               'go-mode
+               'coffee-mode
+               'qml-mode
+               'slime-repl-mode
+               'package-menu-mode
+               'cmake-mode
+               'php-mode
+               'web-mode
+               'coffee-mode
+               'sws-mode
+               'jade-mode
+               'vala-mode
+               'rust-mode
+               'ruby-mode
+               'qmake-mode
+               'lua-mode
+               'swift-mode
+               'llvm-mode
+               'conf-toml-mode
+               'nxml-mode
+               ))
+  (with-eval-after-load mode
+    (add-to-list 'company-backends '(company-tabnine
+                                     :separate company-ctags))))
+
+;; config company-ctags
+(setq company-ctags-ignore-case t)  ; I use company-ctags instead
+;; (company-ctags-auto-setup)
 
 (setq company-tabnine-always-trigger nil) ; 不要一直触发
 (provide 'init-company-tabnine)

@@ -103,6 +103,12 @@
 ;;; Require
 
 ;;; Code:
+(add-hook 'after-init-hook
+          '(lambda ()
+            (require company)
+            (global-company-mode)
+            ))
+
 (defun company-tabnine-sort-by-detail (candidates)
   "Sort tabnine response by detail value"
   (sort candidates
@@ -146,108 +152,113 @@
 
     candidates))
 
+(with-eval-after-load 'company
+  (require 'lazy-load)
+  (require 'company-yasnippet)
+  (require 'company-dabbrev)
+  (require 'company-files)
+  (require 'company-tng)
+  
+  ;; Config for company mode.
+  ;; Trigger completion immediately.
+  (setq company-idle-delay 0)
+  ;; 补全的最小前缀长度
+  (setq company-minimum-prefix-length 2) ; pop up a completion menu by tapping a character
+  ;; Number the candidates (use M-1, M-2 etc to select completions).
+  (setq company-show-numbers t)   ; do not display numbers on the left
+  (setq company-require-match nil) ; allow input string that do not match candidate words
+
+  ;; `compay-dabbrev` search same major mode buffers.
+  (setq company-dabbrev-other-buffers t)
+  ;; (setq company-dabbrev-minimum-length 4)
+
+  ;; Don't downcase the returned candidates.
+  (setq company-dabbrev-downcase nil
+        ;; make previous/next selection in the popup cycles
+        company-selection-wrap-around t
+        company-dabbrev-ignore-case t
+        ;; @see https://github.com/company-mode/company-mode/issues/146
+        company-tooltip-align-annotations t)
+
+  ;; (add-to-list 'company-transformers 'company-sort-by-backend-importance)
+  (add-to-list 'company-transformers 'company-sort-by-tabnine-and-ctags t)
+  ;; NOT to load company-mode for certain major modes.
+  ;; Ironic that I suggested this feature but I totally forgot it
+  ;; until two years later.
+  ;; https://github.com/company-mode/company-mode/issues/29
+  (setq company-global-modes
+        '(not
+          eshell-mode comint-mode erc-mode gud-mode rcirc-mode text-mode
+          minibuffer-inactive-mode))
+
+  ;; Customize company backends.
+  ;; (setq company-backends (delete backend company-backends)))
+  (setq company-backends '(company-capf
+                           company-files
+                           company-dabbrev
+                           (company-dabbrev-code company-keywords)
+                           ;; other backends
+                           ))
+  ;; Add `company-elisp' backend for elisp.
+  (add-hook 'emacs-lisp-mode-hook
+            '(lambda ()
+              (require 'company-elisp)
+              (unless (catch 'found
+                      (dolist (b company-backends)
+                        (cond
+                          ((equal b 'company-elisp)
+                           (throw 'found t))
+                          ((and (listp b) (member 'company-elisp b))
+                           (throw 'found t))
+                          (t nil))))
+                (add-to-list 'company-backends 'company-elisp))))
+
+  ;; Use the tab-and-go frontend.
+  ;; Allows TAB to select and complete at the same time.
+  (company-tng-configure-default)
+  (setq company-frontends
+        '(company-tng-frontend
+          company-pseudo-tooltip-frontend
+          company-echo-metadata-frontend))
+
+  ;; Enable global.
+  (global-company-mode)
+
+  ;; Key settings.
+  (lazy-load-unset-keys
+   '("TAB")
+   company-mode-map)         ;unset default keys
+
+  (lazy-load-unset-keys
+   '("M-p" "M-n" "C-m")
+   company-active-map)
+
+  (lazy-load-set-keys
+   '(
+     ("TAB" . company-complete-selection)
+     ;; ("M-h" . company-complete-selection)
+     ("M-h" . company-complete-common)
+     ;; ("M-H" . company-complete-common)
+     ("M-w" . company-show-location)
+     ("M-s" . company-search-candidates)
+     ("M-S" . company-filter-candidates)
+     ("M-n" . company-select-next)
+     ("M-p" . company-select-previous)
+     ("M-i" . yas-expand)
+     ("RET" . company-complete-selection)
+     )
+   company-active-map)
+  )
+
 (add-hook 'prog-mode-hook
           '(lambda ()
-            (require 'lazy-load)
-            (require 'company)
-            (require 'company-yasnippet)
-            (require 'company-dabbrev)
-            (require 'company-files)
-            (require 'company-tng)
-
-            ;; Config for company mode.
-            ;; Trigger completion immediately.
-            (setq company-idle-delay 0)
-            ;; 补全的最小前缀长度
-            (setq company-minimum-prefix-length 2) ; pop up a completion menu by tapping a character
-            ;; Number the candidates (use M-1, M-2 etc to select completions).
-            (setq company-show-numbers t)   ; do not display numbers on the left
-            (setq company-require-match nil) ; allow input string that do not match candidate words
-
-            ;; Don't downcase the returned candidates.
-            (setq company-dabbrev-downcase nil
-             ;; make previous/next selection in the popup cycles
-             company-selection-wrap-around t
-             company-dabbrev-ignore-case t
-             ;; @see https://github.com/company-mode/company-mode/issues/146
-             company-tooltip-align-annotations t)
-
-            ;; (add-to-list 'company-transformers 'company-sort-by-backend-importance)
-            (add-to-list 'company-transformers 'company-sort-by-tabnine-and-ctags t)
-            ;; NOT to load company-mode for certain major modes.
-            ;; Ironic that I suggested this feature but I totally forgot it
-            ;; until two years later.
-            ;; https://github.com/company-mode/company-mode/issues/29
-            (setq company-global-modes
-             '(not
-               eshell-mode comint-mode erc-mode gud-mode rcirc-mode text-mode
-               minibuffer-inactive-mode))
-
-            ;; config company-ctags
-            (setq company-ctags-ignore-case t)  ; I use company-ctags instead
-
-            ;; Customize company backends.
-            (setq company-backends (delete 'company-xcode company-backends))
-            (setq company-backends (delete 'company-bbdb company-backends))
-            (setq company-backends (delete 'company-eclim company-backends))
-            (setq company-backends (delete 'company-gtags company-backends))
-            ;; (setq company-backends (delete 'company-etags company-backends))
-            (setq company-backends (delete 'company-oddmuse company-backends))
-            (setq company-backends (delete 'company-cmake company-backends))
-            ;; TODO: 打开文件时global-company-mode耗时，待优化
-            (setq company-backends (delete 'company-clang company-backends))
-            ;; (dolist (backend '(company-xcode company-bbdb company-eclim company-gtags company-etags company-oddmuse company-cmake))
-            ;;   (setq company-backends (delete backend company-backends)))
-            (add-to-list 'company-backends 'company-files)
-
-            ;; Use the tab-and-go frontend.
-            ;; Allows TAB to select and complete at the same time.
-            (company-tng-configure-default)
-            (setq company-frontends
-             '(company-tng-frontend
-               company-pseudo-tooltip-frontend
-               company-echo-metadata-frontend))
-
-            ;; Enable global.
-            (global-company-mode)
-
-            ;; Add `company-elisp' backend for elisp.
-            (add-hook 'emacs-lisp-mode-hook
-             '(lambda ()
-               (require 'company-elisp)
-               (add-to-list 'company-backends 'company-elisp)))
-
-             ;; Key settings.
-             (lazy-load-unset-keys
-              '("TAB")
-              company-mode-map)         ;unset default keys
-
-             (lazy-load-unset-keys
-              '("M-p" "M-n" "C-m")
-              company-active-map)
-
-             (lazy-load-set-keys
-              '(
-                ("TAB" . company-complete-selection)
-                ;; ("M-h" . company-complete-selection)
-                ("M-h" . company-complete-common)
-                ;; ("M-H" . company-complete-common)
-                ("M-w" . company-show-location)
-                ("M-s" . company-search-candidates)
-                ("M-S" . company-filter-candidates)
-                ("M-n" . company-select-next)
-                ("M-p" . company-select-previous)
-                ("M-i" . yas-expand)
-                ("RET" . company-complete-selection)
-                )
-              company-active-map)
-
              ;; Add yasnippet support for all company backends.
              (defvar company-mode/enable-yas t
                "Enable yasnippet for all backends.")
 
              (defun company-mode/backend-with-yas (backend)
-               (if (or (not company-mode/enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
+               (if (or (not company-mode/enable-yas)
+                       (and (listp backend) (member 'company-yasnippet backend)))
                    backend
                  (append (if (consp backend) backend (list backend))
                          '(:with company-yasnippet))))

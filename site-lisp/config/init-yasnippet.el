@@ -73,9 +73,10 @@
 
 ;;; Require
 ;; (add-hook 'prog-mode-hook
+;; (add-hook 'after-init-hook
           ;; '(lambda ()
-             (require 'yasnippet)
-(require 'yasnippet-snippets)
+            (require 'yasnippet)
+            (require 'yasnippet-snippets)
 
              (defun get-git-user-name ()
                (interactive)
