@@ -190,3 +190,6 @@
 [submodule "grip-mode"]
 	path = site-lisp/extensions/grip-mode
 	url = https://github.com/seagle0128/grip-mode.git
+[submodule "insert-translated-name"]
+	path = site-lisp/extensions/insert-translated-name
+	url = https://github.com/manateelazycat/insert-translated-name.git

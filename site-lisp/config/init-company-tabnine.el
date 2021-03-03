@@ -133,8 +133,16 @@
                'nxml-mode
                ))
   (with-eval-after-load mode
-    (add-to-list 'company-backends '(company-tabnine
-                                     :separate company-ctags))))
+    (unless (catch 'found
+              (dolist (b company-backends)
+                (cond
+                  ((equal b 'company-tabnine)
+                   (throw 'found t))
+                  ((and (listp b) (member 'company-tabnine b))
+                   (throw 'found t))
+                  (t nil))))
+      (add-to-list 'company-backends '(company-tabnine
+                                       :separate company-ctags)))))
 
 ;; config company-ctags
 (setq company-ctags-ignore-case t)  ; I use company-ctags instead
