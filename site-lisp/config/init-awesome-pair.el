@@ -101,6 +101,7 @@
                'coffee-mode-hook
                'rust-mode-hook
                'qmake-mode-hook
+               'cmake-mode-hook
                'lua-mode-hook
                'swift-mode-hook
                'web-mode-hook

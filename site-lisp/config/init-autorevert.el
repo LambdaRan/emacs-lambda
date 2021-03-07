@@ -1,6 +1,6 @@
 
 (setq global-auto-revert-mode t)
-(setq auto-revert-interval 3)
+(setq auto-revert-interval 5)
 
 ;; (add-hook 'c-mode-hook #'turn-on-auto-revert-mode)
 ;; (add-hook 'prog-mode-hook

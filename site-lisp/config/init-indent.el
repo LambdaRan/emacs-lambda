@@ -117,6 +117,7 @@
                'haskell-cabal-mode-hook
                'ruby-mode-hook
                'qml-mode-hook
+               'cmake-mode-hook
                'web-mode-hook
                'scss-mode-hook
                'coffee-mode-hook
