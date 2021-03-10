@@ -256,11 +256,12 @@
  "buffer-extension")
 
 ;; 文件列表 TODO 目录设置
-(lazy-load-global-keys
- '(
-   ("C-S-s" . sr-speedbar-toggle)
-   )
- "init-speedbar")
+;; (lazy-load-global-keys
+;;  '(
+;;    ("C-S-s" . sr-speedbar-toggle)
+;;    )
+;;  "init-speedbar")
+
 ;;; ### Awesome-Tab ###
 ;;; --- 多标签浏览
 (lazy-load-set-keys
@@ -299,16 +300,16 @@
    )
  "lazycat-toolkit")
 
-(lazy-load-global-keys
- '(
-   ("C-7" . xref-pop-marker-stack)
-   ("C-8" . xref-find-definitions)
-   ("C-9" . xref-find-definitions-other-window)
-   ("M-k" . xref-find-references)
-   ;; ("M-," . nox-rename)
-   ;; ("M-." . nox-show-doc)
-   )
- "init-nox.el")
+;; (lazy-load-global-keys
+;;  '(
+;;    ("C-7" . xref-pop-marker-stack)
+;;    ("C-8" . xref-find-definitions)
+;;    ("C-9" . xref-find-definitions-other-window)
+;;    ("M-k" . xref-find-references)
+;;    ;; ("M-," . nox-rename)
+;;    ;; ("M-." . nox-show-doc)
+;;    )
+;;  "init-nox.el")
 
 ;;; ### Awesome-Pair ###
 ;;; --- 结构化编程
