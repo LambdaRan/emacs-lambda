@@ -193,3 +193,9 @@
 [submodule "insert-translated-name"]
 	path = site-lisp/extensions/insert-translated-name
 	url = https://github.com/manateelazycat/insert-translated-name.git
+[submodule "emacs-libvterm"]
+	path = site-lisp/extensions/emacs-libvterm
+	url = https://github.com/akermu/emacs-libvterm.git
+[submodule "multi-vterm"]
+	path = site-lisp/extensions/multi-vterm
+	url = https://github.com/suonlight/multi-vterm.git

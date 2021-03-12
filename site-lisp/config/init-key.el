@@ -191,6 +191,24 @@
    ("C-?" . undo-tree-redo)             ;重做)
    )
  "undo-tree")
+;;; ### Rect ###
+;;; --- 矩形操作
+(lazy-load-global-keys
+ '(
+   ("s-M" . rm-set-mark)                ;矩形标记
+   ("s-X" . rm-exchange-point-and-mark) ;矩形对角交换
+   ("s-D" . rm-kill-region)             ;矩形删除
+   ("s-S" . rm-kill-ring-save)          ;矩形保存
+   ("s-Y" . yank-rectangle)             ;粘帖矩形
+   ("s-O" . open-rectangle)            ;用空白填充矩形, 并向右移动文本
+   ("s-C" . clear-rectangle)           ;清空矩形
+   ("s-T" . string-rectangle)          ;用字符串替代矩形的每一行
+   ("s-I" . string-insert-rectangle)   ;插入字符串在矩形的每一行
+   ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
+   ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
+   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
+   )
+ "rect-extension")
 ;;; ### Font ###
 ;;; --- 字体命令
 (lazy-load-set-keys
@@ -376,13 +394,18 @@
 ;;  "init-aweshell")
 
 ;;; multi-term`
+;; (lazy-load-global-keys
+;;  '(
+;;    ("C-`" . multi-term)
+;;    ("s-x n" . multi-term-dedicated-toggle)
+;;    )
+;;  "init-multiterm")
 (lazy-load-global-keys
  '(
-   ("C-`" . multi-term)
-   ("s-x n" . multi-term-dedicated-toggle)
+   ("C-`" . multi-vterm)
+   ("s-x n" . multi-vterm-dedicated-toggle)
    )
- "init-multiterm")
-
+ "init-multi-vterm")
 
 ;; ### Dired;;  ###
 (lazy-load-global-keys
