@@ -403,6 +403,7 @@
 (lazy-load-global-keys
  '(
    ("C-`" . multi-vterm)
+   ("C-q" . ran-vterm-open-in-right-or-below-window)
    ("s-x n" . multi-vterm-dedicated-toggle)
    )
  "init-multi-vterm")
