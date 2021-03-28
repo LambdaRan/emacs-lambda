@@ -110,6 +110,36 @@
       woman-use-own-frame nil           ;同一个frame
       woman-cache-level 3)              ;缓存级别, 最快
 
+(setq woman-show-log nil)
+
+(let ((path "/private/etc/"))
+  (when (file-directory-p path)
+    (add-to-list 'woman-man.conf-path path)))
+
+(setq cache-woman-manpath nil)
+
+(defun woman-get-manpath-build-command ()
+  (let ((cmd "manpath")
+        command)
+    (when (executable-find cmd)
+      (setq command (format "%s" (executable-find cmd)))
+      (when (memq system-type '(cygwin windows-nt ms-dos))
+        (setq command-line (encode-coding-string command-line locale-coding-system))))
+    command))
+
+(defun woman-get-manpath ()
+  (interactive)
+  (when (null cache-woman-manpath)
+    (let ((command (woman-get-manpath-build-command)))
+      (unless (string-empty-p command)
+        (setq command-result (shell-command-to-string command))
+        ;; (message "manpath:%s" command-result)
+        (setq cache-woman-manpath (split-string command-result "[:\n]+" t "[0-9. ]+")))
+      (dolist (elt cache-woman-manpath)
+        (add-to-list 'woman-manpath elt))))
+  ;; (message "%S" cache-woman-manpath)
+  )
+
 (provide 'init-woman)
 
 ;;; init-woman.el ends here

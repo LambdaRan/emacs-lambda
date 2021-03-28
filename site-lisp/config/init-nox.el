@@ -97,9 +97,9 @@
                ;; 'c++-mode-hook
                ;; 'haskell-mode-hook
                ))
-  (add-hook hook '(lambda ()
-                   (require 'nox)
-                   (nox-ensure))))
+  (add-hook hook #'(lambda ()
+                     (require 'nox)
+                     (nox-ensure))))
 
 (lazy-load-set-keys
  '(

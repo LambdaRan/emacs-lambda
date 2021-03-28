@@ -92,19 +92,16 @@
 (setq my-dired-omit-regexp "^\\.?#\\|^\\..*") ;设置忽略文件的匹配正则表达式
 (setq dired-omit-verbose nil)                 ; 不显示message
 (setq my-dired-omit-extensions '(".cache")) ;设置忽略文件的扩展名列表
-(add-hook 'dired-after-readin-hook '(lambda ()
-                                     (progn
-                                       (require 'dired-extension)
-                                       (dired-sort-method)))) ;先显示目录, 然后显示文件
+(add-hook 'dired-after-readin-hook #'(lambda ()
+                                       (progn
+                                         (require 'dired-extension)
+                                         (dired-sort-method)))) ;先显示目录, 然后显示文件
 (add-hook
  'dired-mode-hook
- '(lambda ()
-   (require 'dired-extension)
-   (dired-omit-method)                 ;隐藏文件的方法
-
-   ;; (require 'dired+)
-   ;; (toggle-dired-find-file-reuse-dir 1) ;使用单一模式浏览Dired
-   ))
+ #'(lambda ()
+     (require 'dired-extension)
+     (dired-omit-method)                 ;隐藏文件的方法
+     ))
 
 (setq dired-guess-shell-alist-user      ;设置文件默认打开的模式
       '(
@@ -129,7 +126,9 @@
    ("9" . auto-install-from-dired)      ;自动从EmacsWiki安装标记的文件
    ("I" . image-dired)                  ;打开浏览模式
    ("w" . dired-x-find-file)            ;查找文件
-   ("J" . dired-goto-file)              ;跳到某个文件
+   ;; ("J" . dired-goto-file)              ;跳到某个文件
+   ("J" . awesome-tab-backward-tab)
+   ("K" . awesome-tab-forward-tab)
    ("X" . traverse-cp-or-mv-extfiles-in-dir) ;拷贝或移动目录下指定扩展名的文件
    ("V" . traverse-dired-browse-archive)     ;浏览压缩文件
    ("," . dired-diff)                        ;比较文件
@@ -139,7 +138,7 @@
    ("/" . copy-buffer-file-name-as-kill)     ;显示路径或名称
    ("s" . one-key-menu-dired-sort)           ;排序
    ("F" . one-key-menu-dired-filter)         ;过滤
-   ;; ("W" . wdired-change-to-wdired-mode)      ;切换到dired编辑模式
+   ("W" . wdired-change-to-wdired-mode)      ;切换到dired编辑模式
    )
  dired-mode-map)
 
@@ -201,55 +200,15 @@
 ;;; ### Wdired ###
 ;;; --- Dired 的编辑模式
 (eval-after-load 'wdired
-  '(lambda ()
-    (progn
-      (require 'wdired-extension)
-      (lazy-load-set-keys
-       '(
-         ("C-c C-e" . wdired-format-filename) ;格式化文件名
-         )
-       wdired-mode-map))))
+  #'(lambda ()
+      (progn
+        (require 'wdired-extension)
+        (lazy-load-set-keys
+         '(
+           ("C-c C-e" . wdired-format-filename) ;格式化文件名
+           )
+         wdired-mode-map))))
 
-
-;; (defvar one-key-menu-dired-sort-alist nil
-;;   "The `one-key' menu alist for DIRED-SORT.")
-
-;; (setq one-key-menu-dired-sort-alist
-;;       '(
-;;         (("s" . "Size") . dired-sort-size)
-;;         (("x" . "Extension") . dired-sort-extension)
-;;         (("n" . "Name") . dired-sort-name)
-;;         (("t" . "Modified Time") . dired-sort-time)
-;;         (("u" . "Access Time") . dired-sort-utime)
-;;         (("c" . "Create Time") . dired-sort-ctime)))
-
-;; (defun one-key-menu-dired-sort ()
-;;   "The `one-key' menu for DIRED-SORT."
-;;   (interactive)
-;;   (require 'one-key)
-;;   (require 'dired-sort)                 ;排序 dired 文件
-;;   (one-key-menu "DIRED-SORT" one-key-menu-dired-sort-alist t))
-
-;; (defvar one-key-menu-dired-filter-alist nil
-;;   "The `one-key' menu alist for DIRED-FILTER.")
-
-;; (setq one-key-menu-dired-filter-alist
-;;       '(
-;;         (("x" . "Extension") . dired-filter-by-extension)
-;;         (("f" . "File") . dired-filter-by-file)
-;;         (("d" . "Directory") . dired-filter-by-directory)
-;;         (("e" . "Execute") . dired-filter-by-executable)
-;;         (("." . "Dot files") . dired-filter-by-dot-files)
-;;         (("r" . "Regex") . dired-filter-by-regexp)
-;;         (("s" . "Symlink") . dired-filter-by-symlink)
-;;         (("n" . "Name") . dired-filter-by-name)
-;;         ))
-
-;; (defun one-key-menu-dired-filter ()
-;;   "The `one-key' menu for DIRED-FILTER."
-;;   (interactive)
-;;   (require 'dired-filter)
-;;   (one-key-menu "DIRED-FILTER" one-key-menu-dired-filter-alist t))
 
 (provide 'init-dired)
 

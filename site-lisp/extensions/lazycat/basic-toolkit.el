@@ -109,8 +109,8 @@
       (while (<= counter max)
         (insert (format "%0d " line))
         (beginning-of-line 2)
-        (incf line)
-        (incf counter)))))
+        (cl-incf line)
+        (cl-incf counter)))))
 
 (defun insert-line-number+ ()
   "Insert line number into buffer."
@@ -519,6 +519,15 @@ Otherwise return nil."
         (if (and (string-prefix-p "*" (buffer-name)) (string-suffix-p "*" (buffer-name)))
             (kill-buffer buf))
         ))))
+
+(defun join-lines (n)
+  "Join N lines."
+  (interactive "p")
+  (if (use-region-p)
+      (let ((fill-column (point-max)))
+        (fill-region (region-beginning) (region-end)))
+    (dotimes (_ (abs n))
+      (delete-indentation (natnump n)))))
 
 (provide 'basic-toolkit)
 

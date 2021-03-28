@@ -91,15 +91,10 @@
                'php-mode-hook
                ))
   (require 'doxymacs)
-  ;; (require 'lazycat-toolkit)
-  (doxymacs-font-lock)                                                    ;注释高亮模式
-  (add-hook hook 'doxymacs-mode)                                          ;加载文档模式
-  ;; (when (or (eq 'c++-mode major-mode)
-  ;;           (eq 'c-mode major-mode))
-  ;;   (setq doxymacs-doxygen-style "C++"))
-  ;; (unless (eq 'java-mode major-mode)
-  ;;   (setq doxymacs-doxygen-style "Qt"))
-  ;; (add-hook hook (lambda () (local-set-key (kbd "C-m") 'my-doxymacs-return))) ;注释智能换行
+  (require 'lazycat-toolkit)
+  (doxymacs-font-lock)                  ;注释高亮模式
+  (add-hook hook 'doxymacs-mode)        ;加载文档模式
+  (add-hook hook #'(lambda () (local-set-key (kbd "C-m") 'my-doxymacs-return))) ;注释智能换行
   )
 
 (provide 'init-doxymacs)

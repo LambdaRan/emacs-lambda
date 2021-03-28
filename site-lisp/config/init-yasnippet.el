@@ -74,7 +74,7 @@
 ;;; Require
 ;; (add-hook 'prog-mode-hook
 ;; (add-hook 'after-init-hook
-          ;; '(lambda ()
+          ;; #'(lambda ()
             (require 'yasnippet)
             (require 'yasnippet-snippets)
 

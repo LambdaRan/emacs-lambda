@@ -104,10 +104,10 @@
 
 ;;; Code:
 (add-hook 'after-init-hook
-          '(lambda ()
-            (require company)
-            (global-company-mode)
-            ))
+          #'(lambda ()
+              (require company)
+              (global-company-mode)
+              ))
 
 (defun company-tabnine-sort-by-detail (candidates)
   "Sort tabnine response by detail value"
@@ -158,7 +158,7 @@
   (require 'company-dabbrev)
   (require 'company-files)
   (require 'company-tng)
-  
+
   ;; Config for company mode.
   ;; Trigger completion immediately.
   (setq company-idle-delay 0)
@@ -201,17 +201,17 @@
                            ))
   ;; Add `company-elisp' backend for elisp.
   (add-hook 'emacs-lisp-mode-hook
-            '(lambda ()
-              (require 'company-elisp)
-              (unless (catch 'found
-                      (dolist (b company-backends)
-                        (cond
-                          ((equal b 'company-elisp)
-                           (throw 'found t))
-                          ((and (listp b) (member 'company-elisp b))
-                           (throw 'found t))
-                          (t nil))))
-                (add-to-list 'company-backends 'company-elisp))))
+            #'(lambda ()
+                (require 'company-elisp)
+                (unless (catch 'found
+                          (dolist (b company-backends)
+                            (cond
+                              ((equal b 'company-elisp)
+                               (throw 'found t))
+                              ((and (listp b) (member 'company-elisp b))
+                               (throw 'found t))
+                              (t nil))))
+                  (add-to-list 'company-backends 'company-elisp))))
 
   ;; Use the tab-and-go frontend.
   ;; Allows TAB to select and complete at the same time.
@@ -230,20 +230,20 @@
    company-mode-map)         ;unset default keys
 
   (lazy-load-unset-keys
-   '("M-p" "M-n" "C-m")
+   '("M-p" "M-n" "M-s" "C-m" "C-n" "C-p" "C-h")
    company-active-map)
 
   (lazy-load-set-keys
    '(
      ("TAB" . company-complete-selection)
      ;; ("M-h" . company-complete-selection)
-     ("M-h" . company-complete-common)
+     ("C-h" . company-complete-common)
      ;; ("M-H" . company-complete-common)
      ("M-w" . company-show-location)
      ("M-s" . company-search-candidates)
      ("M-S" . company-filter-candidates)
-     ("M-n" . company-select-next)
-     ("M-p" . company-select-previous)
+     ("C-n" . company-select-next)
+     ("C-p" . company-select-previous)
      ("M-i" . yas-expand)
      ("RET" . company-complete-selection)
      )
@@ -251,20 +251,20 @@
   )
 
 (add-hook 'prog-mode-hook
-          '(lambda ()
-             ;; Add yasnippet support for all company backends.
-             (defvar company-mode/enable-yas t
-               "Enable yasnippet for all backends.")
+          #'(lambda ()
+              ;; Add yasnippet support for all company backends.
+              (defvar company-mode/enable-yas t
+                "Enable yasnippet for all backends.")
 
-             (defun company-mode/backend-with-yas (backend)
-               (if (or (not company-mode/enable-yas)
-                       (and (listp backend) (member 'company-yasnippet backend)))
-                   backend
-                 (append (if (consp backend) backend (list backend))
-                         '(:with company-yasnippet))))
+              (defun company-mode/backend-with-yas (backend)
+                (if (or (not company-mode/enable-yas)
+                        (and (listp backend) (member 'company-yasnippet backend)))
+                    backend
+                  (append (if (consp backend) backend (list backend))
+                          '(:with company-yasnippet))))
 
-             (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
-             ))
+              (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
+              ))
 
 (provide 'init-company-mode)
 

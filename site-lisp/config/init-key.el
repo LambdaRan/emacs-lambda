@@ -403,7 +403,8 @@
 (lazy-load-global-keys
  '(
    ("C-`" . multi-vterm)
-   ("C-q" . ran-vterm-open-in-right-or-below-window)
+   ("C-q" . ran-vterm-open-in-right-window)
+   ("s-x m" . ran-vterm-open-in-below-window)
    ("s-x n" . multi-vterm-dedicated-toggle)
    )
  "init-multi-vterm")
@@ -466,9 +467,9 @@
    ("C-x I" . ido-insert-file)          ;插入文件
    ))
 (add-hook 'ido-setup-hook
-          '(lambda ()
-            (interactive)
-            (ido-my-keys ido-completion-map)))
+          #'(lambda ()
+              (interactive)
+              (ido-my-keys ido-completion-map)))
 (defun ido-my-keys (keymap)
   "Add my keybindings for ido."
   (lazy-load-set-keys

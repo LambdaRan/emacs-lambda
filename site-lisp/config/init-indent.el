@@ -125,10 +125,10 @@
                'protobuf-mode-hook
                'php-mode-hook
                ))
-  (add-hook hook '(lambda ()
-                    (setq indent-tabs-mode nil)
-                    (adjust-languages-indent 4)
-                    )))
+  (add-hook hook #'(lambda ()
+                     (setq indent-tabs-mode nil)
+                     (adjust-languages-indent 4)
+                     )))
 
 (provide 'init-indent)
 

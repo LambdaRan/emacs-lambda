@@ -103,19 +103,15 @@ clean buffer we're an order of magnitude laxer about checking."
 
 ;; I don't like `global-flycheck-mode', some mode, such as elisp mode don't need.
 ;; (dolist (hook (list
-               ;; 'ruby-mode-hook
-               ;; 'python-mode-hook
-               ;; 'swift-mode-hook
-               ;; 'go-mode-hook
-               ;; 'js-mode-hook
-               ;; 'c-mode-hook
-               ;; 'c++-mode-hook
-               ;; 'go-mode-hook
-               ;; 'php-mode-hook
-               ;; ))
-  ;; (add-hook
-  ;;  hook
-  ;;  '(lambda ()
+;;                'ruby-mode-hook
+;;                'python-mode-hook
+;;                'swift-mode-hook
+;;                'go-mode-hook
+;;                'js-mode-hook
+;;                ))
+;;   (add-hook
+;;    hook
+;;    #'(lambda ()
       ;; OS Config
       (when (featurep 'cocoa)
         ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
@@ -127,7 +123,6 @@ clean buffer we're an order of magnitude laxer about checking."
       ;; (setq-default flycheck-disabled-checkers ;disable json-jsonlist checking for json files
       ;;               (append flycheck-disabled-checkers
       ;;                       '(json-jsonlist)))
-
       ;; (setq-default flycheck-disabled-checkers ;disable jshint since we prefer eslint checking
       ;;               (append flycheck-disabled-checkers
       ;;                       '(javascript-jshint)))
@@ -147,15 +142,12 @@ clean buffer we're an order of magnitude laxer about checking."
      ;; (setq flycheck-indication-mode nil)
      (setq-default flycheck-temp-prefix ".flycheck")
 
-      (with-eval-after-load 'flycheck
-        (require 'flycheck-posframe)
-        (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
-        (setq flycheck-posframe-border-width 1
-              flycheck-posframe-inhibit-functions
-              '((lambda (&rest _) (bound-and-true-p company-backend)))))
+     (with-eval-after-load 'flycheck
+       (require 'flycheck-posframe)
+       (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
 
-  (flycheck-mode 1)
-  ;; )))
+     (flycheck-mode 1)
+     ;; )))
 ) ;; end defun ran-enable-flycheck
 
 ;; 设置flycheck参数，推荐使用本地文件方式 .dir-locals.el
@@ -175,13 +167,6 @@ clean buffer we're an order of magnitude laxer about checking."
             (setq-default flycheck-cppcheck-include-path include-path)
             ))
 
-
-;; Add flycheck for swift.
-;; (add-hook 'swift-mode-hook
-;;           (lambda ()
-;;             (require 'flycheck-swift)
-;;             (flycheck-swift-setup)
-;;             ))
 
 (provide 'init-flycheck)
 

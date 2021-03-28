@@ -18,4 +18,12 @@
       (setq new-vterm-buffer (multi-vterm))
       (set-window-buffer other-window new-vterm-buffer))))
 
+(defun ran-vterm-open-in-right-window ()
+  (interactive)
+  (ran-vterm-open-in-right-or-below-window))
+
+(defun ran-vterm-open-in-below-window ()
+  (interactive)
+  (ran-vterm-open-in-right-or-below-window 'below))
+
 (provide 'init-multi-vterm)

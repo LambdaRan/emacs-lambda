@@ -86,9 +86,9 @@
 ;;; ### Info ###
 ;;; --- Info 模式
 (add-hook 'Info-mode-hook
-          '(lambda ()
-             (lazy-load-set-keys
-              '(
+          #'(lambda ()
+              (lazy-load-set-keys
+               '(
                 ("f" . Info-follow-nearest-node)    ;进入当前节点
                 ("<tab>" . Info-next-reference)     ;下一个引用
                 ("<backtab>" . Info-prev-reference) ;上一个引用

@@ -141,19 +141,19 @@
                ))
   (add-hook
    hook
-   '(lambda ()
-     (require 'cc-mode)
-     ;; (require 'c-eldoc)
-     (require 'modern-cpp-font-lock)
-     (require 'google-c-style)
+   #'(lambda ()
+       (require 'cc-mode)
+       ;; (require 'c-eldoc)
+       (require 'modern-cpp-font-lock)
+       (require 'google-c-style)
 
-     (c-mode-style-setup)
-     )))
+       (c-mode-style-setup)
+       )))
 
-(add-hook 'c-mode-hook '(lambda ()
-                         (setq-local comment-start "// ")
-                         (setq-local comment-end "")
-                         ))
+(add-hook 'c-mode-hook #'(lambda ()
+                           (setq-local comment-start "// ")
+                           (setq-local comment-end "")
+                           ))
 (provide 'init-c)
 
 ;;; init-qt.el ends here
