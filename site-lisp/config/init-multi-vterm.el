@@ -10,13 +10,18 @@
   (interactive)
   (or side (setq side 'right))
   (save-excursion
-    (let (other-window new-vterm-buffer)
+    (let (other-window-v
+          new-vterm-buffer
+          (origin-dir (file-name-directory buffer-file-name)))
       (when (one-window-p t)
-        (setq other-window (split-window (selected-window) nil side)))
+        (setq other-window-v (split-window (selected-window) nil side)))
       (other-window 1)
-      (or other-window (setq other-window (selected-window)))
+      (unless other-window-v
+        (setq other-window-v (selected-window))
+        (when (and origin-dir (file-exists-p origin-dir))
+          (setq default-directory origin-dir)))
       (setq new-vterm-buffer (multi-vterm))
-      (set-window-buffer other-window new-vterm-buffer))))
+      (set-window-buffer other-window-v new-vterm-buffer))))
 
 (defun ran-vterm-open-in-right-window ()
   (interactive)
