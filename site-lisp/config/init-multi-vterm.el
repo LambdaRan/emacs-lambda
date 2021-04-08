@@ -12,7 +12,11 @@
   (save-excursion
     (let (other-window-v
           new-vterm-buffer
-          (origin-dir (file-name-directory buffer-file-name)))
+          (cur-file-name buffer-file-name))
+      (when (and (not cur-file-name)
+                 (eq major-mode 'dired-mode))
+        (setq cur-file-name (dired-get-file-for-visit)))
+      (setq origin-dir (and cur-file-name (file-name-directory cur-file-name)))
       (when (one-window-p t)
         (setq other-window-v (split-window (selected-window) nil side)))
       (other-window 1)
