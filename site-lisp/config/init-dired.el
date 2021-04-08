@@ -136,8 +136,8 @@
    ("e" . scroll-down)                       ;向上翻页
    ("c" . kill-this-buffer)                  ;关闭当前标签
    ("/" . copy-buffer-file-name-as-kill)     ;显示路径或名称
-   ("s" . one-key-menu-dired-sort)           ;排序
-   ("F" . one-key-menu-dired-filter)         ;过滤
+   ;; ("s" . one-key-menu-dired-sort)           ;排序
+   ;; ("F" . one-key-menu-dired-filter)         ;过滤
    ("W" . wdired-change-to-wdired-mode)      ;切换到dired编辑模式
    )
  dired-mode-map)
@@ -192,7 +192,7 @@
 
 (lazy-load-local-keys
  '(
-   ("K" . dired-open-file)              ;批量打开文件
+   ("F" . dired-open-file)              ;批量打开文件
    )
  dired-mode-map
  "dired-open")

@@ -29,6 +29,16 @@
 ;; (setq counsel-etags-debug nil)
 ;; (setq counsel-etags-grep-program (counsel-etags-guess-program "rg"))
 
+;; (setq imenu-create-index-function 'counsel-etags-imenu-default-create-index-function)
+(defun ran-counsel-imenu()
+  "List all imenu tag with counsel-semantic-or-imenu or counsel-etags-list-tag-in-current-file"
+  (interactive)
+  (require 'semantic/fw)
+  (if (and (not (semantic-active-p))
+           (seq-empty-p (counsel--imenu-candidates)))
+      (call-interactively 'counsel-etags-list-tag-in-current-file)
+    (call-interactively 'counsel-semantic-or-imenu)))
+
 (add-hook 'prog-mode-hook
           (lambda ()
             (add-hook 'after-save-hook
@@ -36,7 +46,8 @@
 
 (lazy-load-set-keys
  '(
-   ("C-]" . counsel-etags-find-tag-at-point)))
+   ("C-]" . counsel-etags-find-tag-at-point)
+   ("C-c M-i" . ran-counsel-imenu)))
 
 
 (provide 'init-etags)
