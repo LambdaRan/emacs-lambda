@@ -81,7 +81,7 @@ if nil, is used as the project root directory for search."
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
-                      '("C-x C-f" "M-x" "C-x b" "M-y"))
+ '("C-x C-f" "M-x" "C-x b" "M-y"))
 
 (lazy-load-set-keys
  '(

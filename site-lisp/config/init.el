@@ -84,8 +84,7 @@
           (require 'init-ibuffer)
           (require 'init-hydra)
           (require 'init-autorevert)
-          (require 'init-ediff)
-          (require 'init-vdiff)
+          (require 'init-diff)
           (require 'ran-toolkit)
 
           ;; Restore session at last.

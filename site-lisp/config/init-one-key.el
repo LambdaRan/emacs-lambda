@@ -90,14 +90,11 @@
 (setq one-key-menu-directory-alist
       '(
         (("h" . "Home") . (lambda () (interactive) (dired-x-find-file "~/")))
-        ;; (("b" . "Book") . (lambda () (interactive) (dired-x-find-file "/space/data/Book")))
         (("p" . "Emacs Package") . (lambda () (interactive) (dired-x-find-file lazycat-emacs-root-dir)))
-        ;; (("z" . "Elisp") . (lambda () (interactive) (dired-x-find-file (concat lazycat-emacs-extension-dir "/lazycat"))))
-        (("c" . "Config") . (lambda () (interactive) (dired-x-find-file lazycat-emacs-config-dir)))
-        (("b" . "baidu code") . (lambda () (interactive) (dired-x-find-file "~/code")))
-        (("l" . "lambda code") . (lambda () (interactive) (dired-x-find-file "~/lambda")))
-        ;; (("e" . "emacs-lambda") . (lambda () (interactive) (dired-x-find-file "")))
-        ;; (("x" . "Reading") . (lambda () (interactive) (dired-x-find-file "/space/data/Book/Reading")))
+        (("c" . "Emacs-lambda") . (lambda () (interactive) (dired-x-find-file lazycat-emacs-config-dir)))
+        (("b" . "Baidu Code") . (lambda () (interactive) (dired-x-find-file "~/work/baidu/code")))
+        (("l" . "Lambda code") . (lambda () (interactive) (dired-x-find-file "~/lambda")))
+        (("o" . "Open code") . (lambda () (interactive) (dired-x-find-file "")))
         ))
 
 (defun one-key-menu-directory ()

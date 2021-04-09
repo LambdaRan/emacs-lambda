@@ -85,17 +85,18 @@
 ;;; Code:
 
 (let ((emacs-font-size 14)
-        emacs-font-name)
-    (cond
-     ((featurep 'cocoa)
-      (setq emacs-font-name "JetBrains Mono"))
-     ((string-equal system-type "gnu/linux")
-      ;; (setq emacs-font-name "WenQuanYi Micro Hei Mono")
-      (setq emacs-font-name "Source Code Pro")))
-    (when (display-grayscale-p)
-      (set-frame-font (format "%s-%s" (eval emacs-font-name) (eval emacs-font-size)))
-      ;; (set-fontset-font (frame-parameter nil 'font) 'unicode (eval emacs-font-name))
-      ))
+      emacs-font-name)
+  (cond
+    ((featurep 'cocoa)
+     (setq emacs-font-name "JetBrains Mono"))
+    ((string-equal system-type "gnu/linux")
+     ;; (setq emacs-font-name "WenQuanYi Micro Hei Mono")
+     (setq emacs-font-name "Source Code Pro"))
+    (t (message "Other System OS, Please configure this case.")))
+  (when (display-grayscale-p)
+    (set-frame-font (format "%s-%s" (eval emacs-font-name) (eval emacs-font-size)))
+    ;; (set-fontset-font (frame-parameter nil 'font) 'unicode (eval emacs-font-name))
+    ))
 
 ;; (setq-default line-spacing 0.2)
 

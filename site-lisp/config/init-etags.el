@@ -1,5 +1,4 @@
 
-
 (require 'counsel-etags)
 (require 'lazy-load)
 

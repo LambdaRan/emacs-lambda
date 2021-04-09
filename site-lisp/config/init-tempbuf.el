@@ -98,12 +98,11 @@
                'magit-diff-mode-hook
                'magit-status-mode-hook
                ))
-  (add-hook
-   hook
-   #'(lambda ()
-       (require 'tempbuf)
-       (setq timer-max-repeats 2) ; 先前的调用被延迟时，连续重复调用计时器函数的最大次数。
-       (turn-on-tempbuf-mode))))  ; 加载自动清理临时buffer
+  (add-hook hook
+            #'(lambda ()
+                (require 'tempbuf)
+                (setq timer-max-repeats 2) ; 先前的调用被延迟时，连续重复调用计时器函数的最大次数。
+                (turn-on-tempbuf-mode))))  ; 加载自动清理临时buffer
 
 
 (provide 'init-tempbuf)

@@ -113,9 +113,9 @@
         (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 
         (run-at-time "1sec" nil
-                    (lambda ()
-                        (toggle-frame-fullscreen)
-                        ))
+                     #'(lambda ()
+                         (toggle-frame-fullscreen)
+                         ))
         )
 
     ;; 非Mac平台直接全屏
