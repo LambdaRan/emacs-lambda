@@ -96,12 +96,15 @@
                                        (progn
                                          (require 'dired-extension)
                                          (dired-sort-method)))) ;先显示目录, 然后显示文件
-(add-hook
- 'dired-mode-hook
- #'(lambda ()
-     (require 'dired-extension)
-     (dired-omit-method)                 ;隐藏文件的方法
-     ))
+(add-hook 'dired-mode-hook
+          #'(lambda ()
+              (require 'dired-extension)
+              (dired-omit-method)                 ;隐藏文件的方法
+              ))
+
+;; ls does not support --dired; see ‘dired-use-ls-dired’ for more details.
+(when (string= system-type "darwin")
+  (setq dired-use-ls-dired nil))
 
 (setq dired-guess-shell-alist-user      ;设置文件默认打开的模式
       '(

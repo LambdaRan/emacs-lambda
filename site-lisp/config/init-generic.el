@@ -178,6 +178,13 @@
 (prefer-coding-system 'utf-8)
 
 
+;; for undo-tree
+(with-eval-after-load 'undo-tree
+  (global-undo-tree-mode)
+  (setq undo-tree-visualizer-timestamps t
+        undo-tree-enable-undo-in-region nil
+        undo-tree-auto-save-history nil)
+  )
 (provide 'init-generic)
 
 ;;; init-generic.el ends here
