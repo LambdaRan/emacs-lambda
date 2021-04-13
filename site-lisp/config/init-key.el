@@ -185,12 +185,19 @@
    ("C-M-S-h" . mark-paragraph)            ;选中段落
    ("M-SPC" . just-one-space)              ;只有一个空格在光标处
    ))
+
 (lazy-load-global-keys
  '(
    ("C-/" . undo-tree-undo)             ;撤销
    ("C-?" . undo-tree-redo)             ;重做)
    )
  "undo-tree")
+(with-eval-after-load 'undo-tree
+  (global-undo-tree-mode)
+  (setq undo-tree-visualizer-timestamps t
+        undo-tree-enable-undo-in-region nil
+        undo-tree-auto-save-history nil))
+
 ;;; ### Rect ###
 ;;; --- 矩形操作
 (lazy-load-global-keys
