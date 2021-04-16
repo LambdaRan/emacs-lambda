@@ -94,7 +94,7 @@
 (auto-save-enable)
 (setq auto-save-silent t)
 (setq auto-save-delete-trailing-whitespace t)
-
+(setq auto-save-idle 2)                 ; idle 2s then to save
 ;;(add-hook 'kill-buffer-hook #'basic-save-buffer)
 
 (provide 'init-auto-save)

@@ -96,76 +96,65 @@
 This lets us fix any errors as quickly as possible, but in a
 clean buffer we're an order of magnitude laxer about checking."
   (setq flycheck-idle-change-delay
-        (if flycheck-current-errors 1 4.0)))
-(defun ran-enable-flycheck ()
-  "Enable the flycheck manually"
-  (interactive)
+        (if flycheck-current-errors 1 3.0)))
 
-;; I don't like `global-flycheck-mode', some mode, such as elisp mode don't need.
-;; (dolist (hook (list
-;;                'ruby-mode-hook
-;;                'python-mode-hook
-;;                'swift-mode-hook
-;;                'go-mode-hook
-;;                'js-mode-hook
-;;                ))
-;;   (add-hook
-;;    hook
-;;    #'(lambda ()
-      ;; OS Config
-      (when (featurep 'cocoa)
-        ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
-        (require 'exec-path-from-shell)
-        (setq exec-path-from-shell-variables '("PATH" "MANPATH" "GEM_PATH"))
-        (exec-path-from-shell-initialize))
+(defun ran-init-flycheck()
+  "Initialize the flycheck."
+  (require 'flycheck)
 
-      (require 'flycheck)
-      ;; (setq-default flycheck-disabled-checkers ;disable json-jsonlist checking for json files
-      ;;               (append flycheck-disabled-checkers
-      ;;                       '(json-jsonlist)))
-      ;; (setq-default flycheck-disabled-checkers ;disable jshint since we prefer eslint checking
-      ;;               (append flycheck-disabled-checkers
-      ;;                       '(javascript-jshint)))
-      ;; (flycheck-add-mode 'javascript-eslint 'web-mode) ;use eslint with web-mode for jsx files
+  ;; OS Config
+  (when (featurep 'cocoa)
+    ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
+    (require 'exec-path-from-shell)
+    (setq exec-path-from-shell-variables '("PATH" "MANPATH" "GEM_PATH"))
+    (exec-path-from-shell-initialize))
 
-     ;; Each buffer gets its own idle-change-delay because of the
-     ;; buffer-sensitive adjustment above.
-     (make-variable-buffer-local 'flycheck-idle-change-delay)
-     (add-hook 'flycheck-after-syntax-check-hook
-      'magnars/adjust-flycheck-automatic-syntax-eagerness)
+  ;; Each buffer gets its own idle-change-delay because of the
+  ;; buffer-sensitive adjustment above.
+  (make-variable-buffer-local 'flycheck-idle-change-delay)
+  (add-hook 'flycheck-after-syntax-check-hook
+            'magnars/adjust-flycheck-automatic-syntax-eagerness)
 
-     ;; (setq flycheck-idle-change-delay 2)
-     (setq flycheck-check-syntax-automatically '(idle-change
-                                                 mode-enabled))
+  ;; (setq flycheck-idle-change-delay 2)
+  (setq flycheck-check-syntax-automatically '(idle-change save))
 
-     (setq flycheck-emacs-lisp-load-path 'inherit)
-     ;; (setq flycheck-indication-mode nil)
-     (setq-default flycheck-temp-prefix ".flycheck")
+  (setq flycheck-emacs-lisp-load-path 'inherit)
+  ;; (setq flycheck-indication-mode nil)
+  (setq-default flycheck-temp-prefix ".flycheck")
 
-     (with-eval-after-load 'flycheck
-       (require 'flycheck-posframe)
-       (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+  ;; 有问题，产生黑窗口
+  ;; (with-eval-after-load 'flycheck
+  ;;   (require 'flycheck-posframe)
+  ;;   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+  (flycheck-mode 1))
 
-     (flycheck-mode 1)
-     ;; )))
-) ;; end defun ran-enable-flycheck
+
+;; Add flycheck for Rust.
+(add-hook 'rust-mode-hook
+          #'(lambda ()
+              (ran-init-flycheck)
+              (require 'flycheck-rust)
+              (flycheck-rust-setup)
+              ))
+;; (with-eval-after-load 'rust-mode
+;;   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ;; 设置flycheck参数，推荐使用本地文件方式 .dir-locals.el
 ;; https://stackoverflow.com/questions/30949847/configuring-flycheck-to-work-with-c11
 ;; Open the root directory of your project in Dired with C-x d,
 ;; and then type M-x add-dir-local-variable RET c++-mode RET flycheck-gcc-language-standard RET "c++11".
 ;; This will create a .dir-locals.el file in the root directory of your project.
-(add-hook 'c++-mode-hook
-          (lambda ()
-            (setq-default flycheck-gcc-language-standard "c++11")
-            (setq-default flycheck-clang-language-standard "c++11")
-            (setq-default flycheck-cppcheck-standards "c++11")
-            (setq include-path '(;;"/usr/local/opt/llvm/include"
-                                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"))
-            (setq-default flycheck-clang-include-path include-path)
-            (setq-default flycheck-gcc-include-path include-path)
-            (setq-default flycheck-cppcheck-include-path include-path)
-            ))
+;; (add-hook 'c++-mode-hook
+;;           #'(lambda ()
+;;             (setq-default flycheck-gcc-language-standard "c++11")
+;;             (setq-default flycheck-clang-language-standard "c++11")
+;;             (setq-default flycheck-cppcheck-standards "c++11")
+;;             (setq include-path '(;;"/usr/local/opt/llvm/include"
+;;                                  "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"))
+;;             (setq-default flycheck-clang-include-path include-path)
+;;             (setq-default flycheck-gcc-include-path include-path)
+;;             (setq-default flycheck-cppcheck-include-path include-path)
+;;             ))
 
 
 (provide 'init-flycheck)

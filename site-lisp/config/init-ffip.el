@@ -13,6 +13,8 @@
 (setq ffip-use-rust-fd t)
 ;; "Don 't show search results from '.*ignore' files."
 
+(setq ffip-prefer-ido-mode nil)
+
 ;; (setq ffip-project-root "~/projs/PROJECT_DIR")
 ;; ffip-project-root-function
 

@@ -202,3 +202,6 @@
 [submodule "rust-mode"]
 	path = site-lisp/extensions/rust-mode
 	url = https://github.com/rust-lang/rust-mode.git
+[submodule "flycheck-rust"]
+	path = site-lisp/extensions/flycheck-rust
+	url = https://github.com/flycheck/flycheck-rust.git
