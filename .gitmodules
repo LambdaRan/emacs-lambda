@@ -196,3 +196,9 @@
 [submodule "multi-vterm"]
 	path = site-lisp/extensions/multi-vterm
 	url = https://github.com/suonlight/multi-vterm.git
+[submodule "emacs-deferred"]
+	path = site-lisp/extensions/emacs-deferred
+	url = https://github.com/kiwanami/emacs-deferred.git
+[submodule "rust-mode"]
+	path = site-lisp/extensions/rust-mode
+	url = https://github.com/rust-lang/rust-mode.git
