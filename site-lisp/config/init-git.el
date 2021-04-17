@@ -141,7 +141,7 @@
 ;; (setq magit-refresh-verbose t)
 (setq magit-git-executable "/usr/local/bin/git")
 ;; {{ speed up magit, @see https://jakemccrary.com/blog/2020/11/14/speeding-up-magit/
-(defvar my-prefer-lightweight-magit t)
+(defvar my-prefer-lightweight-magit nil)
 (with-eval-after-load 'magit
   (when my-prefer-lightweight-magit
     (remove-hook 'magit-status-sections-hook 'magit-insert-tags-header)

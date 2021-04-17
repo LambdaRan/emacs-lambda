@@ -122,10 +122,10 @@ clean buffer we're an order of magnitude laxer about checking."
   ;; (setq flycheck-indication-mode nil)
   (setq-default flycheck-temp-prefix ".flycheck")
 
-  ;; 有问题，产生黑窗口
-  ;; (with-eval-after-load 'flycheck
-  ;;   (require 'flycheck-posframe)
-  ;;   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+  ;; rollback Tag v0.85 没有黑窗口
+  (with-eval-after-load 'flycheck
+    (require 'flycheck-posframe)
+    (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
   (flycheck-mode 1))
 
 
