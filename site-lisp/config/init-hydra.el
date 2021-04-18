@@ -43,12 +43,12 @@ SortFile                  FilterFile
   ("q" nil "quit"))
 
 (lazy-load-set-keys
- '(("C-c C-d" . (lambda ()
-                  (interactive)
-                  (require 'dired-sort)
-                  ;; https://github.com/Fuco1/dired-hacks
-                  (require 'dired-filter)
-                  (hydra-dired-shortkey/body)))))
+ '(("C-c C-d" . #'(lambda ()
+                    (interactive)
+                    (require 'dired-sort)
+                    ;; https://github.com/Fuco1/dired-hacks
+                    (require 'dired-filter)
+                    (hydra-dired-shortkey/body)))))
 
 
 
@@ -89,18 +89,18 @@ SortFile                  FilterFile
 
 (eval-after-load 'find-file-in-project
   '(progn
-     (defhydra hydra-ffip-diff-group (:color blue)
-       "
+    (defhydra hydra-ffip-diff-group (:color blue)
+      "
 [_k_] Previous hunk
 [_j_] Next hunk
 [_p_] Previous file
 [_n_] Next file
 "
-       ("k" diff-hunk-prev)
-       ("j" diff-hunk-next)
-       ("p" diff-file-prev)
-       ("n" diff-file-next)
-       ("q" nil))))
+      ("k" diff-hunk-prev)
+      ("j" diff-hunk-next)
+      ("p" diff-file-prev)
+      ("n" diff-file-next)
+      ("q" nil))))
 (defun ffip-diff-mode-hook-hydra-setup ()
   (local-set-key (kbd "C-c C-y") 'hydra-ffip-diff-group/body))
 (add-hook 'ffip-diff-mode-hook 'ffip-diff-mode-hook-hydra-setup)
@@ -165,31 +165,31 @@ _SPC_ cancel _o_nly this     _d_elete
   ("b" ivy-switch-buffer)
   ("f" counsel-find-file)
   ("F" follow-mode)
-  ("a" (lambda ()
-         (interactive)
-         (ace-window 1)
-         (add-hook 'ace-window-end-once-hook
-                   'hydra-window/body)))
-  ("v" (lambda ()
-         (interactive)
-         (split-window-right)
-         (windmove-right)))
-  ("x" (lambda ()
-         (interactive)
-         (split-window-below)
-         (windmove-down)))
-  ("s" (lambda ()
-         (interactive)
-         (ace-window 4)
-         (add-hook 'ace-window-end-once-hook
-                   'hydra-window/body)))
+  ("a" #'(lambda ()
+           (interactive)
+           (ace-window 1)
+           (add-hook 'ace-window-end-once-hook
+                     'hydra-window/body)))
+  ("v" #'(lambda ()
+           (interactive)
+           (split-window-right)
+           (windmove-right)))
+  ("x" #'(lambda ()
+           (interactive)
+           (split-window-below)
+           (windmove-down)))
+  ("s" #'(lambda ()
+           (interactive)
+           (ace-window 4)
+           (add-hook 'ace-window-end-once-hook
+                     'hydra-window/body)))
   ("S" save-buffer)
   ("d" delete-window)
-  ("D" (lambda ()
-         (interactive)
-         (ace-window 16)
-         (add-hook 'ace-window-end-once-hook
-                   'hydra-window/body)))
+  ("D" #'(lambda ()
+           (interactive)
+           (ace-window 16)
+           (add-hook 'ace-window-end-once-hook
+                     'hydra-window/body)))
   ("o" delete-other-windows)
   ("i" ace-delete-other-windows)
   ("z" (progn
@@ -231,19 +231,19 @@ _SPC_ cancel                         _k_ Previous line   _r_ X Right
   ("d" delete-window)
   ("D" delete-other-windows)
 
-  ("c" (lambda ()
-         (interactive)
-         (ace-window 1)
-         (add-hook 'ace-window-end-once-hook
-                   'hydra-source-insight/body)))
-  ("v" (lambda ()
-         (interactive)
-         (split-window-right)
-         (windmove-right)))
-  ("h" (lambda ()
-         (interactive)
-         (split-window-below)
-         (windmove-down)))
+  ("c" #'(lambda ()
+           (interactive)
+           (ace-window 1)
+           (add-hook 'ace-window-end-once-hook
+                     'hydra-source-insight/body)))
+  ("v" #'(lambda ()
+           (interactive)
+           (split-window-right)
+           (windmove-right)))
+  ("h" #'(lambda ()
+           (interactive)
+           (split-window-below)
+           (windmove-down)))
 
   ("SPC" nil))
 (lazy-load-set-keys

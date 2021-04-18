@@ -100,8 +100,9 @@ clean buffer we're an order of magnitude laxer about checking."
 
 (defun ran-init-flycheck()
   "Initialize the flycheck."
-  (require 'flycheck)
+  (interactive)
 
+  (require 'flycheck)
   ;; OS Config
   (when (featurep 'cocoa)
     ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
