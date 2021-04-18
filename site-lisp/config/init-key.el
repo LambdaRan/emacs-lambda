@@ -49,7 +49,6 @@
    ("s-[" . eval-expression)                ;执行表达式
    ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
    ("M-h" . set-mark-command) ;Instead C-Space for Chinese input method
-   ("C-c c w" . browse-url-at-point)
    ("C-z i" . display-fill-column-indicator-mode)
    ("C-z l" . display-line-numbers-mode) ;行号模式切换
    ))
@@ -279,6 +278,24 @@
    ("C-M-;" . kill-other-window-buffer) ;关闭其他窗口的buffer
    )
  "buffer-extension")
+
+;; xwidget webkit
+(lazy-load-global-keys
+ '(
+   ("C-c c w" . browse-url-at-point)
+   ("C-c c W" . xwidget-webkit-browse-url)
+   ("C-c c n" . ran-xwidget-webkit-browse-url-at-point-new-session)
+   ("C-c c N" . ran-xwidget-webkit-browse-url-at-point-old-session)
+   )
+ "init-xwidget")
+
+(with-eval-after-load 'xwidget
+  (lazy-load-set-keys
+   '(
+     ("M-w" . xwidget-webkit-copy-selection-as-kill)
+     )
+   xwidget-webkit-mode-map))
+
 
 ;; 文件列表 TODO 目录设置
 ;; (lazy-load-global-keys

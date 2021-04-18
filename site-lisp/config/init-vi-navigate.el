@@ -83,7 +83,7 @@
 (require 'vi-navigate)
 
 ;;; Code:
-
+(add-to-list 'vi-navigate-hook-list 'xwidget-webkit-mode-hook)
 (vi-navigate-load-keys)
 
 (provide 'init-vi-navigate)
