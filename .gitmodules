@@ -205,3 +205,9 @@
 [submodule "flycheck-rust"]
 	path = site-lisp/extensions/flycheck-rust
 	url = https://github.com/flycheck/flycheck-rust.git
+[submodule "js2-mode"]
+	path = site-lisp/extensions/js2-mode
+	url = https://github.com/mooz/js2-mode.git
+[submodule "web-mode"]
+	path = site-lisp/extensions/web-mode
+	url = https://github.com/fxbois/web-mode.git
