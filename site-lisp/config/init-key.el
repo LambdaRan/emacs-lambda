@@ -289,13 +289,6 @@
    )
  "init-xwidget")
 
-(with-eval-after-load 'xwidget
-  (lazy-load-set-keys
-   '(
-     ("M-w" . xwidget-webkit-copy-selection-as-kill)
-     )
-   xwidget-webkit-mode-map))
-
 
 ;; 文件列表 TODO 目录设置
 ;; (lazy-load-global-keys

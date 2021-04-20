@@ -18,5 +18,11 @@
   (ran-xwidget-webkit-browse-url-at-point nil))
 
 
+(with-eval-after-load 'xwidget
+  (lazy-load-set-keys
+   '(
+     ("M-w" . xwidget-webkit-copy-selection-as-kill)
+     )
+   xwidget-webkit-mode-map))
 
 (provide 'init-xwidget)
