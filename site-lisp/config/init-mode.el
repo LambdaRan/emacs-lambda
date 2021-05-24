@@ -169,6 +169,8 @@ The test for presence of the car of ELT-CONS is done with `equal'."
                     ("\\.ll$" . llvm-mode)
                     ("\\.bc$" . hexl-mode)
                     ("\\.proto$" . protobuf-mode)
+                    ("\\.yaml\\'" . yaml-mode)
+                    ("\\.yml\\'" . yaml-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 
@@ -201,6 +203,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
 (autoload 'pdf-view-mode "init-pdf-tools")
 (autoload 'llvm-mode "llvm-mode")
 (autoload 'protobuf-mode "protobuf-mode")
+(autoload 'yaml-mode "yaml-mode")
 
 ;;; ### Auto-fill ###
 ;;; --- 自动换行
