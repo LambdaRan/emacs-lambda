@@ -124,9 +124,10 @@ clean buffer we're an order of magnitude laxer about checking."
   (setq-default flycheck-temp-prefix ".flycheck")
 
   ;; rollback Tag v0.85 没有黑窗口
-  (with-eval-after-load 'flycheck
-    (require 'flycheck-posframe)
-    (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+  ;; (with-eval-after-load 'flycheck
+  ;;   (require 'flycheck-posframe)
+  ;;   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+  
   (flycheck-mode 1))
 
 
