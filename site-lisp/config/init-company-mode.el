@@ -181,7 +181,7 @@
         company-tooltip-align-annotations t)
 
   ;; (add-to-list 'company-transformers 'company-sort-by-backend-importance)
-  (add-to-list 'company-transformers 'company-sort-by-tabnine-and-ctags t)
+  ;; (add-to-list 'company-transformers 'company-sort-by-tabnine-and-ctags t)
   ;; NOT to load company-mode for certain major modes.
   ;; Ironic that I suggested this feature but I totally forgot it
   ;; until two years later.
