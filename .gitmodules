@@ -46,12 +46,6 @@
 [submodule "lazycat-theme"]
 	path = site-lisp/extensions/lazycat-theme
 	url = https://github.com/manateelazycat/lazycat-theme.git
-[submodule "watch-other-window"]
-	path = site-lisp/extensions/watch-other-window
-	url = https://github.com/manateelazycat/watch-other-window.git
-[submodule "cache-path-from-shell"]
-	path = site-lisp/extensions/cache-path-from-shell
-	url = https://github.com/manateelazycat/cache-path-from-shell.git
 [submodule "vi-navigate"]
 	path = site-lisp/extensions/vi-navigate
 	url = https://github.com/manateelazycat/vi-navigate.git
@@ -67,15 +61,6 @@
 [submodule "lazy-search"]
 	path = site-lisp/extensions/lazy-search
 	url = https://github.com/manateelazycat/lazy-search.git
-[submodule "duplicate-line"]
-	path = site-lisp/extensions/duplicate-line
-	url = https://github.com/manateelazycat/duplicate-line.git
-[submodule "move-text"]
-	path = site-lisp/extensions/move-text
-	url = https://github.com/manateelazycat/move-text.git
-[submodule "open-newline"]
-	path = site-lisp/extensions/open-newline
-	url = https://github.com/manateelazycat/open-newline.git
 [submodule "lazy-load"]
 	path = site-lisp/extensions/lazy-load
 	url = https://github.com/manateelazycat/lazy-load.git
@@ -88,9 +73,6 @@
 [submodule "symbol-overlay"]
 	path = site-lisp/extensions/symbol-overlay
 	url = https://github.com/wolray/symbol-overlay.git
-[submodule "delete-block"]
-	path = site-lisp/extensions/delete-block
-	url = https://github.com/manateelazycat/delete-block.git
 [submodule "names"]
 	path = site-lisp/extensions/names
 	url = https://github.com/Malabarba/names.git
@@ -172,9 +154,6 @@
 [submodule "ibuffer-vc"]
 	path = site-lisp/extensions/ibuffer-vc
 	url = https://github.com/purcell/ibuffer-vc.git
-[submodule "nox"]
-	path = site-lisp/extensions/nox
-	url = https://github.com/manateelazycat/nox.git
 [submodule "go-mode"]
     path = site-lisp/extensions/go-mode
 	url = https://github.com/dominikh/go-mode.el.git
@@ -187,9 +166,6 @@
 [submodule "grip-mode"]
 	path = site-lisp/extensions/grip-mode
 	url = https://github.com/seagle0128/grip-mode.git
-[submodule "insert-translated-name"]
-	path = site-lisp/extensions/insert-translated-name
-	url = https://github.com/manateelazycat/insert-translated-name.git
 [submodule "emacs-libvterm"]
 	path = site-lisp/extensions/emacs-libvterm
 	url = https://github.com/akermu/emacs-libvterm.git
@@ -212,8 +188,5 @@
 	path = site-lisp/extensions/web-mode
 	url = https://github.com/fxbois/web-mode.git
 [submodule "yaml-mode"]
-	path = site-lisp/extensions/yaml-mode
-	url = https://github.com/yoshiki/yaml-mode.git
-[submodule "y"]
 	path = site-lisp/extensions/yaml-mode
 	url = https://github.com/yoshiki/yaml-mode.git

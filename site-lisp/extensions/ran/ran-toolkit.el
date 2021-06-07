@@ -34,7 +34,6 @@
 
 ;; (magit-toplevel) 函数得到 仓库根目录
 ;; https://emacs.stackexchange.com/questions/9323/get-git-repo-root-directory-preferably-with-magit
-;;
 (defun ran-git-refs-for ()
   "git push origin HEAD:refs/for/[branch] "
   (interactive)
@@ -51,17 +50,6 @@
   (interactive)
   (with-demoted-errors
       "Something wrong when align."
-
-    ;; (let ((align-start
-    ;;        (save-excursion
-    ;;          (backward-up-list)
-    ;;          (point)
-    ;;          ))
-    ;;       (align-end
-    ;;        (save-excursion
-    ;;          (up-list)
-    ;;          (point))))
-    ;;   (align-regexp align-start align-end "\\(\\s-*\\)\\(=\\|:\\)" 1 1))
     (let ((align-start) (align-end))
       (if (use-region-p)
         (setq align-start (region-beginning)
@@ -84,6 +72,39 @@
   "Comment line and move to previous line. "
   (interactive)
   (comment-line -1))
+
+;; From lazycat-toolkit
+;; https://github.com/manateelazycat/lazycat-emacs/blob/master/site-lisp/extensions/lazycat/lazycat-toolkit.el
+(defun insert-standard-date ()
+  "Inserts standard date time string."
+  (interactive)
+  (insert (format-time-string "%Y-%m-%d %T")))
+
+(defun insert-changelog-date ()
+  "Insert changelog date, like yyyy/mm/dd."
+  (interactive)
+  (insert (format-time-string "%Y/%m/%d")))
+
+(defun switch-to-scratch ()
+  "Select buffer *scratch* in the current window."
+  (interactive)
+  (switch-to-buffer "*scratch*"))
+
+(defun switch-to-messages ()
+  "Select buffer *message* in the current window."
+  (interactive)
+  (switch-to-buffer "*Messages*"))
+
+(defun ielm-toggle ()
+  "Toggle ielm buffer."
+  (interactive)
+  (require 'ielm)
+  (let ((ielm-buffer-name "*ielm*"))
+    (if (get-buffer ielm-buffer-name)
+        (if (string-equal ielm-buffer-name (buffer-name))
+            (bury-buffer)
+          (switch-to-buffer ielm-buffer-name))
+      (ielm))))
 
 (provide 'ran-toolkit)
 

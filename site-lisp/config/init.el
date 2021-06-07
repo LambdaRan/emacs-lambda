@@ -34,7 +34,6 @@
      ;; 显示行号
      (require 'display-line-numbers)
      (require 'basic-toolkit)
-     (require 'redo)
      (require 'init-highlight-parentheses)
      (require 'init-awesome-pair)
      (require 'init-awesome-tab)

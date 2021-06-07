@@ -1,21 +1,21 @@
-;;; wdired-extension.el --- Some extension functions for `wdired.el'.
+;;; open-newline.el --- Open newline like vi
 
-;; Filename: wdired-extension.el
-;; Description: Some extension functions for `wdired.el'.
+;; Filename: open-newline.el
+;; Description: Open newline like vi
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2009, Andy Stewart, all rights reserved.
-;; Created: 2009-02-09 12:23:03
+;; Copyright (C) 2019, Andy Stewart, all rights reserved.
+;; Created: 2019-03-23 23:21:34
 ;; Version: 0.1
-;; Last-Updated: 2009-02-09 12:23:03
+;; Last-Updated: 2019-03-23 23:21:34
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/wdired-extension.el
-;; Keywords: wdired, format filename
-;; Compatibility: GNU Emacs 23.0.60.1
+;; URL: http://www.emacswiki.org/emacs/download/open-newline.el
+;; Keywords:
+;; Compatibility: GNU Emacs 26.1.92
 ;;
 ;; Features that might be required by this library:
 ;;
-;; `rect-extension' `rect-mark' `dired-extension'
+;;
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -39,25 +39,35 @@
 
 ;;; Commentary:
 ;;
-;; Some extension functions for `wdired.el'.
+;; Open newline like vi
+;;
+;; Those code wrote in 2009, extract from my basic-toolkit.el
 ;;
 
 ;;; Installation:
 ;;
-;; Put wdired-extension.el to your load-path.
+;; Put open-newline.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'wdired-extension)
+;; (require 'open-newline)
 ;;
 ;; No need more.
 
+;;; Customize:
+;;
+;;
+;;
+;; All of the above can customize by:
+;;      M-x customize-group RET open-newline RET
+;;
+
 ;;; Change log:
 ;;
-;; 2009/02/09
+;; 2019/03/23
 ;;      * First released.
 ;;
 
@@ -72,23 +82,29 @@
 ;;
 
 ;;; Require
-(require 'rect-extension)
-(require 'rect-mark)
-(require 'dired-extension)
+
 
 ;;; Code:
 
-(defun wdired-format-filename ()
-  "Format filename with `wdired-mode' in dired."
-  (interactive)
-  (save-excursion
-    (dired-move-to-first-file)
-    (call-interactively 'rm-set-mark)
-    (dired-move-to-last-file)
-    (mark-rectangle-to-end)
-    (execute-command-with-region-replace 'rte-format-filename)))
+(defun open-newline-above (arg)
+  "Move to the previous line (like vi) and then opens a line."
+  (interactive "p")
+  (beginning-of-line)
+  (open-line arg)
+  (if (not (member major-mode '(haskell-mode org-mode literate-haskell-mode)))
+      (indent-according-to-mode)
+    (beginning-of-line)))
 
-(provide 'wdired-extension)
+(defun open-newline-below (arg)
+  "Move to the next line (like vi) and then opens a line."
+  (interactive "p")
+  (end-of-line)
+  (open-line arg)
+  (call-interactively 'next-line arg)
+  (if (not (member major-mode '(haskell-mode org-mode literate-haskell-mode)))
+      (indent-according-to-mode)
+    (beginning-of-line)))
 
-;;; wdired-extension.el ends here
+(provide 'open-newline)
 
+;;; open-newline.el ends here
