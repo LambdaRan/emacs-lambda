@@ -88,9 +88,6 @@
 [submodule "sly-el-indent"]
 	path = site-lisp/extensions/sly-el-indent
 	url = https://github.com/cireu/sly-el-indent.git
-[submodule "elispfl"]
-	path = site-lisp/extensions/elispfl
-	url = https://github.com/cireu/elispfl.git
 [submodule "yasnippet"]
 	 path = site-lisp/extensions/yasnippet
 	 url = https://github.com/joaotavora/yasnippet.git
@@ -103,27 +100,18 @@
 [submodule "site-lisp/extensions/highlight-parentheses"]
 	path = site-lisp/extensions/highlight-parentheses
 	url = https://github.com/tsdh/highlight-parentheses.el.git
-[submodule "site-lisp/extensions/s"]
-	path = site-lisp/extensions/s
-	url = https://github.com/magnars/s.el.git
 [submodule "site-lisp/extensions/php-mode"]
 	path = site-lisp/extensions/php-mode
 	url = https://github.com/emacs-php/php-mode.git
 [submodule "site-lisp/extensions/modern-cpp-font-lock"]
 	path = site-lisp/extensions/modern-cpp-font-lock
 	url = https://github.com/ludwigpacifici/modern-cpp-font-lock.git
-[submodule "site-lisp/extensions/f"]
-	path = site-lisp/extensions/f
-	url = https://github.com/rejeep/f.el.git
 [submodule "site-lisp/extensions/ace-window"]
 	path = site-lisp/extensions/ace-window
 	url = https://github.com/abo-abo/ace-window.git
 [submodule "site-lisp/extensions/all-the-icons"]
 	path = site-lisp/extensions/all-the-icons
 	url = https://github.com/domtronn/all-the-icons.el.git
-[submodule "site-lisp/extensions/emacs-memoize"]
-	path = site-lisp/extensions/emacs-memoize
-	url = https://github.com/skeeto/emacs-memoize.git
 [submodule "site-lisp/extensions/avy"]
 	path = site-lisp/extensions/avy
 	url = https://github.com/abo-abo/avy.git
@@ -172,9 +160,6 @@
 [submodule "multi-vterm"]
 	path = site-lisp/extensions/multi-vterm
 	url = https://github.com/suonlight/multi-vterm.git
-[submodule "emacs-deferred"]
-	path = site-lisp/extensions/emacs-deferred
-	url = https://github.com/kiwanami/emacs-deferred.git
 [submodule "rust-mode"]
 	path = site-lisp/extensions/rust-mode
 	url = https://github.com/rust-lang/rust-mode.git
