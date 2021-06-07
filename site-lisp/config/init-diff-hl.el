@@ -15,7 +15,7 @@
 ;; (unless (window-system) (diff-hl-margin-mode))
 ;; right fringe
 (diff-hl-margin-mode)
-(setq diff-hl-margin-side 'right)
+(setq diff-hl-side 'right)
 
 (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
 
