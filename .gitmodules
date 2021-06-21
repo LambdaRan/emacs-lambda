@@ -172,6 +172,3 @@
 [submodule "web-mode"]
 	path = site-lisp/extensions/web-mode
 	url = https://github.com/fxbois/web-mode.git
-[submodule "yaml-mode"]
-	path = site-lisp/extensions/yaml-mode
-	url = https://github.com/yoshiki/yaml-mode.git

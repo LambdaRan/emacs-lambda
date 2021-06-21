@@ -172,6 +172,8 @@
   (setq company-dabbrev-other-buffers t)
   ;; (setq company-dabbrev-minimum-length 4)
 
+  ;; (setq company-format-margin-function nil)
+  
   ;; Don't downcase the returned candidates.
   (setq company-dabbrev-downcase nil
         ;; make previous/next selection in the popup cycles
