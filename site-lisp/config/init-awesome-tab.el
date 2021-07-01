@@ -82,16 +82,26 @@
 ;;; Require
 (require 'awesome-tab)
 (require 'all-the-icons)
+(require 'init-const)
 ;; (header-line :inherit 'default :height (face-attribute 'default :height))
 ;; (set-face-attribute 'mode-line nil  :height 100)
 ;; (set-face-attribute 'header-line nil  :height 160)
 ;;; Code:
 (awesome-tab-mode t)
-(setq awesome-tab-height 130)
-;; (setq awesome-tab-icon-v-adjust 0)
-(setq awesome-tab-icon-height 0.8)
-;; (setq awesome-tab-label-fixed-length 14)
-(setq awesome-tab-active-bar-height 22)
+(if sys/win32p
+    (progn
+      (setq awesome-tab-height 110)
+      ;; (setq awesome-tab-icon-v-adjust 0)
+      (setq awesome-tab-icon-height 0.7)
+      ;; (setq awesome-tab-label-fixed-length 14)
+      (setq awesome-tab-active-bar-height 22))
+  (setq awesome-tab-height 130)
+  ;; (setq awesome-tab-icon-v-adjust 0)
+  (setq awesome-tab-icon-height 0.8)
+  ;; (setq awesome-tab-label-fixed-length 14)
+  (setq awesome-tab-active-bar-height 22))
+
+
 (provide 'init-awesome-tab)
 
 ;;; init-awesome-tab.el ends here

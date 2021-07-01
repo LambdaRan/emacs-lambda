@@ -77,7 +77,7 @@
           (require 'init-ffip)
 
           (require 'init-etags)
-          ;; (require 'init-doxymacs)
+          (require 'init-doxymacs)
           (require 'init-ibuffer)
           ;; (require 'init-hydra)
           (require 'init-autorevert)
