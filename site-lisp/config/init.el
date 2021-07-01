@@ -36,7 +36,7 @@
      (require 'init-awesome-pair)
      (require 'init-awesome-tab)
      (require 'init-awesome-tray)
-     ;; 不要自动备份
+    ;;  ;; 不要自动备份
      (require 'init-backup)
      (require 'init-line-number)
      (require 'init-auto-save)
@@ -45,7 +45,7 @@
      (require 'init-indent)
      (require 'init-one-key)
      (require 'init-key)
-     ;; 只读模式下使用vi样式的单按键操作
+    ;;  ;; 只读模式下使用vi样式的单按键操作
      (require 'init-vi-navigate)
      (require 'init-performance)
      (require 'init-ivy)
@@ -72,14 +72,14 @@
           (require 'init-c)
           (require 'init-flycheck)
           (require 'init-idle)
-          ;; (require 'init-nox)
+
           (require 'init-diff-hl)
           (require 'init-ffip)
 
           (require 'init-etags)
-          (require 'init-doxymacs)
+          ;; (require 'init-doxymacs)
           (require 'init-ibuffer)
-          (require 'init-hydra)
+          ;; (require 'init-hydra)
           (require 'init-autorevert)
           (require 'init-diff)
           (require 'ran-toolkit)

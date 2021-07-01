@@ -1,17 +1,29 @@
 
-;; Mac平台下交换 Ctrol 和 Command 键。
-;; key bindings
-(when (eq system-type 'darwin) ;; mac specific settings
-  (setq mac-control-modifier 'super)
-  (setq mac-command-modifier 'control))
-;; (cond
-;;   ((string= system-type "darwin") "config_mac")
-;;   ((string= system-type "windows-nt") "config_win")
-;;   (t "config_linux"))
+(require 'init-const)
+
+;; Super = windows
+;; Hyper = 
+;; Meta = Alt
+;; Key Modifiers
+(with-no-warnings
+  (cond
+    (sys/win32p
+      ;;(setq w32-pass-apps-to-system nil)
+      (setq w32-apps-modifier 'hyper)
+      ;; (setq w32-lwindow-modifier 'super)
+      ;; (w32-register-hot-key [s-c])
+    )
+    ;; Mac平台下交换Ctrl与Command
+    (sys/macp
+      (setq mac-control-modifier 'super)    ;; ctrl -> commnd
+      (setq mac-command-modifier 'control)  ;; command -> ctrl
+    )
+    (t (message "Other System os"))
+  ))
 
 ;;; ### Unset key ###
 ;;; --- 卸载按键
-(lazy-load-unset-keys                   ;全局按键的卸载
+(lazy-load-unset-keys                   ;全局按键的卸�?
                       '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "s-c" "s-x" "s-v" "C-x d"))
 
 (lazy-load-global-keys
@@ -24,13 +36,13 @@
 ;;; --- 工具函数
 (lazy-load-set-keys
  '(
-   ("s-c o" . one-key-menu-directory)       ;目录打开菜单
+   ("s-c o" . one-key-menu-directory)       ;�?录打开菜单
    ("s-," . bury-buffer)                    ;隐藏当前buffer
    ("s-." . unbury-buffer)                  ;反隐藏当前buffer
-   ("s-&" . killall)                        ;杀掉进程
+   ("s-&" . killall)                        ;杀掉进�?
    ("<M-s-return>" . toggle-debug-on-error) ;切换调试模式
-   ("s-[" . eval-expression)                ;执行表达式
-   ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
+   ("s-[" . eval-expression)                ;执�?�表达式
+   ("C-s-q" . quoted-insert)                ;读取系一�?输入字�?�并插入
    ("M-h" . set-mark-command) ;Instead C-Space for Chinese input method
    ("C-z i" . display-fill-column-indicator-mode)
    ("C-z l" . display-line-numbers-mode) ;行号模式切换
@@ -40,7 +52,7 @@
 ;; 搜索
 (lazy-load-global-keys
  '(
-   ("s-R" . re-builder)                 ;可视化构建正则表达式
+   ("s-R" . re-builder)                 ;�?视化构建正则表达�?
    )
  "init-rebuilder")
 
@@ -70,16 +82,16 @@
 ;;; --- 缓存移动
 (lazy-load-set-keys
  '(
-   ("C-z k" . beginning-of-buffer)      ;缓存开始
+   ("C-z k" . beginning-of-buffer)      ;缓存开�?
    ("C-z j" . end-of-buffer)            ;缓存结尾
-   ("C-M-f" . forward-paragraph)        ;下一个段落
-   ("C-M-b" . backward-paragraph)       ;上一个段落
+   ("C-M-f" . forward-paragraph)        ;下一�?段落
+   ("C-M-b" . backward-paragraph)       ;上一�?段落
    ("C-M-y" . backward-up-list)         ;向左跳出 LIST
    ("C-M-o" . up-list)                  ;向右跳出 LIST
    ("C-M-u" . backward-down-list)       ;向左跳进 LIST
    ("C-M-i" . down-list)                ;向右跳进 LIST
-   ("C-M-a" . beginning-of-defun)       ;函数开头
-   ("C-M-e" . end-of-defun)             ;函数末尾
+   ("C-M-a" . beginning-of-defun)       ;函数开�?
+   ("C-M-e" . end-of-defun)             ;函数�?�?
    ))
 
 (lazy-load-global-keys
@@ -94,21 +106,21 @@
    ;; ("M-s-p" . comment-part-move-up)      ;向上移动注释
    ("C-s-n" . comment-dwim-next-line)    ;移动到上一行并注释x
    ("C-s-p" . comment-dwim-prev-line)    ;移动到下一行并注释x
-   ("M-2" . indent-buffer)               ;自动格式化当前Buffer
+   ("M-2" . indent-buffer)               ;动格式化当前Buffer
    ("M-z" . upcase-char)      ;Upcase char handly with capitalize-word
-   ("C-x u" . mark-line)      ;选中整行
-   ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
-   ("C->" . remember-init)              ;记忆初始函数
+   ("C-x u" . mark-line)      ;选中整�??
+   ("s-k" . kill-and-join-forward)      ;在缩进的行之间删�?
+   ("C->" . remember-init)              ;记忆初�?�函�?
    ("C-<" . remember-jump)              ;记忆跳转函数
    ("M-s-," . point-stack-pop)          ;buffer索引跳转
-   ("M-s-." . point-stack-push)         ;buffer索引标记
+   ("M-s-." . point-stack-push)         ;buffer索引标�??
    ("M-G" . goto-column)                ;到指定列
-   ("s-g" . goto-percent)    ;跳转到当前Buffer的文本百分比, 单位为字符
-   ("M-I" . backward-indent) ;向后移动4个字符
+   ("s-g" . goto-percent)    ;跳转到当前Buffer的文�?百分�?, 单位为字�?
+   ("M-I" . backward-indent) ;向后移动4�?字�??
 
-   ("s-J" . scroll-up-one-line)         ;向上滚动一行
-   ("s-K" . scroll-down-one-line)       ;向下滚动一行
-   ;; ("<f2>" . refresh-file)              ;自动刷新文件
+   ("s-J" . scroll-up-one-line)         ;向上滚动一�?
+   ("s-K" . scroll-down-one-line)       ;向下滚动一�?
+   ;; ("<f2>" . refresh-file)              ;�?动刷新文�?
    ;; ("s-f" . find-file-root)             ;用root打开文件
    ;; ("s-r" . find-file-smb)              ;访问sambao
    )
@@ -125,26 +137,26 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (lazy-load-global-keys
  '(
-   ("C-o" . open-newline-above)         ;在上面一行新建一行
-   ("C-l" . open-newline-below)         ;在下面一行新建一行
+   ("C-o" . open-newline-above)         ;在上�?一行新建一�?
+   ("C-l" . open-newline-below)         ;在下�?一行新建一�?
    )
  "open-newline")
 (lazy-load-global-keys
  '(
-   ("s-N" . move-text-down)      ;把光标所在的整行文字(或标记)下移一行
-   ("s-P" . move-text-up)        ;把光标所在的整行文字(或标记)上移一行
+   ("s-N" . move-text-down)      ;把光标所在的整�?�文�?(或标�?)下移一�?
+   ("s-P" . move-text-up)        ;把光标所在的整�?�文�?(或标�?)上移一�?
    )
  "move-text")
 (lazy-load-global-keys
  '(
    ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
    ("C-S-l" . duplicate-line-or-region-below) ;向下复制当前行或区域
-   ("C-S-M-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
-   ("C-S-M-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
-   ("C-;" . comment-or-uncomment-region+)     ;注释当前行
+   ("C-S-M-o" . duplicate-line-above-comment) ;复制当前行到上一�?, 并注释当前�??
+   ("C-S-M-l" . duplicate-line-below-comment) ;复制当前行到下一�?, 并注释当前�??
+   ("C-;" . comment-or-uncomment-region+)     ;注释当前�?
    )
  "duplicate-line")
-;; 快速删除光标左右的内容
+;; �?速删除光标左右的内�??
 (lazy-load-global-keys
  '(
    ("M-N" . delete-block-backward)
@@ -155,10 +167,10 @@
 ;;; --- 缓存编辑
 (lazy-load-set-keys
  '(
-   ("C-x C-x" . exchange-point-and-mark)   ;交换当前点和标记点
-   ("M-o" . backward-delete-char-untabify) ;向前删除字符
+   ("C-x C-x" . exchange-point-and-mark)   ;交换当前点和标�?�点
+   ("M-o" . backward-delete-char-untabify) ;向前删除字�??
    ("C-M-S-h" . mark-paragraph)            ;选中段落
-   ("M-SPC" . just-one-space)              ;只有一个空格在光标处
+   ("M-SPC" . just-one-space)              ;�?有一�?空格在光标�??
    ))
 
 (lazy-load-global-keys
@@ -177,18 +189,18 @@
 ;;; --- 矩形操作
 (lazy-load-global-keys
  '(
-   ("s-M" . rm-set-mark)                ;矩形标记
-   ("s-X" . rm-exchange-point-and-mark) ;矩形对角交换
+   ("s-M" . rm-set-mark)                ;矩形标�??
+   ("s-X" . rm-exchange-point-and-mark) ;矩形对�?�交�?
    ("s-D" . rm-kill-region)             ;矩形删除
    ("s-S" . rm-kill-ring-save)          ;矩形保存
    ("s-Y" . yank-rectangle)             ;粘帖矩形
-   ("s-O" . open-rectangle)            ;用空白填充矩形, 并向右移动文本
+   ("s-O" . open-rectangle)            ;用空白填充矩�?, 并向右移动文�?
    ("s-C" . clear-rectangle)           ;清空矩形
-   ("s-T" . string-rectangle)          ;用字符串替代矩形的每一行
-   ("s-I" . string-insert-rectangle)   ;插入字符串在矩形的每一行
-   ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
+   ("s-T" . string-rectangle)          ;用字符串替代矩形的每一�?
+   ("s-I" . string-insert-rectangle)   ;插入字�?�串在矩形的每一�?
+   ("s-F" . delete-whitespace-rectangle) ;删除矩形�?空格
    ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
-   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
+   ("s-:" . mark-rectangle-to-end)       ;标�?�矩形到行末
    )
  "rect-extension")
 ;;; ### Font ###
@@ -218,17 +230,17 @@
 (lazy-load-set-keys
  '(
    ("C-c v" . split-window-vertically)   ;纵向分割窗口
-   ("C-c h" . split-window-horizontally) ;横向分割窗口
+   ("C-c h" . split-window-horizontally) ;�?向分割窗�?
    ("C-c w" . kill-this-buffer)          ;关闭当前buffer
    ("C-c o" . delete-other-windows)      ;关闭其它窗口
    ))
 (lazy-load-global-keys
  '(
-   ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
-   ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
-   ("C-'" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
-   ("C-\"" . delete-current-buffer-window)    ;删除当前buffer的窗口
-   ("C-c i" . toggle-one-window)              ;切换一个窗口
+   ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗�?
+   ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗�?
+   ("C-'" . delete-current-buffer-and-window) ;关闭当前buffer, 并关�?窗口
+   ("C-\"" . delete-current-buffer-window)    ;删除当前buffer的窗�?
+   ("C-c i" . toggle-one-window)              ;切换一�?窗口
    ("C-x O" . toggle-window-split)
    )
  "window-extension")
@@ -238,8 +250,8 @@
  '(
    ("M-J" . watch-other-window-up)        ;向下滚动其他窗口
    ("M-K" . watch-other-window-down)      ;向上滚动其他窗口
-   ("M-<" . watch-other-window-up-line)   ;向下滚动其他窗口一行
-   ("M->" . watch-other-window-down-line) ;向上滚动其他窗口一行
+   ("M-<" . watch-other-window-up-line)   ;向下滚动其他窗口一�?
+   ("M->" . watch-other-window-down-line) ;向上滚动其他窗口一�?
    )
  "watch-other-window")
 ;; ### Buffer Name ###
@@ -261,14 +273,14 @@
  "init-xwidget")
 
 ;;; ### Awesome-Tab ###
-;;; --- 多标签浏览
+;;; --- 多标签浏�?
 (lazy-load-set-keys
  '(
    ("s-j" . awesome-tab-ace-jump)                  ;Ace jump
-   ("M-7" . awesome-tab-backward-tab)              ;移动到后一个标签
-   ("M-8" . awesome-tab-forward-tab)               ;移动到前一个标签
-   ("M-9" . awesome-tab-backward-group)            ;移动到后一个标签组
-   ("M-0" . awesome-tab-forward-group)             ;移动到前一个标签组
+   ("M-7" . awesome-tab-backward-tab)              ;移动到后一�?标�??
+   ("M-8" . awesome-tab-forward-tab)               ;移动到前一�?标�??
+   ("M-9" . awesome-tab-backward-group)            ;移动到后一�?标�?�组
+   ("M-0" . awesome-tab-forward-group)             ;移动到前一�?标�?�组
    ))
 (lazy-load-global-keys
  '(
@@ -294,12 +306,12 @@
  '(
    ("s-o" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
    ("s-p" . insert-standard-date)
-   ("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
+   ("C-&" . switch-to-messages)         ;跳转�? *Messages* buffer
    )
  "ran-toolkit")
 
 ;;; ### Awesome-Pair ###
-;;; --- 结构化编程
+;;; --- 结构化编�?
 (lazy-load-unset-keys
  '("M-J" "M-r" "M-s" "M-;" "C-M-f" "C-M-b" "M-)")
  awesome-pair-mode-map)                 ;卸载按键
@@ -310,7 +322,7 @@
         ("M-n" . awesome-pair-jump-left)
         ("M-p" . awesome-pair-jump-right)
         ;; 符号插入
-        ("%" . awesome-pair-match-paren)       ;括号跳转
+        ("%" . awesome-pair-match-paren)       ;�?号跳�?
         ("(" . awesome-pair-open-round)        ;智能 (
         ("[" . awesome-pair-open-bracket)      ;智能 [
         ("{" . awesome-pair-open-curly)        ;智能 {
@@ -325,21 +337,21 @@
         ("C-d" . awesome-pair-forward-delete)  ;向前删除
         ("C-k" . awesome-pair-kill)            ;向前kill
         ;; 包围
-        ("M-\"" . awesome-pair-wrap-double-quote) ;用 " " 包围对象, 或跳出字符串
-        ("M-[" . awesome-pair-wrap-bracket)       ;用 [ ] 包围对象
-        ("M-{" . awesome-pair-wrap-curly)         ;用 { } 包围对象
-        ("M-(" . awesome-pair-wrap-round)         ;用 ( ) 包围对象
+        ("M-\"" . awesome-pair-wrap-double-quote) ;�? " " 包围对象, 或跳出字符串
+        ("M-[" . awesome-pair-wrap-bracket)       ;�? [ ] 包围对象
+        ("M-{" . awesome-pair-wrap-curly)         ;�? { } 包围对象
+        ("M-(" . awesome-pair-wrap-round)         ;�? ( ) 包围对象
         ("M-)" . awesome-pair-unwrap)             ;去掉包围对象
-        ;; 跳出并换行缩进
-        ("M-:" . awesome-pair-jump-out-pair-and-newline) ;跳出括号并换行
+        ;; 跳出并换行缩�?
+        ("M-:" . awesome-pair-jump-out-pair-and-newline) ;跳出�?号并换�??
         ))
 (lazy-load-set-keys awesome-pair-key-alist awesome-pair-mode-map)
 
 ;;; ### Help ###
-;;; --- 帮助模式
+;;; --- �?助模�?
 (lazy-load-global-keys
  '(
-   ("C-h". one-key-menu-help)           ;帮助菜单
+   ("C-h". one-key-menu-help)           ;�?助菜�?
    )
  "init-help-mode")
 
@@ -396,8 +408,8 @@
        ielm-map)                        ;卸载按键
       (lazy-load-set-keys
        '(
-         ("C-s-p" . comint-previous-input) ;上一个输入
-         ("C-s-n" . comint-next-input)     ;下一个输入
+         ("C-s-p" . comint-previous-input) ;上一�?输入
+         ("C-s-n" . comint-next-input)     ;下一�?输入
          )
        ielm-map
        )
@@ -411,11 +423,11 @@
  "init-woman")
 
 ;;; ### Ido ###
-;;; --- 交互式管理文件和缓存
+;;; --- 交互式�?�理文件和缓�?
 (lazy-load-set-keys
  '(
-   ("C-x C-f" . ido-find-file)          ;交互式查找文件
-   ("C-x b" . ido-switch-buffer)        ;交互式切换buffer
+   ("C-x C-f" . ido-find-file)          ;交互式查找文�?
+   ("C-x b" . ido-switch-buffer)        ;交互式切�?buffer
    ("C-x i" . ido-insert-buffer)        ;插入缓存
    ("C-x I" . ido-insert-file)          ;插入文件
    ))
@@ -427,12 +439,12 @@
   "Add my keybindings for ido."
   (lazy-load-set-keys
    '(
-     ("M-p" . ido-prev-match)              ;上一个匹配
-     ("M-n" . ido-next-match)              ;下一个匹配
-     ("M-h" . ido-next-work-directory)     ;下一个工作目录
-     ("M-l" . ido-prev-work-directory)     ;上一个工作目录
-     ("M-o" . backward-delete-char-untabify) ;向前删除字符
-     ("M-O" . ido-delete-backward-updir)     ;删除字符或进入上一级目录
+     ("M-p" . ido-prev-match)              ;上一�?匹配
+     ("M-n" . ido-next-match)              ;下一�?匹配
+     ("M-h" . ido-next-work-directory)     ;下一�?工作�?�?
+     ("M-l" . ido-prev-work-directory)     ;上一�?工作�?�?
+     ("M-o" . backward-delete-char-untabify) ;向前删除字�??
+     ("M-O" . ido-delete-backward-updir)     ;删除字�?�或进入上一级目�?
      )
    keymap
    ))
@@ -440,7 +452,7 @@
 ;;; Elisp
 (lazy-load-set-keys
  '(
-   ("RET" . comment-indent-new-line)    ;自动换行并注释
+   ("RET" . comment-indent-new-line)    ;�?动换行并注释
    )
  emacs-lisp-mode-map
  )

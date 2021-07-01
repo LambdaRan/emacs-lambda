@@ -81,15 +81,15 @@
 
 ;;; Require
 
-
+(require 'init-const)
 ;;; Code:
 
 (one-key-create-menu
  "DIRECTORY"
  '(
    (("h" . "Home") . (lambda () (interactive) (dired-x-find-file "~/")))
-   (("p" . "Emacs Package") . (lambda () (interactive) (dired-x-find-file lazycat-emacs-root-dir)))
-   (("c" . "Emacs-lambda") . (lambda () (interactive) (dired-x-find-file lazycat-emacs-config-dir)))
+   (("p" . "Emacs Package") . (lambda () (interactive) (dired-x-find-file my-emacs-root-dir)))
+   (("c" . "Emacs-lambda") . (lambda () (interactive) (dired-x-find-file my-emacs-config-dir)))
    (("b" . "Baidu Code") . (lambda () (interactive) (dired-x-find-file "~/work/baidu/code")))
    (("l" . "Lambda code") . (lambda () (interactive) (dired-x-find-file "~/lambda")))
    (("o" . "Open code") . (lambda () (interactive) (dired-x-find-file ""))))
