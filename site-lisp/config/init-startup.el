@@ -87,15 +87,14 @@
 ;;; Require
 
 ;;; Code:
+(require 'init-const)
 
 (tool-bar-mode -1)                      ;禁用工具栏
 (menu-bar-mode -1)                      ;禁用菜单栏
 (scroll-bar-mode -1)                    ;禁用滚动条
 
-(defun make_fullscreen()
-    "set emacs fullscreen"
-    (interactive)
-    (if (featurep 'cocoa)
+(defun make-fullscreen-cocoa()
+    "Set emacs fullscreen in mac cocoa"
         (progn
         ;; 在Mac平台, Emacs不能进入Mac原生的全屏模式,否则会导致 `make-frame' 创建时也集成原生全屏属性后造成白屏和左右滑动现象.
         ;; 所以先设置 `ns-use-native-fullscreen' 和 `ns-use-fullscreen-animation' 禁止Emacs使用Mac原生的全屏模式.
@@ -117,10 +116,18 @@
                          (toggle-frame-fullscreen)
                          ))
         )
+)
 
+(defun make_fullscreen()
+    "set emacs fullscreen"
+    (interactive)
+    (if sys/mac-cocoa-p
+        (make-fullscreen-cocoa)
     ;; 非Mac平台直接全屏
-    (require 'fullscreen)
-    (fullscreen)))
+    ;; (require 'fullscreen)
+    ;; (fullscreen)
+    ;; (toggle-frame-fullscreen)
+    ))
 
 (make_fullscreen)
 

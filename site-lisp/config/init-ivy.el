@@ -55,7 +55,7 @@ if nil, is used as the project root directory for search."
    (list nil
          (when current-prefix-arg
            (counsel-read-directory-name "From directory: "))))
-  ;; 默认在工程中搜索目录
+  ;; 默�?�在工程�?搜索�?�?
   (unless initial-directory
     (let ((project (project-current)))
       (when project
@@ -75,12 +75,12 @@ if nil, is used as the project root directory for search."
 
 (advice-add 'counsel-dired-jump :override #'counsel-dired-jump@override)
 
-;; 设置zlua脚本路径
-(setq zlua-path "~/ransysconf/zlua/z.lua")
+;; 设置zlua脚本�?�?
+(setq zlua-path "")
 
 ;;; ### Unset key ###
 ;;; --- 卸载按键
-(lazy-load-unset-keys                   ;全局按键的卸载
+(lazy-load-unset-keys                   ;全局按键的卸�?
  '("C-x C-f" "M-x" "C-x b" "M-y"))
 
 (lazy-load-set-keys

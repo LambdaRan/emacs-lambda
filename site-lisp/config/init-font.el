@@ -80,16 +80,17 @@
 ;;
 
 ;;; Require
-
+(require 'init-const)
 
 ;;; Code:
-
 (let ((emacs-font-size 14)
       emacs-font-name)
   (cond
-    ((featurep 'cocoa)
+    (sys/win32p
+      (setq emacs-font-name "JetBrains Mono"))
+    (sys/mac-cocoa-p
      (setq emacs-font-name "JetBrains Mono"))
-    ((string-equal system-type "gnu/linux")
+    (sys/linuxp
      ;; (setq emacs-font-name "WenQuanYi Micro Hei Mono")
      (setq emacs-font-name "Source Code Pro"))
     (t (message "Other System OS, Please configure this case.")))

@@ -139,7 +139,7 @@
 
 ;; 调试模式
 ;; (setq magit-refresh-verbose t)
-(setq magit-git-executable "/usr/local/bin/git")
+;; (setq magit-git-executable "/usr/local/bin/git")
 ;; {{ speed up magit, @see https://jakemccrary.com/blog/2020/11/14/speeding-up-magit/
 (defvar my-prefer-lightweight-magit nil)
 (with-eval-after-load 'magit

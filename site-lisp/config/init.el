@@ -1,3 +1,6 @@
+
+(require 'init-const)
+
 ;; 加速配置。
 (require 'init-accelerate)
 
@@ -11,16 +14,11 @@
       ;; 清空避免加载远程文件的时候分析文件。
       (file-name-handler-alist nil))
 
-;; 定义一些启动目录，方便下次迁移修改
-(defvar lazycat-emacs-root-dir (file-truename "~/emacs-lambda/site-lisp"))
-(defvar lazycat-emacs-config-dir (concat lazycat-emacs-root-dir "/config"))
-(defvar lazycat-emacs-extension-dir (concat lazycat-emacs-root-dir "/extensions"))
-
 ;; 统计启动时间
   (with-temp-message ""                 ;抹掉插件启动的输出
-     ;; (require 'benchmark-init-modes)
-     ;; (require 'benchmark-init)
-     ;; (benchmark-init/activate)
+     (require 'benchmark-init-modes)
+     (require 'benchmark-init)
+     (benchmark-init/activate)
 
      (require 'init-startup)
      (require 'init-generic)
@@ -91,6 +89,7 @@
           (emacs-session-restore)
 
           (server-start)            ;为emacsclient准备使用场景，比如git
-          ))))
+          )))
+          )
 
 (provide 'init)
