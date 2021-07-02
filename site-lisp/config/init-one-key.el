@@ -91,6 +91,7 @@
    (("p" . "Emacs Package") . (lambda () (interactive) (dired-x-find-file my-emacs-root-dir)))
    (("c" . "Emacs-lambda") . (lambda () (interactive) (dired-x-find-file my-emacs-config-dir)))
    (("b" . "Baidu Code") . (lambda () (interactive) (dired-x-find-file "~/work/baidu/code")))
+   (("n" . "Netease Code") . (lambda () ((interactive (dired-x-find-file "F:\pangu")))))
    (("l" . "Lambda code") . (lambda () (interactive) (dired-x-find-file "~/lambda")))
    (("o" . "Open code") . (lambda () (interactive) (dired-x-find-file ""))))
  t)

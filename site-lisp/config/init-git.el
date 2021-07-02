@@ -81,6 +81,7 @@
 
 ;;; Require
 (require 'magit)
+(require 'init-const)
 
 ;;; Code:
 (when (featurep 'cocoa)
@@ -88,6 +89,10 @@
   (require 'exec-path-from-shell)
   (exec-path-from-shell-initialize))
 ;; (load-file (concat lazycat-emacs-extension-dir "/with-editor/with-editor.el"))
+;;
+(when sys/win32p
+  (setenv "GIT_ASKPASS" "git-gui--askpass"))
+(setq vc-handled-backends '(Git SVN Hg))
 
 ;; Magit configuration.
 (setq magit-commit-ask-to-stage nil)    ;don't ask stage question

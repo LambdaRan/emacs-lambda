@@ -140,8 +140,8 @@
 (electric-pair-mode t)                  ;括号自动匹配插入
 
 ;; 平滑地进行半屏滚动，避免滚动后recenter操作
-(setq scroll-step 1
-      scroll-conservatively 10000)
+(setq scroll-step 1)
+(setq scroll-conservatively 10000)
 
 ;; ;; 不显示 *scratch*
 ;; (defun remove-scratch-buffer ()
@@ -158,7 +158,7 @@
   (setq locale-coding-system 'gb18030)
   (setq w32-unicode-filenames 'nil)
   (setq file-name-coding-system 'gb18030)
-  (set-selection-coding-system 'utf-16le-dos)
+  (set-selection-coding-system 'utf-8)
   ;; 使用英文day-time
   (setq system-time-locale "C")
   )

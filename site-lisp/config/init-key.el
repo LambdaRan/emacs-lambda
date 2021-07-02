@@ -2,16 +2,20 @@
 (require 'init-const)
 
 ;; Super = windows
-;; Hyper = 
+;; Hyper =
 ;; Meta = Alt
 ;; Key Modifiers
 (with-no-warnings
   (cond
     (sys/win32p
-      ;;(setq w32-pass-apps-to-system nil)
-      (setq w32-apps-modifier 'hyper)
-      ;; (setq w32-lwindow-modifier 'super)
-      ;; (w32-register-hot-key [s-c])
+     (setq w32-pass-lwindow-to-system nil)
+    ;;  (setq w32-lwindow-modifier 'super)
+     (setq w32-pass-rwindow-to-system nil)
+    ;;  (setq w32-rwindow-modifier 'super)
+     ;;(setq w32-pass-apps-to-system nil)
+     (setq w32-apps-modifier 'hyper)
+     (setq w32-pass-alt-to-system nil)
+     ;; (w32-register-hot-key [s-c])
     )
     ;; Mac平台下交换Ctrl与Command
     (sys/macp
@@ -365,14 +369,15 @@
  )
 
 ;; ### vterm
-(lazy-load-global-keys
- '(
-   ("C-`" . multi-vterm)
-   ("C-q" . ran-vterm-open-in-right-window)
-   ("s-x m" . ran-vterm-open-in-below-window)
-   ("s-x n" . multi-vterm-dedicated-toggle)
-   )
- "init-multi-vterm")
+(unless sys/win32p
+  (lazy-load-global-keys
+   '(
+     ("C-`" . multi-vterm)
+     ("C-q" . ran-vterm-open-in-right-window)
+     ("s-x m" . ran-vterm-open-in-below-window)
+     ("s-x n" . multi-vterm-dedicated-toggle)
+     )
+   "init-multi-vterm"))
 
 ;; ### Dired;;  ###
 (lazy-load-global-keys
