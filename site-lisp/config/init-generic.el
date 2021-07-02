@@ -154,12 +154,13 @@
      (remq 'process-kill-buffer-query-function
            kill-buffer-query-functions))
 
-
 (when sys/win32p
   (setq locale-coding-system 'gb18030)
   (setq w32-unicode-filenames 'nil)
   (setq file-name-coding-system 'gb18030)
   (set-selection-coding-system 'utf-16le-dos)
+  ;; 使用英文day-time
+  (setq system-time-locale "C")
   )
 
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
