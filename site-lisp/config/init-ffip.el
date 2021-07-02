@@ -1,9 +1,9 @@
 
 (require 'find-file-in-project)
 (require 'lazy-load)
+(require 'init-const)
 
-
-(when (featurep 'cocoa)
+(when sys/mac-cocoa-p
   ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
   (require 'exec-path-from-shell)
   (exec-path-from-shell-initialize))

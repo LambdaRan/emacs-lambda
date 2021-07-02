@@ -121,13 +121,13 @@
 (setq async-bytecomp-allowed-packages nil) ;避免magit报错
 (setq word-wrap-by-category t)             ;按照中文折行
 (setq profiler-report-cpu-line-format ;让 profiler-report 第一列宽一点
-     '((100 left)
-       (24 right ((19 right)
-                  (5 right)))))
+      '((100 left)
+        (24 right ((19 right)
+                   (5 right)))))
 (setq profiler-report-memory-line-format
-     '((100 left)
-       (19 right ((14 right profiler-format-number)
-                  (5 right)))))
+      '((100 left)
+        (19 right ((14 right profiler-format-number)
+                   (5 right)))))
 (add-hook 'find-file-hook 'highlight-parentheses-mode t) ;增强的括号高亮
 
 (setq ad-redefinition-action 'accept)   ;不要烦人的 redefine warning
@@ -151,17 +151,16 @@
 
 ;; Don't ask me when kill process buffer
 (setq kill-buffer-query-functions
-     (remq 'process-kill-buffer-query-function
-           kill-buffer-query-functions))
+      (remq 'process-kill-buffer-query-function
+            kill-buffer-query-functions))
 
-(when sys/win32p
+(when sys/windows-p
   (setq locale-coding-system 'gb18030)
   (setq w32-unicode-filenames 'nil)
   (setq file-name-coding-system 'gb18030)
   (set-selection-coding-system 'utf-8)
   ;; 使用英文day-time
-  (setq system-time-locale "C")
-  )
+  (setq system-time-locale "C"))
 
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
 ;; Explicitly set the prefered coding systems to avoid annoying prompt

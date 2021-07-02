@@ -1,6 +1,7 @@
 
 (require 'counsel-etags)
 (require 'lazy-load)
+(require 'init-const)
 
 ;; Don't ask before rereading the TAGS files if they have changed
 (setq tags-revert-without-query t)
@@ -9,7 +10,7 @@
 ;; Don't warn when TAGS files are large
 (setq large-file-warning-threshold nil)
 
-(when (featurep 'cocoa)
+(when sys/mac-cocoa-p
   ;; Mac's default ctags does not support -e option
   ;; If you install Emacs by homebrew, another version of etags is already installed which does not need -e too
   ;; the best option is to install latest ctags from sf.net
@@ -39,9 +40,9 @@
     (call-interactively 'counsel-semantic-or-imenu)))
 
 (add-hook 'prog-mode-hook
-          (lambda ()
-            (add-hook 'after-save-hook
-              'counsel-etags-virtual-update-tags 'append 'local)))
+          #'(lambda ()
+              (add-hook 'after-save-hook
+                        'counsel-etags-virtual-update-tags 'append 'local)))
 
 (lazy-load-set-keys
  '(

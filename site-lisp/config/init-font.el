@@ -93,12 +93,12 @@
 (let ((emacs-font-size 14)
       emacs-font-name)
   (cond
-    (sys/win32p
+    (sys/windows-p
      (setq emacs-font-size 10)
      (setq emacs-font-name "JetBrains Mono"))
     (sys/mac-cocoa-p
      (setq emacs-font-name "JetBrains Mono"))
-    (sys/linuxp
+    (sys/linux-p
      ;; (setq emacs-font-name "WenQuanYi Micro Hei Mono")
      (setq emacs-font-name "Source Code Pro"))
     (t (message "Other System OS, Please configure this case.")))

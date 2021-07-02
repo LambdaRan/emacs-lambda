@@ -1,7 +1,7 @@
 
 (require 'init-const)
 
-(unless sys/win32p
+(unless sys/windows-p
 
   (message "Error: windows-nt load multi-vterm")
   (require 'multi-vterm)                   ;多标签SHELL

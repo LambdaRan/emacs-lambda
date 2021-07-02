@@ -86,6 +86,7 @@
 (awesome-tray-mode 1)
 (setq awesome-tray-buffer-name-buffer-changed t)
 (setq awesome-tray-active-modules '("location" "parent-dir" "mode-name" "git" "date"))
+
 (provide 'init-awesome-tray)
 
 ;;; init-awesome-tray.el ends here

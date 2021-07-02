@@ -4,11 +4,10 @@
 (require 'lazy-load)
 (require 'zlua)
 
-(when (featurep 'cocoa)
+(when sys/mac-cocoa-p
   ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
   (require 'exec-path-from-shell)
   (exec-path-from-shell-initialize))
-
 
 (ivy-mode t)
 
@@ -55,7 +54,7 @@ if nil, is used as the project root directory for search."
    (list nil
          (when current-prefix-arg
            (counsel-read-directory-name "From directory: "))))
-  ;; 榛樿?ゅ湪宸ョ▼涓?鎼滅储鐩?褰?
+  ;; 默认在工程中搜索目录
   (unless initial-directory
     (let ((project (project-current)))
       (when project
@@ -75,12 +74,11 @@ if nil, is used as the project root directory for search."
 
 (advice-add 'counsel-dired-jump :override #'counsel-dired-jump@override)
 
-;; 璁剧疆zlua鑴氭湰璺?寰?
-(setq zlua-path "")
+;; 设置zlua脚本路径
+(setq zlua-path "~/ransysconf/zlua/z.lua")
 
 ;;; ### Unset key ###
-;;; --- 鍗歌浇鎸夐敭
-(lazy-load-unset-keys                   ;鍏ㄥ眬鎸夐敭鐨勫嵏杞?
+(lazy-load-unset-keys                   ; 全局按键卸载
  '("C-x C-f" "M-x" "C-x b" "M-y"))
 
 (lazy-load-set-keys
