@@ -80,7 +80,7 @@
 ;;
 
 ;;; Require
-
+(require 'lazy-load)
 ;;; Code:
 
 ;;; ### Info ###

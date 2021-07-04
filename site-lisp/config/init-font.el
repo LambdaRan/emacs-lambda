@@ -81,13 +81,7 @@
 
 ;;; Require
 (require 'init-const)
-
-;; (custom-set-faces
-;;  ;; custom-set-faces was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(default ((t (:family "Courier New" :foundry "outline" :slant normal :weight normal :height 113 :width normal)))))
+(require 'lazy-load)
 
 ;;; Code:
 (let ((emacs-font-size 14)
@@ -108,6 +102,14 @@
     ))
 
 ;; (setq-default line-spacing 0.2)
+
+;;; ### Font ###
+;;; --- 字体命令
+(lazy-load-set-keys
+ '(
+   ("s--" . text-scale-decrease)        ;减小字体大小
+   ("s-=" . text-scale-increase)        ;增加字体大小
+   ))
 
 (provide 'init-font)
 

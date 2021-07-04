@@ -12,7 +12,6 @@
 ;; `diff-hl-next-hunk'       C-x v ]
 
 
-;; (unless (window-system) (diff-hl-margin-mode))
 ;; right fringe
 (diff-hl-margin-mode)
 (setq diff-hl-side 'right)
@@ -37,11 +36,7 @@
   (add-hook hook 'turn-on-diff-hl-mode))
 
 (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-
 (add-hook 'dired-mode-hook 'diff-hl-dired-mode-unless-remote)
 ;; (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
-
-
-
 
 (provide 'init-diff-hl)

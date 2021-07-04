@@ -73,7 +73,7 @@
   (interactive)
   (comment-line -1))
 
-;; From lazycat-toolkit
+;; {{ From lazycat-toolkit
 ;; https://github.com/manateelazycat/lazycat-emacs/blob/master/site-lisp/extensions/lazycat/lazycat-toolkit.el
 (defun insert-standard-date ()
   "Inserts standard date time string."
@@ -105,6 +105,7 @@
             (bury-buffer)
           (switch-to-buffer ielm-buffer-name))
       (ielm))))
+;; }}
 
 (provide 'ran-toolkit)
 

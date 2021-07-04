@@ -83,11 +83,10 @@
 (require 'awesome-tab)
 (require 'all-the-icons)
 (require 'init-const)
-;; (header-line :inherit 'default :height (face-attribute 'default :height))
-;; (set-face-attribute 'mode-line nil  :height 100)
-;; (set-face-attribute 'header-line nil  :height 160)
+
 ;;; Code:
 (awesome-tab-mode t)
+
 (if sys/windows-p
     (progn
       (setq awesome-tab-height 110)

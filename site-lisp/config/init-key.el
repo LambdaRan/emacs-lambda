@@ -5,30 +5,34 @@
 ;; Hyper =
 ;; Meta = Alt
 ;; Key Modifiers
-(with-no-warnings
-  (cond
-    (sys/windows-p
-     (setq w32-pass-lwindow-to-system nil)
-    ;;  (setq w32-lwindow-modifier 'super)
-     (setq w32-pass-rwindow-to-system nil)
-    ;;  (setq w32-rwindow-modifier 'super)
-     ;;(setq w32-pass-apps-to-system nil)
-     (setq w32-apps-modifier 'hyper)
-     (setq w32-pass-alt-to-system nil)
-     ;; (w32-register-hot-key [s-c])
-    )
-    ;; Mac平台下交换Ctrl与Command
-    (sys/mac-p
-      (setq mac-control-modifier 'super)    ;; ctrl -> commnd
-      (setq mac-command-modifier 'control)  ;; command -> ctrl
-    )
-    (t (message "Other System os"))
-  ))
+
+;; Mac平台下交换Ctrl与Command
+(when sys/mac-p
+  (setq mac-control-modifier 'super)    ;; ctrl -> commnd
+  (setq mac-command-modifier 'control)  ;; command -> ctrl
+  )
+
+(when sys/windows-p
+  (setq w32-pass-lwindow-to-system nil)
+  (setq w32-lwindow-modifier 'super)
+
+  (setq w32-pass-rwindow-to-system nil)
+  (setq w32-rwindow-modifier 'super)
+
+  (setq w32-pass-apps-to-system nil)
+  (setq w32-apps-modifier 'hyper)
+
+  (setq w32-pass-alt-to-system nil)
+  (setq w32-recognize-altgr nil)
+
+  (w32-register-hot-key [s-])
+  (w32-register-hot-key [C-])
+  )
 
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
-                      '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "s-c" "s-x" "s-v" "C-x d"))
+ '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "s-c" "s-x" "s-v" "C-x d"))
 
 (lazy-load-global-keys
  '(
@@ -40,7 +44,6 @@
 ;;; --- 工具函数
 (lazy-load-set-keys
  '(
-   ("s-c o" . one-key-menu-directory)       ;目录打开菜单
    ("s-," . bury-buffer)                    ;隐藏当前buffer
    ("s-." . unbury-buffer)                  ;反隐藏当前buffer
    ("s-&" . killall)                        ;杀掉进程
@@ -48,6 +51,7 @@
    ("s-[" . eval-expression)                ;执行表达式
    ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
    ("M-h" . set-mark-command) ;Instead C-Space for Chinese input method
+
    ("C-z i" . display-fill-column-indicator-mode)
    ("C-z l" . display-line-numbers-mode) ;行号模式切换
    ))
@@ -105,9 +109,6 @@
 
 (lazy-load-global-keys
  '(
-   ;; ("C-z l" . display-line-numbers-mode) ;行号模式切换
-   ;; ("M-s-n" . comment-part-move-down)    ;向下移动注释
-   ;; ("M-s-p" . comment-part-move-up)      ;向上移动注释
    ("C-s-n" . comment-dwim-next-line)    ;移动到上一行并注释x
    ("C-s-p" . comment-dwim-prev-line)    ;移动到下一行并注释x
    ("M-2" . indent-buffer)               ;动格式化当前Buffer
@@ -130,7 +131,6 @@
    )
  "basic-toolkit")
 
-
 (lazy-load-global-keys
  '(
    ("M-s-n" . ran-comment-line-next-line) ; 向下移动注释
@@ -138,29 +138,31 @@
    )
  "ran-toolkit")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (lazy-load-global-keys
  '(
    ("C-o" . open-newline-above)         ;在上面一行新建一行
    ("C-l" . open-newline-below)         ;在下面一行新建一行
    )
  "open-newline")
+
 (lazy-load-global-keys
  '(
    ("s-N" . move-text-down)      ;把光标所在的整行文字(或标记)下移一行
    ("s-P" . move-text-up)        ;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
+
 (lazy-load-global-keys
  '(
    ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
    ("C-S-l" . duplicate-line-or-region-below) ;向下复制当前行或区域
    ("C-S-M-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
    ("C-S-M-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
-   ("C-;" . comment-or-uncomment-region+)     ;注释当前行
+   ("C-c ;" . comment-or-uncomment-region+)     ;注释当前行
    )
  "duplicate-line")
-;; �?速删除光标左右的内�??
+
+;; 快速删除光标左右的内容
 (lazy-load-global-keys
  '(
    ("M-N" . delete-block-backward)
@@ -183,6 +185,7 @@
    ("C-?" . undo-tree-redo)             ;重做)
    )
  "undo-tree")
+
 (with-eval-after-load 'undo-tree
   (global-undo-tree-mode)
   (setq undo-tree-visualizer-timestamps t
@@ -207,13 +210,6 @@
    ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
    )
  "rect-extension")
-;;; ### Font ###
-;;; --- 字体命令
-(lazy-load-set-keys
- '(
-   ("s--" . text-scale-decrease)        ;减小字体大小
-   ("s-=" . text-scale-increase)        ;增加字体大小
-   ))
 
  ;;; ### Multi-Scratch
 (lazy-load-global-keys
@@ -223,13 +219,13 @@
    )
  "multi-scratch")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ### Window Operation ###
 (lazy-load-global-keys
  '(
    ("C-c j" . ace-window)
    )
  "init-ace-window")
+
 ;;; --- 窗口操作
 (lazy-load-set-keys
  '(
@@ -238,6 +234,7 @@
    ("C-c w" . kill-this-buffer)          ;关闭当前buffer
    ("C-c o" . delete-other-windows)      ;关闭其它窗口
    ))
+
 (lazy-load-global-keys
  '(
    ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
@@ -258,6 +255,7 @@
    ("M->" . watch-other-window-down-line) ;向上滚动其他窗口一行
    )
  "watch-other-window")
+
 ;; ### Buffer Name ###
 ;; --- 缓存名字
 (lazy-load-global-keys
@@ -277,7 +275,7 @@
  "init-xwidget")
 
 ;;; ### Awesome-Tab ###
-;;; --- 多标签浏�?
+;;; --- 多标签浏览
 (lazy-load-set-keys
  '(
    ("s-j" . awesome-tab-ace-jump)                  ;Ace jump
@@ -286,6 +284,7 @@
    ("M-9" . awesome-tab-backward-group)            ;移动到后一个标签组
    ("M-0" . awesome-tab-forward-group)             ;移动到前一个标签组
    ))
+
 (lazy-load-global-keys
  '(
    ("M-&" . awesome-tab-backward-tab-other-window)
@@ -306,6 +305,7 @@
  '(
    ("<f5>" . emacs-session-save)        ;退出emacs
    ))
+
 (lazy-load-global-keys
  '(
    ("s-o" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
@@ -315,7 +315,7 @@
  "ran-toolkit")
 
 ;;; ### Awesome-Pair ###
-;;; --- 结构化编�?
+;;; --- 结构化编程
 (lazy-load-unset-keys
  '("M-J" "M-r" "M-s" "M-;" "C-M-f" "C-M-b" "M-)")
  awesome-pair-mode-map)                 ;卸载按键
@@ -467,8 +467,7 @@
  '(("y" . dash-at-point)
    )
  "dash-at-point"
- "C-x"
- )
+ "C-x")
 
 ;;; ### expand-region ###
 (lazy-load-global-keys

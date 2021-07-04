@@ -1,7 +1,6 @@
 
-
-
 (require 'color-rg)
+(require 'lazy-load)
 
 (setq color-rg-show-function-name-p nil)
 

@@ -31,17 +31,7 @@
        (setq counsel-grep-base-command
              (concat (executable-find "rg")
                      " -n -M 512 --no-heading --color never -i \"%s\" %s")))
-      ('t
-       (message "Not find rg")))
-    ;; @see https://oremacs.com/2015/07/23/ivy-multiaction/
-    ;; press "M-o" to choose ivy action
-    ;; (ivy-set-actions
-    ;;  'counsel-find-file
-    ;;  '(("j" find-file-other-frame "other frame")
-    ;;    ("b" counsel-find-file-cd-bookmark-action "cd bookmark")
-    ;;    ("x" counsel-find-file-extern "open externally")
-    ;;    ("d" delete-file "delete")
-    ;;    ("r" counsel-find-file-as-root "open as root")))
+      ('t (message "Not find rg")))
     ))
 
 (defun counsel-dired-jump@override (orig &optional initial-input initial-directory)
@@ -97,14 +87,8 @@ if nil, is used as the project root directory for search."
    ;; ("C-c M-i" . counsel-semantic-or-imenu)
    ))
 
-;; Integration with `projectile'
-;; (with-eval-after-load 'projectile
-;;   (setq projectile-completion-system 'ivy))
-
 ;; Integration with `magit'
 (with-eval-after-load 'magit
   (setq magit-completing-read-function 'ivy-completing-read))
-
-
 
 (provide 'init-ivy)

@@ -80,10 +80,10 @@
 ;;
 
 ;;; Require
-
 (require 'init-const)
-;;; Code:
+(require 'lazy-load)
 
+;;; Code:
 (one-key-create-menu
  "DIRECTORY"
  '(
@@ -103,6 +103,11 @@
    (("m" . "Menu-Bar") . menu-bar-mode)
    (("c" . "Scroll-Bar") . scroll-bar-mode))
  t)
+
+(lazy-load-set-keys
+ '(
+   ("C-c d" . one-key-menu-directory)       ;目录打开菜单
+   ))
 
 (provide 'init-one-key)
 
