@@ -101,6 +101,12 @@
     ;; (set-fontset-font (frame-parameter nil 'font) 'unicode (eval emacs-font-name))
     ))
 
+;; 给相应的字符集设置中文字体，这里的字体是。
+(when (display-graphic-p)
+  (dolist (charset '(kana han cjk-misc bopomofo chinese-gbk))
+    (set-fontset-font (frame-parameter nil 'font) charset
+                      (font-spec :family "微软雅黑" :size 20))))
+
 ;; (setq-default line-spacing 0.2)
 
 ;;; ### Font ###

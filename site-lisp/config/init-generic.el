@@ -160,7 +160,16 @@
   (setq file-name-coding-system 'gb18030)
   (set-selection-coding-system 'utf-8)
   ;; 使用英文day-time
-  (setq system-time-locale "C"))
+  (setq system-time-locale "C")
+  (setq-default process-coding-system-alist
+	            '(("[pP][lL][iI][nN][kK]" gbk-dos . gbk-dos)
+		          ("[pP][iI][nN][gG]" gbk-dos . gbk-dos)
+		          ("[cC][mM][dD][pP][rR][oO][xX][yY]" gbk-dos . gbk-dos)
+		          ("[gG][sS]" gbk-dos . gbk-dos)
+		          ("[fF][iI][nN][dD]" gbk-dos . gbk-dos)
+		          ("[gG][rR][eE][pP]" gbk-dos . gbk-dos)
+		          ("[gG][sS][wW][iI][nN]32[cC]" gbk-dos . gbk-dos)))
+  (set-locale-environment "zh_CN.UTF-8"))
 
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
 ;; Explicitly set the prefered coding systems to avoid annoying prompt
@@ -188,6 +197,8 @@
 (setenv "LC_ALL" "en_US.UTF-8")
 (setenv "LANG" "en_US.UTF-8")
 (setenv "LC_CTYPE" "en_US.UTF-8")
+
+
 
 
 (provide 'init-generic)
