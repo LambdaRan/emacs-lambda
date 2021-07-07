@@ -100,9 +100,9 @@
  t)
 
 (one-key-create-menu
- "Ui"
+ "UI"
  '(
-   (("T" . "Tool-Bar") . tool-bar-mode)
+   (("t" . "Tool-Bar") . tool-bar-mode)
    (("m" . "Menu-Bar") . menu-bar-mode)
    (("c" . "Scroll-Bar") . scroll-bar-mode))
  t)

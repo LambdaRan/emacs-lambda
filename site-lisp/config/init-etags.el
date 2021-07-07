@@ -16,9 +16,6 @@
   ;; the best option is to install latest ctags from sf.net
   (setq ctags-command "/usr/local/bin/ctags -e -R "))
 
-(when sys/windows-p
-  (setq counsel-etags-ctags-options-file "~\.ctags")
-  )
 ;; Ignore files above 800kb
 (setq counsel-etags-max-file-size 800)
 ;; Ignore build directories for tagging

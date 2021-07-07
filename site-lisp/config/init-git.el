@@ -92,7 +92,7 @@
 ;;
 (when sys/windows-p
   (setenv "GIT_ASKPASS" "git-gui--askpass"))
-;; (setq vc-handled-backends '(Git SVN Hg))
+(setq vc-handled-backends '(Git SVN Hg))
 
 ;; Magit configuration.
 (setq magit-commit-ask-to-stage nil)    ;don't ask stage question
