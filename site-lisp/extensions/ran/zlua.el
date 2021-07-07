@@ -55,12 +55,22 @@
 (defun zlua-build-command (keywords)
   "Create command for z.lua with KEYWORDS"
   (unless cache-zlua-command-can-executable-p
-    (if (and (executable-find "lua")
-             (file-exists-p zlua-path))
-        (setq cache-zlua-command-can-executable-p t)
-      (error "lua and z.lua is not in path")))
+    (unless (executable-find "lua")
+      (error "Not find lua, please install lua first."))
+
+    (cond
+      ((eq system-type 'windows-nt)
+       (if (executable-find "clink")
+           (setq cache-zlua-command-can-executable-p t)
+         (error "clink is not install.")))
+      (t (if (file-exists-p zlua-path)
+             (setq cache-zlua-command-can-executable-p t)
+           (error "z.lua is not in path")))
+      ))
   (let ((command-line))
-    (setq command-line (format "%s %s -l %s" (executable-find "lua") zlua-path keywords))
+    (if (eq system-type 'windows-nt)
+        (setq command-line (format "z -l %s" keywords))
+      (setq command-line (format "%s %s -l %s" (executable-find "lua") zlua-path keywords)))
     (when (memq system-type '(cygwin windows-nt ms-dos))
       (setq command-line (encode-coding-string command-line locale-coding-system)))
     (when zlua-debug
