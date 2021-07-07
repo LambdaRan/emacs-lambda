@@ -89,17 +89,20 @@
  '(
    (("h" . "Home") . (lambda () (interactive) (dired-x-find-file "~/")))
    (("p" . "Emacs Package") . (lambda () (interactive) (dired-x-find-file my-emacs-root-dir)))
-   (("c" . "Emacs-lambda") . (lambda () (interactive) (dired-x-find-file my-emacs-config-dir)))
-   (("b" . "Baidu Code") . (lambda () (interactive) (dired-x-find-file "~/work/baidu/code")))
-   (("n" . "Netease Code") . (lambda () ((interactive (dired-x-find-file "F:\pangu")))))
-   (("l" . "Lambda code") . (lambda () (interactive) (dired-x-find-file "~/lambda")))
-   (("o" . "Open code") . (lambda () (interactive) (dired-x-find-file ""))))
+   (("l" . "Emacs-lambda") . (lambda () (interactive) (dired-x-find-file my-emacs-config-dir)))
+   (("m" . "Lambda code") . (lambda () (interactive) (dired-x-find-file "~/lambda")))
+
+   (("c" . "win c") . (lambda () (interactive) (dired-x-find-file "c:\\")))
+   (("d" . "win d") . (lambda () (interactive) (dired-x-find-file "d:\\")))
+   (("e" . "win e") . (lambda () (interactive) (dired-x-find-file "e:\\")))
+   (("f" . "win f") . (lambda () (interactive) (dired-x-find-file "f:\\")))
+   )
  t)
 
 (one-key-create-menu
- "UI"
+ "Ui"
  '(
-   (("t" . "Tool-Bar") . tool-bar-mode)
+   (("T" . "Tool-Bar") . tool-bar-mode)
    (("m" . "Menu-Bar") . menu-bar-mode)
    (("c" . "Scroll-Bar") . scroll-bar-mode))
  t)

@@ -169,7 +169,8 @@
 		          ("[fF][iI][nN][dD]" gbk-dos . gbk-dos)
 		          ("[gG][rR][eE][pP]" gbk-dos . gbk-dos)
 		          ("[gG][sS][wW][iI][nN]32[cC]" gbk-dos . gbk-dos)))
-  (set-locale-environment "zh_CN.UTF-8"))
+  ;; (set-locale-environment "zh_CN.UTF-8")
+  )
 
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
 ;; Explicitly set the prefered coding systems to avoid annoying prompt
