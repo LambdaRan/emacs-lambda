@@ -32,7 +32,7 @@
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
- '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "s-c" "s-x" "s-v" "C-x d"))
+ '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "C-/" "s-c" "s-x" "s-v" "C-x d"))
 
 (lazy-load-global-keys
  '(
@@ -158,7 +158,7 @@
    ("C-S-l" . duplicate-line-or-region-below) ;向下复制当前行或区域
    ("C-S-M-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
    ("C-S-M-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
-   ("C-;" . comment-or-uncomment-region+)     ;注释当前行
+   ("C-\\" . comment-or-uncomment-region+)     ;注释当前行
    )
  "duplicate-line")
 

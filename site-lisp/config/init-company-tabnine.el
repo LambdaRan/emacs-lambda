@@ -81,7 +81,7 @@
 
 ;;; Require
 (require 'company-tabnine)
-(require 'company-ctags)
+;; (require 'company-ctags)
 ;;; Code:
 
 ;; The free version of TabNine is good enough,
@@ -142,13 +142,13 @@
                    (throw 'found t))
                   (t nil))))
       (add-to-list 'company-backends '(company-tabnine
-                                       :separate company-ctags)))))
-
+                                       )))))
+;; :separate company-ctags
 ;; config company-ctags
-(setq company-ctags-ignore-case t)  ; I use company-ctags instead
+;; (setq company-ctags-ignore-case t)  ; I use company-ctags instead
 ;; (company-ctags-auto-setup)
 
-(setq company-tabnine-always-trigger nil) ; 不要一直触发
+(setq company-tabnine-always-trigger nil) ; 不�?�一直触�?
 (provide 'init-company-tabnine)
 
 ;;; init-company-tabnine.el ends here
