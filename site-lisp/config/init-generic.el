@@ -86,9 +86,7 @@
 
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
-;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Scrolling.html
-;; https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doom_emacs/fp392eh/
-(setq fast-but-imprecise-scrolling 't)
+
 (setq jit-lock-defer-time 0)
 
 ;; Restore emacs session.
@@ -155,51 +153,45 @@
             kill-buffer-query-functions))
 
 (when sys/windows-p
-  (setq locale-coding-system 'gb18030)
-  (setq w32-unicode-filenames 'nil)
-  (setq file-name-coding-system 'gb18030)
-  (set-selection-coding-system 'utf-8)
+  ;; (setq locale-coding-system 'gb18030)
   ;; 使用英文day-time
-  (setq system-time-locale "C")
-  ;; (setq-default process-coding-system-alist
-  ;;               '(("[pP][lL][iI][nN][kK]" gbk-dos . gbk-dos)
-  ;;   	          ("[pP][iI][nN][gG]" gbk-dos . gbk-dos)
-  ;;   	          ("[cC][mM][dD][pP][rR][oO][xX][yY]" gbk-dos . gbk-dos)
-  ;;   	          ("[gG][sS]" gbk-dos . gbk-dos)
-  ;;   	          ("[fF][iI][nN][dD]" gbk-dos . gbk-dos)
-  ;;   	          ("[gG][rR][eE][pP]" gbk-dos . gbk-dos)
-  ;;   	          ("[gG][sS][wW][iI][nN]32[cC]" gbk-dos . gbk-dos)))
-  ;; (set-locale-environment "zh_CN.UTF-8")
-  )
+  (setq system-time-locale "C"))
+
+;; Contrary to what many Emacs users have in their configs, you don't need more
+;; than this to make UTF-8 the default coding system:
+(set-language-environment "UTF-8")
+;; ...but the clipboard's on Windows could be in another encoding (likely
+;; utf-16), so let Emacs/the OS decide what to use there.
+(unless sys/windows-p
+  (setq selection-coding-system 'utf-8)) ; with sugar on top
 
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
-;; Explicitly set the prefered coding systems to avoid annoying prompt
-;; from emacs (especially on Microsoft Windows)
-(prefer-coding-system 'utf-8)
-(setq locale-coding-system 'utf-8)
 
-(set-language-environment 'utf-8)
-(set-default-coding-systems 'utf-8)
-(set-buffer-file-coding-system 'utf-8)
-(set-clipboard-coding-system 'utf-8)
-(set-file-name-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(set-selection-coding-system 'utf-8)
-(modify-coding-system-alist 'process "*" 'utf-8)
+(unless sys/windows-p
+  (setq locale-coding-system 'utf-8)
+  (set-language-environment 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-buffer-file-coding-system 'utf-8)
+  (set-clipboard-coding-system 'utf-8)
+  (set-file-name-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (modify-coding-system-alist 'process "*" 'utf-8)
 
-(prefer-coding-system 'gb18030)
-;; (prefer-coding-system 'utf-16)
-(prefer-coding-system 'utf-8-dos)
-;; (prefer-coding-system 'utf-8-mac)
-(prefer-coding-system 'utf-8-unix)
-(prefer-coding-system 'utf-8)
-;; Set LANG and LC_* variables
-(setenv "LC_ALL" "en_US.UTF-8")
-(setenv "LANG" "en_US.UTF-8")
-(setenv "LC_CTYPE" "en_US.UTF-8")
-
-
+  ;; Explicitly set the prefered coding systems to avoid annoying prompt
+  ;; from emacs (especially on Microsoft Windows)
+  (prefer-coding-system 'utf-8)
+  (prefer-coding-system 'gb18030)
+  ;; (prefer-coding-system 'utf-16)
+  (prefer-coding-system 'utf-8-dos)
+  ;; (prefer-coding-system 'utf-8-mac)
+  (prefer-coding-system 'utf-8-unix)
+  (prefer-coding-system 'utf-8)
+  ;; Set LANG and LC_* variables
+  (setenv "LC_ALL" "en_US.UTF-8")
+  (setenv "LANG" "en_US.UTF-8")
+  (setenv "LC_CTYPE" "en_US.UTF-8"))
 
 
 (provide 'init-generic)

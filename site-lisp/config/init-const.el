@@ -1,6 +1,6 @@
 ;; init-const.el --- Define constants.	-*- lexical-binding: t -*-
 
-(defconst my-emacs-root-dir (file-name-directory user-init-file)
+(defconst my-emacs-root-dir (file-name-directory my-init-file)
   "Directory of site-lisp")
 
 (defconst my-emacs-config-dir (concat my-emacs-root-dir "config")
@@ -11,7 +11,7 @@
 
 ;;; https://github.com/seagle0128/.emacs.d/blob/master/lisp/init-const.el
 (defconst sys/windows-p
-  (memq system-type '(cygwin windows-nt ms-dos))  
+  (memq system-type '(cygwin windows-nt ms-dos))
   "Are we running on a WinTel system?")
 
 (defconst sys/linux-p

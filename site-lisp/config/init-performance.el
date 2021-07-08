@@ -142,6 +142,9 @@ decrease this. If you experience stuttering, increase this.")
 (setq-default cursor-in-non-selected-windows nil)
 (setq highlight-nonselected-windows nil)
 
+;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Scrolling.html
+;; https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doom_emacs/fp392eh/
+
 ;; More performant rapid scrolling over unfontified regions. May cause brief
 ;; spells of inaccurate syntax highlighting right after scrolling, which should
 ;; quickly self-correct.

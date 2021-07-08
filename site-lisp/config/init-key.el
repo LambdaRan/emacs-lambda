@@ -158,7 +158,7 @@
    ("C-S-l" . duplicate-line-or-region-below) ;向下复制当前行或区域
    ("C-S-M-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
    ("C-S-M-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
-   ("C-\\" . comment-or-uncomment-region+)     ;注释当前行
+   ("C-/" . comment-or-uncomment-region+)     ;注释当前行
    )
  "duplicate-line")
 
@@ -181,8 +181,8 @@
 
 (lazy-load-global-keys
  '(
-   ("C-/" . undo-tree-undo)             ;撤销
-   ("C-?" . undo-tree-redo)             ;重做)
+   ("C-\\" . undo-tree-undo)             ;撤销
+   ("C-|" . undo-tree-redo)             ;重做)
    )
  "undo-tree")
 
