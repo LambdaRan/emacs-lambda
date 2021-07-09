@@ -179,19 +179,18 @@
   (set-selection-coding-system 'utf-8)
   (modify-coding-system-alist 'process "*" 'utf-8)
 
-  ;; Explicitly set the prefered coding systems to avoid annoying prompt
-  ;; from emacs (especially on Microsoft Windows)
-  (prefer-coding-system 'utf-8)
-  (prefer-coding-system 'gb18030)
-  ;; (prefer-coding-system 'utf-16)
-  (prefer-coding-system 'utf-8-dos)
-  ;; (prefer-coding-system 'utf-8-mac)
-  (prefer-coding-system 'utf-8-unix)
-  (prefer-coding-system 'utf-8)
   ;; Set LANG and LC_* variables
   (setenv "LC_ALL" "en_US.UTF-8")
   (setenv "LANG" "en_US.UTF-8")
   (setenv "LC_CTYPE" "en_US.UTF-8"))
+
+;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Recognize-Coding.html#Recognize-Coding
+(prefer-coding-system 'gb18030)
+(prefer-coding-system 'gb2312)
+(prefer-coding-system 'utf-16)
+(prefer-coding-system 'utf-8-dos)
+(prefer-coding-system 'utf-8-unix)
+(prefer-coding-system 'utf-8)
 
 
 (provide 'init-generic)

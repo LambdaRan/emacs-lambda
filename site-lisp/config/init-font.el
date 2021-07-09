@@ -105,7 +105,7 @@
 (when (display-graphic-p)
   (dolist (charset '(kana han cjk-misc bopomofo chinese-gbk))
     (set-fontset-font (frame-parameter nil 'font) charset
-                      (font-spec :family "微软雅黑" :size 20))))
+                      (font-spec :family "微软雅黑" :size 12))))
 
 ;; (setq-default line-spacing 0.2)
 
