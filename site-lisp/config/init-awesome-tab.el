@@ -89,7 +89,7 @@
 
 (if sys/windows-p
     (progn
-      (setq awesome-tab-height 110)
+      (setq awesome-tab-height 100)
       (setq awesome-tab-icon-height 0.7)
       (setq awesome-tab-active-bar-height 22))
   (setq awesome-tab-height 130)
