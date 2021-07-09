@@ -1,7 +1,5 @@
 
 (require 'init-const)
-(message "MyEmacsRootDir %s" my-emacs-root-dir)
-
 ;; 加速配置。
 (require 'init-accelerate)
 ;; 字体设置
