@@ -3,7 +3,6 @@
 
 (unless sys/windows-p
 
-  (message "Error: windows-nt load multi-vterm")
   (require 'multi-vterm)                   ;多标签SHELL
 
   (setq vterm-kill-buffer-on-exit t)

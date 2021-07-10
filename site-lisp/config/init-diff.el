@@ -3,7 +3,7 @@
 
 (require 'ediff)
 (require 'diff-mode)
-(require 'vdiff)
+;; (require 'vdiff)
 
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 (setq ediff-split-window-function 'split-window-horizontally)
@@ -42,9 +42,9 @@
 ;;
 ;; For more information see
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Class-Table.html
-(setq vdiff-default-refinement-syntax-code "w_")
+;; (setq vdiff-default-refinement-syntax-code "w_")
 
-(define-key vdiff-mode-map (kbd "C-x v") vdiff-mode-prefix-map)
+;; (define-key vdiff-mode-map (kbd "C-x v") vdiff-mode-prefix-map)
 
 ;; ### vdiff ###
 ;; (lazy-load-global-keys
@@ -54,10 +54,10 @@
 ;;    ;; ("C-x v h" . vdiff-hydra/body)
 ;;    )
 ;;  "vdiff")
-(lazy-load-set-keys
- '(
-   ("C-x v b" . vdiff-buffers)
-   ("C-x v f" . vdiff-files)
-   ))
+;; (lazy-load-set-keys
+;;  '(
+;;    ("C-x v b" . vdiff-buffers)
+;;    ("C-x v f" . vdiff-files)
+;;    ))
 
 (provide 'init-diff)

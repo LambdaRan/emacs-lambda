@@ -77,7 +77,6 @@
          (require 'init-etags)
          (require 'init-doxymacs)
          (require 'init-ibuffer)
-         (require 'init-hydra)
          (require 'init-autorevert)
          (require 'init-diff)
          (require 'ran-toolkit)
