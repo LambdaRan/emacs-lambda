@@ -47,7 +47,7 @@
     (when (string-blank-p input-string)
       (setq input-string current-symbol))
     (if (string= input-string "")
-        (setq input-string "/Users/randegang"))
+        (setq input-string "~"))
     (when zlua-debug
       (message "User input : %s" input-string))
     input-string))
@@ -57,20 +57,12 @@
   (unless cache-zlua-command-can-executable-p
     (unless (executable-find "lua")
       (error "Not find lua, please install lua first."))
+    (setq zlua-path (expand-file-name zlua-path))
+    (unless (file-exists-p zlua-path)
+      (error "[%s]: No such file or directory" zlua-path)))
 
-    (cond
-      ((eq system-type 'windows-nt)
-       (if (executable-find "clink")
-           (setq cache-zlua-command-can-executable-p t)
-         (error "clink is not install.")))
-      (t (if (file-exists-p zlua-path)
-             (setq cache-zlua-command-can-executable-p t)
-           (error "z.lua is not in path")))
-      ))
   (let ((command-line))
-    (if (eq system-type 'windows-nt)
-        (setq command-line (format "z -l %s" keywords))
-      (setq command-line (format "%s %s -l %s" (executable-find "lua") zlua-path keywords)))
+    (setq command-line (format "%s %s -l %s" (executable-find "lua") zlua-path keywords))
     (when (memq system-type '(cygwin windows-nt ms-dos))
       (setq command-line (encode-coding-string command-line locale-coding-system)))
     (when zlua-debug

@@ -88,12 +88,9 @@
                (interactive)
                (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.email")))
 
-            (if sys/windows-p
-                (progn
-                  (add-to-list `yas-snippet-dirs (concat my-emacs-extension-dir "\\yasnippet-snippets\\snippets"))
-                  (add-to-list 'yas-snippet-dirs (concat my-emacs-extension-dir "\\yasnippet-php-mode")))
+
               (add-to-list `yas-snippet-dirs (concat my-emacs-extension-dir "/yasnippet-snippets/snippets"))
-              (add-to-list 'yas-snippet-dirs (concat my-emacs-extension-dir "/yasnippet-php-mode")))
+              (add-to-list 'yas-snippet-dirs (concat my-emacs-extension-dir "/yasnippet-php-mode"))
 
 
             ;; my private snippets, should be placed before enabling yasnippet
