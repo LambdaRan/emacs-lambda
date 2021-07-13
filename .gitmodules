@@ -82,7 +82,7 @@
 [submodule "posframe"]
 	path = site-lisp/extensions/posframe
 	url = https://github.com/tumashu/posframe.git
-[submodule "site-lisp/extensions/benchmark-init"]
+[submodule "benchmark-init"]
 	path = site-lisp/extensions/benchmark-init
 	url = https://github.com/dholm/benchmark-init-el.git
 [submodule "sly-el-indent"]
