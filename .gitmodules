@@ -142,12 +142,6 @@
 [submodule "grip-mode"]
 	path = site-lisp/extensions/grip-mode
 	url = https://github.com/seagle0128/grip-mode.git
-[submodule "emacs-libvterm"]
-	path = site-lisp/extensions/emacs-libvterm
-	url = https://github.com/akermu/emacs-libvterm.git
-[submodule "multi-vterm"]
-	path = site-lisp/extensions/multi-vterm
-	url = https://github.com/suonlight/multi-vterm.git
 [submodule "rust-mode"]
 	path = site-lisp/extensions/rust-mode
 	url = https://github.com/rust-lang/rust-mode.git
@@ -160,3 +154,6 @@
 [submodule "web-mode"]
 	path = site-lisp/extensions/web-mode
 	url = https://github.com/fxbois/web-mode.git
+[submodule "aweshell"]
+	path = site-lisp/extensions/aweshell
+	url = https://github.com/manateelazycat/aweshell.git

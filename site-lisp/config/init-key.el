@@ -369,15 +369,15 @@
  )
 
 ;; ### vterm
-(unless sys/windows-p
-  (lazy-load-global-keys
-   '(
-     ("C-`" . multi-vterm)
-     ("C-q" . ran-vterm-open-in-right-window)
-     ("s-x m" . ran-vterm-open-in-below-window)
-     ("s-x n" . multi-vterm-dedicated-toggle)
-     )
-   "init-multi-vterm"))
+;; (unless sys/windows-p
+;;   (lazy-load-global-keys
+;;    '(
+;;      ("C-`" . multi-vterm)
+;;      ("C-q" . ran-vterm-open-in-right-window)
+;;      ("s-x m" . ran-vterm-open-in-below-window)
+;;      ("s-x n" . multi-vterm-dedicated-toggle)
+;;      )
+;;    "init-multi-vterm"))
 
 ;; ### Dired;;  ###
 (lazy-load-global-keys
@@ -480,5 +480,15 @@
  '(
    ("C-c m" . magit-status+))
  "init-git")
+
+;;; ### Aweshell ###
+;;; --- 多标签式的shell
+(lazy-load-global-keys
+ '(
+   ("C-`'" . aweshell-new)
+   ("s-h" . aweshell-toggle)
+   ("s-x s-x" . aweshell-dedicated-toggle)
+   )
+ "init-aweshell")
 
 (provide 'init-key)
