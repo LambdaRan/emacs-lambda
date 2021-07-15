@@ -485,7 +485,7 @@
 ;;; --- 多标签式的shell
 (lazy-load-global-keys
  '(
-   ("C-`'" . aweshell-new)
+   ("C-`" . aweshell-new)
    ("s-h" . aweshell-toggle)
    ("s-x s-x" . aweshell-dedicated-toggle)
    )
