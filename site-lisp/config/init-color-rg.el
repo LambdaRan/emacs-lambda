@@ -4,6 +4,19 @@
 
 (setq color-rg-show-function-name-p nil)
 
+(defcustom color-rg-project-root nil
+  "If non-nil, overrides the project root directory location."
+  :group 'color-rg
+  :type 'string)
+
+(defun color-rg-project-root-dir@around(func &rest args)
+    "Return special project root or `color-rg-project-root-dir'."
+    (if color-rg-project-root
+        (file-name-as-directory color-rg-project-root)
+      (apply func args)))
+
+(advice-add #'color-rg-project-root-dir :around #'color-rg-project-root-dir@around)
+
 (defun color-rg-open-file-and-stay-then-quit ()
   "Open current file and stay there then quit color-rg."
   (interactive)
