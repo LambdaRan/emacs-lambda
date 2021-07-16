@@ -104,7 +104,7 @@
                'java-mode
                'asm-mode
                'haskell-mode
-               'sh-mode
+               ;; 'sh-mode
                'makefile-gmake-mode
                'python-mode
                'js-mode

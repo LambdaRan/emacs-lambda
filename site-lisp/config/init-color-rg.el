@@ -11,7 +11,7 @@
 
 (defun color-rg-project-root-dir@around(func &rest args)
     "Return special project root or `color-rg-project-root-dir'."
-    (if color-rg-project-root
+    (if (and color-rg-project-root (not (string-empty-p color-rg-project-root)))
         (file-name-as-directory color-rg-project-root)
       (apply func args)))
 

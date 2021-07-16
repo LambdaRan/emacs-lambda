@@ -173,7 +173,7 @@
   ;; (setq company-dabbrev-minimum-length 4)
 
   ;; (setq company-format-margin-function nil)
-  
+
   ;; Don't downcase the returned candidates.
   (setq company-dabbrev-downcase nil
         ;; make previous/next selection in the popup cycles
@@ -190,7 +190,7 @@
   ;; https://github.com/company-mode/company-mode/issues/29
   (setq company-global-modes
         '(not
-          eshell-mode comint-mode erc-mode gud-mode rcirc-mode text-mode
+          shell-mode eshell-mode comint-mode erc-mode gud-mode rcirc-mode text-mode
           minibuffer-inactive-mode))
 
   ;; Customize company backends.
