@@ -1,4 +1,3 @@
-
 (require 'init-const)
 ;; 加速配置。
 (require 'init-accelerate)

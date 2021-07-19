@@ -39,10 +39,11 @@
       (call-interactively 'counsel-etags-list-tag-in-current-file)
     (call-interactively 'counsel-semantic-or-imenu)))
 
-(add-hook 'prog-mode-hook
-          #'(lambda ()
-              (add-hook 'after-save-hook
-                        'counsel-etags-virtual-update-tags 'append 'local)))
+(unless sys/windows-p
+  (add-hook 'prog-mode-hook
+            #'(lambda ()
+                (add-hook 'after-save-hook
+                          'counsel-etags-virtual-update-tags 'append 'local))))
 
 (lazy-load-set-keys
  '(
