@@ -26,6 +26,7 @@
   (setq w32-recognize-altgr nil)
 
   (w32-register-hot-key [s-])
+  (w32-register-hot-key [M-])  
   (w32-register-hot-key [C-])
   )
 
@@ -130,13 +131,6 @@
    ;; ("s-r" . find-file-smb)              ;访问sambao
    )
  "basic-toolkit")
-
-(lazy-load-global-keys
- '(
-   ("M-s-n" . ran-comment-line-next-line) ; 向下移动注释
-   ("M-s-p" . ran-comment-line-prev-line) ; 向上移动注释
-   )
- "ran-toolkit")
 
 (lazy-load-global-keys
  '(
@@ -306,14 +300,6 @@
    ("<f5>" . emacs-session-save)        ;退出emacs
    ))
 
-(lazy-load-global-keys
- '(
-   ("s-o" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
-   ("s-p" . insert-standard-date)
-   ("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
-   )
- "ran-toolkit")
-
 ;;; ### Awesome-Pair ###
 ;;; --- 结构化编程
 (lazy-load-unset-keys
@@ -395,6 +381,22 @@
    ("C-c l" . avy-goto-line)
    )
  "avy")
+
+;全局按键的卸载
+(lazy-load-unset-keys                   
+ '("C-x e"))
+(lazy-load-global-keys
+ '(
+   ("s-o" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
+   ("s-p" . insert-standard-date)
+   ("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
+
+   ("M-s-n" . ran-comment-line-next-line) ; 向下移动注释
+   ("M-s-p" . ran-comment-line-prev-line) ; 向上移动注释
+
+   ("C-x e" . xah-show-in-desktop)        ; 使用系统文件管理器打开文件
+   )
+ "ran-toolkit")
 
 ;;; ### Ielm ###
 ;;; --- Emacs Lisp 解释模式

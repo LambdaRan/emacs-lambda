@@ -130,7 +130,8 @@
 
 (setq ad-redefinition-action 'accept)   ;不要烦人的 redefine warning
 (setq frame-resize-pixelwise t) ;设置缩放的模式,避免Mac平台最大化窗口以后右边和下边有空隙
-
+(setq delete-by-moving-to-trash t)      ; 删除的文件移动到垃圾篓
+                                        ; 
 ;; (set-cursor-color "Red")           ;更改光标颜色
 (add-to-list 'default-frame-alist '(cursor-color . "Red"))
 (setq-default cursor-type 'bar)    ;更改光标类型
@@ -153,7 +154,6 @@
             kill-buffer-query-functions))
 
 (when sys/windows-p
-  ;; (setq locale-coding-system 'gb18030)
   ;; 使用英文day-time
   (setq system-time-locale "C"))
 
