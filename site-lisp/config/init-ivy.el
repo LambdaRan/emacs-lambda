@@ -70,7 +70,6 @@ if nil, is used as the project root directory for search."
 ;;; ### Unset key ###
 (lazy-load-unset-keys                   ; È«¾Ö°´¼üÐ¶ÔØ
  '("C-x C-f" "M-x" "C-x b" "M-y"))
-
 (lazy-load-set-keys
  '(
    ("C-x C-f" . counsel-find-file)

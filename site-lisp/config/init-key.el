@@ -26,7 +26,7 @@
   (setq w32-recognize-altgr nil)
 
   (w32-register-hot-key [s-])
-  (w32-register-hot-key [M-])  
+  (w32-register-hot-key [M-])
   (w32-register-hot-key [C-])
   )
 
@@ -35,26 +35,17 @@
 (lazy-load-unset-keys                   ;全局按键的卸载
  '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "C-/" "s-c" "s-x" "s-v" "C-x d"))
 
-(lazy-load-global-keys
- '(
-   ("<f2>" . make_fullscreen) ; 全屏模式
-   )
- "init-startup")
-
-;;; ### Toolkit ###
 ;;; --- 工具函数
 (lazy-load-set-keys
  '(
-   ("s-," . bury-buffer)                    ;隐藏当前buffer
-   ("s-." . unbury-buffer)                  ;反隐藏当前buffer
-   ("s-&" . killall)                        ;杀掉进程
+   ("<f2>" . make_fullscreen) ; 全屏模式   
+   ("<f5>" . emacs-session-save)        ;退出emacs
    ("<M-s-return>" . toggle-debug-on-error) ;切换调试模式
    ("s-[" . eval-expression)                ;执行表达式
-   ("C-s-q" . quoted-insert)                ;读取系一个输入字符并插入
-   ("M-h" . set-mark-command) ;Instead C-Space for Chinese input method
+   ("M-h" . set-mark-command)               ;Instead C-Space for Chinese input method
 
-   ("C-z i" . display-fill-column-indicator-mode)
-   ("C-z l" . display-line-numbers-mode) ;行号模式切换
+   ("C-z i" . display-fill-column-indicator-mode) ; 120字符限制线
+   ("C-z l" . display-line-numbers-mode) ; 行号模式切换
    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -72,7 +63,6 @@
  "init-symbol-overlay")
 
 ;;; ### Color-Rg ###
-;;; --- 搜索重构
 (lazy-load-global-keys
  '(
    ("g" . color-rg-search-symbol)
@@ -87,7 +77,6 @@
  "init-color-rg"
  "C-c c")
 
-;;; ### Buffer Move ###
 ;;; --- 缓存移动
 (lazy-load-set-keys
  '(
@@ -101,6 +90,7 @@
    ("C-M-i" . down-list)                ;向右跳进 LIST
    ("C-M-a" . beginning-of-defun)       ;函数开头
    ("C-M-e" . end-of-defun)             ;函数结尾
+   
    ))
 
 (lazy-load-global-keys
@@ -110,25 +100,22 @@
 
 (lazy-load-global-keys
  '(
-   ("C-s-n" . comment-dwim-next-line)    ;移动到上一行并注释x
-   ("C-s-p" . comment-dwim-prev-line)    ;移动到下一行并注释x
-   ("M-2" . indent-buffer)               ;动格式化当前Buffer
-   ("M-z" . upcase-char)      ;Upcase char handly with capitalize-word
-   ("C-x u" . mark-line)      ;选中整行
+   ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
+   ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
+   ("M-2" . indent-buffer)              ;动格式化当前Buffer
+   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
+   ("C-x l" . mark-line)                ;选中整行
    ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
    ("C->" . remember-init)              ;记忆初始函数
    ("C-<" . remember-jump)              ;记忆跳转函数
    ("M-s-," . point-stack-pop)          ;buffer索引跳转
    ("M-s-." . point-stack-push)         ;buffer索引标记
    ("M-G" . goto-column)                ;到指定列
-   ("s-g" . goto-percent)    ;跳转到当前Buffer的文本百分比, 单位为字符
-   ("M-I" . backward-indent) ;向后移动4个字符
+   ("s-g" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
+   ("M-I" . backward-indent)            ;向后移动4个字符
 
-   ("s-J" . scroll-up-one-line)         ;向上滚动一行
-   ("s-K" . scroll-down-one-line)       ;向下滚动一行
-   ;; ("<f2>" . refresh-file)              ;自动刷新文件
-   ;; ("s-f" . find-file-root)             ;用root打开文件
-   ;; ("s-r" . find-file-smb)              ;访问sambao
+   ("M-j" . scroll-up-one-line)         ;向上滚动一行
+   ("M-k" . scroll-down-one-line)       ;向下滚动一行
    )
  "basic-toolkit")
 
@@ -139,23 +126,6 @@
    )
  "open-newline")
 
-(lazy-load-global-keys
- '(
-   ("s-N" . move-text-down)      ;把光标所在的整行文字(或标记)下移一行
-   ("s-P" . move-text-up)        ;把光标所在的整行文字(或标记)上移一行
-   )
- "move-text")
-
-(lazy-load-global-keys
- '(
-   ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
-   ("C-S-l" . duplicate-line-or-region-below) ;向下复制当前行或区域
-   ("C-S-M-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
-   ("C-S-M-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
-   ("C-\\" . comment-or-uncomment-region+)     ;注释当前行
-   )
- "duplicate-line")
-
 ;; 快速删除光标左右的内容
 (lazy-load-global-keys
  '(
@@ -163,13 +133,11 @@
    ("M-M" . delete-block-forward))
  "delete-block")
 
-;;; ### Buffer Edit ###
 ;;; --- 缓存编辑
 (lazy-load-set-keys
  '(
-   ("C-x C-x" . exchange-point-and-mark)   ;交换当前点和标记点
    ("M-o" . backward-delete-char-untabify) ;向前删除字符
-   ("C-M-S-h" . mark-paragraph)            ;选中段落
+   ("C-M-h" . mark-defun)                  ;选中函数
    ("M-SPC" . just-one-space)              ;只有一个空格在光标处
    ))
 
@@ -229,17 +197,6 @@
    ("C-c o" . delete-other-windows)      ;关闭其它窗口
    ))
 
-(lazy-load-global-keys
- '(
-   ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
-   ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
-   ("C-'" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
-   ("C-\"" . delete-current-buffer-window)    ;删除当前buffer的窗口
-   ("C-c i" . toggle-one-window)              ;切换一个窗口
-   ("C-x O" . toggle-window-split)
-   )
- "window-extension")
-;;; ### Watch other window ###
 ;;; --- 滚动其他窗口
 (lazy-load-global-keys
  '(
@@ -249,14 +206,6 @@
    ("M->" . watch-other-window-down-line) ;向上滚动其他窗口一行
    )
  "watch-other-window")
-
-;; ### Buffer Name ###
-;; --- 缓存名字
-(lazy-load-global-keys
- '(
-   ("C-M-;" . kill-other-window-buffer) ;关闭其他窗口的buffer
-   )
- "buffer-extension")
 
 ;; xwidget webkit
 (lazy-load-global-keys
@@ -286,19 +235,12 @@
    ("M-s-7" . awesome-tab-select-beg-tab)
    ("M-s-8" . awesome-tab-select-end-tab)
    ("M-s-9" . awesome-tab-move-current-tab-to-beg)
-   ("s-a" . awesome-tab-kill-other-buffers-in-current-group)
-   ("s-A" . awesome-tab-kill-all-buffers-in-current-group)
+   ("C-c A" . awesome-tab-kill-other-buffers-in-current-group)
+   ("C-c a" . awesome-tab-kill-all-buffers-in-current-group)
    ("s-w" . awesome-tab-keep-match-buffers-in-current-group)
    ("s-W" . awesome-tab-kill-match-buffers-in-current-group)
    )
  "awesome-tab")
-
-;;; ### Functin key ###
-;;; --- 功能函数
-(lazy-load-set-keys
- '(
-   ("<f5>" . emacs-session-save)        ;退出emacs
-   ))
 
 ;;; ### Awesome-Pair ###
 ;;; --- 结构化编程
@@ -351,19 +293,7 @@
  '(
    ("C-c k" . one-key-menu-thing-edit)  ;thing-edit 菜单
    )
- "init-thing-edit"
- )
-
-;; ### vterm
-;; (unless sys/windows-p
-;;   (lazy-load-global-keys
-;;    '(
-;;      ("C-`" . multi-vterm)
-;;      ("C-q" . ran-vterm-open-in-right-window)
-;;      ("s-x m" . ran-vterm-open-in-below-window)
-;;      ("s-x n" . multi-vterm-dedicated-toggle)
-;;      )
-;;    "init-multi-vterm"))
+ "init-thing-edit")
 
 ;; ### Dired;;  ###
 (lazy-load-global-keys
@@ -382,28 +312,26 @@
    )
  "avy")
 
+(autoload 'ielm-map "ielm")
 ;全局按键的卸载
-(lazy-load-unset-keys                   
+(lazy-load-unset-keys
  '("C-x e"))
 (lazy-load-global-keys
  '(
    ("s-o" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
-   ("s-p" . insert-standard-date)
+   ("s-p" . insert-standard-date)       ;
    ("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
 
-   ("M-s-n" . ran-comment-line-next-line) ; 向下移动注释
-   ("M-s-p" . ran-comment-line-prev-line) ; 向上移动注释
-
-   ("C-x e" . xah-show-in-desktop)        ; 使用系统文件管理器打开文件
-   )
- "ran-toolkit")
-
-;;; ### Ielm ###
-;;; --- Emacs Lisp 解释模式
-(autoload 'ielm-map "ielm")
-(lazy-load-global-keys
- '(
-   ("M-s-i" . ielm-toggle)              ;切换ielm
+   ("M-s-n" . ran-comment-line-next-line) ;向下移动注释
+   ("M-s-p" . ran-comment-line-prev-line) ;向上移动注释
+   ("M-s-i" . ielm-toggle)                ;切换ielm,Emacs Lisp 解释模式     
+   
+   ("C-x e" . xah-show-in-desktop)         ;使用系统文件管理器打开文件
+   ("C-\\" . comment-or-uncomment-region+) ;注释当前行
+   
+   ("C-\"" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
+   ("C-'" . delete-current-buffer-window)      ;删除当前buffer的窗口
+                                   
    )
  "ran-toolkit")
 
@@ -418,9 +346,15 @@
          ("C-s-p" . comint-previous-input) ;上一个输入
          ("C-s-n" . comint-next-input)     ;下一个输入
          )
-       ielm-map
-       )
+       ielm-map)
       )))
+
+;;; Elisp
+(lazy-load-set-keys
+ '(
+   ("RET" . comment-indent-new-line)    ;自动换行并注释
+   )
+ emacs-lisp-mode-map)
 
 ;;; ### Man ###
 ;;; --- Man
@@ -428,41 +362,6 @@
  '(
    ("<f1>" . woman))
  "init-woman")
-
-;;; ### Ido ###
-;;; --- 交互式管理文件和缓存
-(lazy-load-set-keys
- '(
-   ("C-x C-f" . ido-find-file)          ;交互式查找文件
-   ("C-x b" . ido-switch-buffer)        ;交互式切换buffer
-   ("C-x i" . ido-insert-buffer)        ;插入缓存
-   ("C-x I" . ido-insert-file)          ;插入文件
-   ))
-(add-hook 'ido-setup-hook
-          #'(lambda ()
-              (interactive)
-              (ido-my-keys ido-completion-map)))
-(defun ido-my-keys (keymap)
-  "Add my keybindings for ido."
-  (lazy-load-set-keys
-   '(
-     ("M-p" . ido-prev-match)              ;上一个匹配
-     ("M-n" . ido-next-match)              ;下一个匹配
-     ("M-h" . ido-next-work-directory)     ;下一个工作目录
-     ("M-l" . ido-prev-work-directory)     ;上一个工作目录
-     ("M-o" . backward-delete-char-untabify) ;向前删除字符
-     ("M-O" . ido-delete-backward-updir)     ;删除字符或进入上一级目录
-     )
-   keymap
-   ))
-
-;;; Elisp
-(lazy-load-set-keys
- '(
-   ("RET" . comment-indent-new-line)    ;自动换行并注释
-   )
- emacs-lisp-mode-map
- )
 
 ;; Dash.
 (lazy-load-global-keys

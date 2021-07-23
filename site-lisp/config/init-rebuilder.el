@@ -99,8 +99,7 @@
    ("C-c TAB" . reb-change-syntax)      ;改变语法
    ("C-c M-%" . reb-query-replace-this-regxp) ;直接替换
    )
- reb-mode-map
- )
+ reb-mode-map)
 
 (provide 'init-rebuilder)
 

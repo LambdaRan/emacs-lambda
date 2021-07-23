@@ -108,7 +108,55 @@
 ;; }}
 
 ;; {{
+;; https://github.com/manateelazycat/duplicate-line/blob/master/duplicate-line.el
+(defun comment-or-uncomment-region+ ()
+  "This function is to comment or uncomment a line or a region."
+  (interactive)
+  (let (beg end)
+    (if mark-active
+        (progn
+          (setq beg (region-beginning))
+          (setq end (region-end)))
+      (setq beg (line-beginning-position))
+      (setq end (line-end-position)))
+    (save-excursion
+      (comment-or-uncomment-region beg end))))
+;; }}
 
+
+;; {{
+;; https://github.com/manateelazycat/lazycat-emacs/blob/master/site-lisp/extensions/lazycat/window-extension.el
+(defun delete-buffer-window (buffer-name)
+  "Delete the window of special buffer.
+Argument BUFFER-NAME the buffer name that will delete."
+  (interactive)
+  (if (bufferp (get-buffer buffer-name))
+      (delete-window (get-buffer-window (get-buffer buffer-name)))
+    (message "Buffer %s is not exist." buffer-name)))
+
+(defun delete-buffer-and-window (buffer-name)
+  "Delete buffer and window that special.
+Argument BUFFER-NAME the buffer name that will delete."
+  (interactive)
+  (if (bufferp (get-buffer buffer-name))
+      (progn
+        (delete-buffer-window buffer-name)
+        (kill-buffer (get-buffer buffer-name)))
+    (message "Buffer %s is not exist." buffer-name)))
+
+(defun delete-current-buffer-and-window ()
+  "Delete current buffer and window."
+  (interactive)
+  (delete-buffer-and-window (buffer-name)))
+
+(defun delete-current-buffer-window ()
+  "Delete the window of current buffer."
+  (interactive)
+  (delete-buffer-window (current-buffer)))
+
+;;}}
+
+;; {{
 (defun xah-show-in-desktop()
   "Show current file in desktop.
  (Mac Finder, Windows Explorer, Linux file manager)
