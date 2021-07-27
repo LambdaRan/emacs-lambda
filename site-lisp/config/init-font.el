@@ -91,7 +91,7 @@
 (defvar font-list
   (cond
    (sys/mac-p
-    '(("JetBrains Mono" . 120) ("SF Mono" . 150) ("Monaco" . 150)))
+    '(("JetBrains Mono" . 140) ("SF Mono" . 140) ("Monaco" . 140)))
    (sys/windows-p
     '(("JetBrains Mono" . 100) ("Courier New" . 100) ("Consolas" . 100)))
    (t
