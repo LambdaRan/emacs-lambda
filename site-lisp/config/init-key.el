@@ -144,7 +144,7 @@
 (lazy-load-global-keys
  '(
    ("C-/" . undo-tree-undo)             ;撤销
-   ("C-?" . undo-tree-redo)             ;重做)
+   ("C-?" . undo-tree-redo)             ;重做
    )
  "undo-tree")
 
