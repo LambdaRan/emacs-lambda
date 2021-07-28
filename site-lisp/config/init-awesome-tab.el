@@ -87,16 +87,23 @@
 ;;; Code:
 (awesome-tab-mode t)
 
-(if sys/windows-p
-    (progn
-      (setq awesome-tab-height 100)
-      (setq awesome-tab-icon-height 0.7)
-      (setq awesome-tab-active-bar-height 22))
-  (setq awesome-tab-height 130)
-  ;; (setq awesome-tab-icon-v-adjust 0)
-  (setq awesome-tab-icon-height 0.8)
-  ;; (setq awesome-tab-label-fixed-length 14)
-  (setq awesome-tab-active-bar-height 22))
+(cond
+  (sys/windows-p
+   (setq awesome-tab-height 100)
+   (setq awesome-tab-icon-height 0.7)
+   (setq awesome-tab-active-bar-height 22))
+  (sys/mac-p
+   (setq awesome-tab-height 145)
+   ;; (setq awesome-tab-icon-v-adjust 0)
+   (setq awesome-tab-icon-height 0.9)
+   ;; (setq awesome-tab-label-fixed-length 14)
+   (setq awesome-tab-active-bar-height 24))
+  (sys/linux-p
+   (setq awesome-tab-height 100)
+   (setq awesome-tab-icon-height 0.7)
+   (setq awesome-tab-active-bar-height 22)   
+   )
+  (t (message "Not support OS.")))
 
 (provide 'init-awesome-tab)
 
