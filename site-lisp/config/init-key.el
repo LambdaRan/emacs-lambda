@@ -392,4 +392,10 @@
    )
  "init-aweshell")
 
+(lazy-load-set-keys
+ '(
+   ("DEL" . isearch-del-char)
+   ("M-o" . isearch-del-char))
+ isearch-mode-map)
+
 (provide 'init-key)
