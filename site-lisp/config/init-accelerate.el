@@ -81,6 +81,7 @@
 
 ;;; Require
 (require 'init-const)
+(require 'gcmh)
 
 ;;; Code:
 (setq frame-inhibit-implied-resize t    ;;; 不要缩放frame.
@@ -137,6 +138,21 @@
 
 ;; Don't ping things that look like domain names.
 (setq ffap-machine-p-known 'reject)
+
+;; https://github.com/seagle0128/.emacs.d/blob/master/init.el
+;; Speed up startup
+(setq auto-mode-case-fold nil)
+
+(add-hook 'emacs-startup-hook
+          #'(lambda ()
+              "Recover GC values after startup."
+              (setq gc-cons-threshold 800000
+                    gc-cons-percentage 0.1)))
+
+ ;; Garbage Collector Magic Hack
+(setq gcmh-idle-delay 5
+      gcmh-high-cons-threshold #x1000000) ; 16MB
+(gcmh-mode 1)
 
 (provide 'init-accelerate)
 

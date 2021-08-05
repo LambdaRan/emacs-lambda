@@ -1,18 +1,15 @@
 (require 'init-const)
-;; 加速配置。
-(require 'init-accelerate)
-;; 字体设置
-(require 'init-font)
 
-(let (
-      ;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
+(let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
       (gc-cons-threshold most-positive-fixnum)
       (gc-cons-percentage 0.6)
       ;; 清空避免加载远程文件的时候分析文件。
       (file-name-handler-alist nil))
 
-;; 统计启动时间
+  ;; 统计启动时间
   (with-temp-message ""                 ;抹掉插件启动的输出
+    (require 'init-accelerate)
+    (require 'init-font)                                       
     (require 'benchmark-init-modes)
     (require 'benchmark-init)
     (benchmark-init/activate)
@@ -33,7 +30,7 @@
     (require 'init-awesome-pair)
     (require 'init-awesome-tab)
     (require 'init-awesome-tray)
-    ;;  ;; 不要自动备份
+    ;; 不要自动备份
     (require 'init-backup)
     (require 'init-line-number)
     (require 'init-auto-save)
@@ -42,16 +39,14 @@
     (require 'init-indent)
     (require 'init-one-key)
     (require 'init-key)
-    ;;  ;; 只读模式下使用vi样式的单按键操作
+    ;; 只读模式下使用vi样式的单按键操作
     (require 'init-vi-navigate)
-    (require 'init-performance)
     (require 'init-ivy)
 
     ;; 可以延后加载的
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-
          ;; 后台自动删除不用的buffer
          (require 'init-tempbuf)
          ;; minibuf中参数提示
@@ -69,10 +64,8 @@
          (require 'init-c)
          (require 'init-flycheck)
          (require 'init-idle)
-
          (require 'init-diff-hl)
          (require 'init-ffip)
-
          (require 'init-etags)
          (require 'init-ibuffer)
          (require 'init-autorevert)
