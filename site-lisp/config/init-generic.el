@@ -155,15 +155,18 @@
 
 (when sys/windows-p
   ;; 使用英文day-time
-  (setq system-time-locale "C"))
+  (setq system-time-locale "C")
+  (set-default 'process-coding-system-alist
+               '(("[cC][mM][dD][pP][rR][oO][xX][yY]" gbk-dos . gbk-dos)))
+  )
 
 ;; Contrary to what many Emacs users have in their configs, you don't need more
 ;; than this to make UTF-8 the default coding system:
-(set-language-environment "UTF-8")
+;; (set-language-environment "UTF-8")
 ;; ...but the clipboard's on Windows could be in another encoding (likely
 ;; utf-16), so let Emacs/the OS decide what to use there.
-(unless sys/windows-p
-  (setq selection-coding-system 'utf-8)) ; with sugar on top
+;; (unless sys/windows-p
+;;   (setq selection-coding-system 'utf-8)) ; with sugar on top
 
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
 
@@ -188,8 +191,6 @@
 (prefer-coding-system 'gb18030)
 (prefer-coding-system 'gb2312)
 (prefer-coding-system 'utf-16)
-(prefer-coding-system 'utf-8-dos)
-(prefer-coding-system 'utf-8-unix)
 (prefer-coding-system 'utf-8)
 
 

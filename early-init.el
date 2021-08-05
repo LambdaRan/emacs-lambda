@@ -1,9 +1,8 @@
 ;; URL: https://github.com/seagle0128/.emacs.d
 
-;; 需要拷贝到.emacs.d�?录中
-
 ;; Defer garbage collection further back in the startup process
-(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-threshold most-positive-fixnum
+      gc-cons-percentage 0.5)
 
 ;; In Emacs 27+, package initialization occurs before `user-init-file' is
 ;; loaded, but after `early-init-file'. Doom handles package initialization, so

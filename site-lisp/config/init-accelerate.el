@@ -80,17 +80,13 @@
 ;;
 
 ;;; Require
-
+(require 'init-const)
 
 ;;; Code:
-(setq
- ;; 不要缩放frame.
- frame-inhibit-implied-resize t
- ;; 默认用最简单的模式
- initial-major-mode 'fundamental-mode
- ;; 不要自动启用package
- package-enable-at-startup nil
- package--init-file-ensured t)
+(setq frame-inhibit-implied-resize t    ;;; 不要缩放frame.
+      initial-major-mode 'fundamental-mode ; ;; 默认用最简单的模式
+      package-enable-at-startup nil        ; ;; 不要自动启用package
+      package--init-file-ensured t)
 
 ;; Improve the performance of rendering long lines.
 (setq-default bidi-display-reordering nil)
@@ -138,6 +134,9 @@
 ;; slightly less to process at startup.
 (unless sys/mac-p   (setq command-line-ns-option-alist nil))
 (unless sys/linux-p (setq command-line-x-option-alist nil))
+
+;; Don't ping things that look like domain names.
+(setq ffap-machine-p-known 'reject)
 
 (provide 'init-accelerate)
 
