@@ -33,7 +33,7 @@
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
- '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "C-/" "s-c" "s-x" "s-v" "C-x d"))
+ '("C-x C-f" "C-z" "C-q" "s-W" "M-h" "C-\\" "C-/" "s-x" "C-x d"))
 
 ;;; --- 工具函数
 (lazy-load-set-keys
@@ -57,8 +57,7 @@
  "init-rebuilder")
 
 (lazy-load-global-keys
- '(
-   ("M-s" . symbol-overlay-put)         ;懒惰搜索
+ '(("M-s" . symbol-overlay-put)         ;懒惰搜索
    )
  "init-symbol-overlay")
 
@@ -71,31 +70,22 @@
    ("k" . color-rg-search-input-in-project)
    ("," . color-rg-search-symbol-in-current-file)
    ("." . color-rg-search-input-in-current-file)
-   ("o" . color-rg-search-symbol-with-type)
-   ("p" . color-rg-search-project-with-type)
+   ("[" . color-rg-search-symbol-with-type)
+   ("]" . color-rg-search-project-with-type)
    )
  "init-color-rg"
- "C-c c")
+ "C-c")
 
-;;; --- 缓存移动
 (lazy-load-set-keys
  '(
    ("C-z k" . beginning-of-buffer)      ;缓存开始
    ("C-z j" . end-of-buffer)            ;缓存结尾
-   ("C-M-f" . forward-paragraph)        ;下一个段落
-   ("C-M-b" . backward-paragraph)       ;上一个段落
-   ("C-M-y" . backward-up-list)         ;向左跳出 LIST
-   ("C-M-o" . up-list)                  ;向右跳出 LIST
-   ("C-M-u" . backward-down-list)       ;向左跳进 LIST
-   ("C-M-i" . down-list)                ;向右跳进 LIST
-   ("C-M-a" . beginning-of-defun)       ;函数开头
-   ("C-M-e" . end-of-defun)             ;函数结尾
-   
+   ("M-a" . beginning-of-defun)         ;函数开头
+   ("M-e" . end-of-defun)               ;函数结尾
    ))
 
 (lazy-load-global-keys
- '(
-   ("M-g" . goto-line-preview))
+ '(("M-g" . goto-line-preview))
  "goto-line-preview")
 
 (lazy-load-global-keys
@@ -105,7 +95,7 @@
    ("M-2" . indent-buffer)              ;动格式化当前Buffer
    ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
    ("C-x l" . mark-line)                ;选中整行
-   ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
+   ("C-q" . kill-and-join-forward)      ;在缩进的行之间删除
    ("C->" . remember-init)              ;记忆初始函数
    ("C-<" . remember-jump)              ;记忆跳转函数
    ("M-s-," . point-stack-pop)          ;buffer索引跳转
@@ -133,7 +123,6 @@
    ("M-M" . delete-block-forward))
  "delete-block")
 
-;;; --- 缓存编辑
 (lazy-load-set-keys
  '(
    ("M-o" . backward-delete-char-untabify) ;向前删除字符
@@ -175,17 +164,12 @@
 
  ;;; ### Multi-Scratch
 (lazy-load-global-keys
- '(
-   ("s-Q" . multi-scratch-new)
-   ("C-S-s-q" . multi-scratch-new)
-   )
+ '(("s-Q" . multi-scratch-new))
  "multi-scratch")
 
 ;;; ### Window Operation ###
 (lazy-load-global-keys
- '(
-   ("C-c j" . ace-window)
-   )
+ '(("C-j" . ace-window))
  "init-ace-window")
 
 ;;; --- 窗口操作
@@ -221,7 +205,7 @@
 ;;; --- 多标签浏览
 (lazy-load-set-keys
  '(
-   ("s-j" . awesome-tab-ace-jump)                  ;Ace jump
+   ("M-i" . awesome-tab-ace-jump)                  ;Ace jump
    ("M-7" . awesome-tab-backward-tab)              ;移动到后一个标签
    ("M-8" . awesome-tab-forward-tab)               ;移动到前一个标签
    ("M-9" . awesome-tab-backward-group)            ;移动到后一个标签组
@@ -235,8 +219,8 @@
    ("M-s-7" . awesome-tab-select-beg-tab)
    ("M-s-8" . awesome-tab-select-end-tab)
    ("M-s-9" . awesome-tab-move-current-tab-to-beg)
-   ("C-c A" . awesome-tab-kill-other-buffers-in-current-group)
-   ("C-c a" . awesome-tab-kill-all-buffers-in-current-group)
+   ("C-c Q" . awesome-tab-kill-other-buffers-in-current-group)
+   ("C-c q" . awesome-tab-kill-all-buffers-in-current-group)
    ("s-w" . awesome-tab-keep-match-buffers-in-current-group)
    ("s-W" . awesome-tab-kill-match-buffers-in-current-group)
    )
@@ -282,16 +266,14 @@
 ;;; ### Help ###
 ;;; --- 帮助模式
 (lazy-load-global-keys
- '(
-   ("C-h". one-key-menu-help)           ;帮助菜单
+ '(("C-h". one-key-menu-help)           ;帮助菜单
    )
  "init-help-mode")
 
 ;;; ### Thingh-edit ###
 ;;; --- 增强式编辑当前光标的对象
 (lazy-load-global-keys
- '(
-   ("C-c k" . one-key-menu-thing-edit)  ;thing-edit 菜单
+ '(("C-c k" . one-key-menu-thing-edit)  ;thing-edit 菜单
    )
  "init-thing-edit")
 
@@ -397,5 +379,30 @@
    ("DEL" . isearch-del-char)
    ("M-o" . isearch-del-char))
  isearch-mode-map)
+
+(lazy-load-global-keys
+ '(
+   ("C-]" . counsel-etags-find-tag-at-point)
+   ("C-c M-i" . ran-counsel-imenu))
+ "init-etags")
+
+(lazy-load-global-keys
+ '(
+   ("e" . find-file-in-project-at-point)
+   ("f" . find-file-in-project-by-selected)
+   ;; ("F" . find-file-in-project)
+   ("s" . find-file-with-similar-name)
+   ("d" . find-directory-in-project-by-selected)
+   ;; ("D" . find-directory-in-project)
+   ("r" . find-file-in-current-directory-by-selected)
+   ;; ("C" . find-file-in-current-directory)
+   )
+ "init-ffip"
+ "C-c")
+
+(lazy-load-unset-keys '("C-x C-b"))
+(lazy-load-global-keys
+ '(("C-x C-b" . ibuffer))
+ "init-ibuffer")
 
 (provide 'init-key)

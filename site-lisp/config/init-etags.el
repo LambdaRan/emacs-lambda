@@ -44,12 +44,4 @@
             #'(lambda ()
                 (add-hook 'after-save-hook
                           'counsel-etags-virtual-update-tags 'append 'local))))
-
-
-(lazy-load-set-keys
- '(
-   ("C-]" . counsel-etags-find-tag-at-point)
-   ("C-c M-i" . ran-counsel-imenu)))
-
-
 (provide 'init-etags)

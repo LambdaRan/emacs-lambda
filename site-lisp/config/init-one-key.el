@@ -109,7 +109,7 @@
 
 (lazy-load-set-keys
  '(
-   ("C-c d" . one-key-menu-directory)       ;目录打开菜单
+   ("C-c a" . one-key-menu-directory)       ;目录打开菜单
    ))
 
 (provide 'init-one-key)

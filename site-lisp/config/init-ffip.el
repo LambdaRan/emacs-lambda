@@ -1,7 +1,6 @@
 
-(require 'find-file-in-project)
-(require 'lazy-load)
 (require 'init-const)
+(require 'find-file-in-project)
 
 (when sys/mac-cocoa-p
   ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
@@ -24,17 +23,5 @@
 ;; ffip-split-window-horizontally
 ;; ffip-split-window-vertically
 ;; ffip-insert-file
-
-(lazy-load-set-keys
- '(
-   ("C-c f p" . find-file-in-project-at-point)
-   ("C-c f f" . find-file-in-project-by-selected)
-   ;; ("C-c f F" . find-file-in-project)
-   ("C-c f s" . find-file-with-similar-name)
-   ("C-c f d" . find-directory-in-project-by-selected)
-   ;; ("C-c f D" . find-directory-in-project)
-   ("C-c f c" . find-file-in-current-directory-by-selected)
-   ;; ("C-c f C" . find-file-in-current-directory)
-   ))
 
 (provide 'init-ffip)

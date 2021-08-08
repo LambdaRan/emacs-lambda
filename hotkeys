@@ -1,0 +1,82 @@
+Ctrl键：表示为C
+Alt键：表示为M
+Shift键：表示为S
+
+C-q kill-and-join-forward
+C-w kill-regin 当剪切用
+C-e move-end-of-line 移动到行尾
+C-r isearch-backward 反向搜索
+#C-t 
+C-y yank
+C-u universal-argument
+C-i 相当于TAB
+    C-o new-line-above在上面生成新行
+C-p previous-line 上一行
+C-[ ESC
+    C-] counsel-etags-find-tag-at-point
+C-a move-beginning-of-line
+C-s isearch-forward 正向搜索
+C-d delete-char 
+C-f forward-char
+C-g keyboard-quit
+    C-h one-key-menu-help
+    C-j ace-window
+C-k kill-line
+    C-l open-newline-below
+#C-; 
+    C-' delete-current-buffer-window
+    C-z 前缀
+C-x 系统设定前缀
+    C-c 自定义前缀
+C-v scroll-up-command
+C-b back-char
+C-n next-line
+C-m 相当于RET
+#C-, 
+#C-. 
+    C-/ undo-tree-undo
+
+-------------------------------------------------------
+
+M-q fill-paragraph
+M-w kill-ring-save 当复制用
+    M-e end-of-fun
+#M-r move-to-window-line-to-bottom
+#M-t transpose-words
+    M-y counsel-yank-pop
+M-u upcase-word
+    M-i awesome-tab-ace-jump
+M-o backward-delete-char-untabify
+    M-p awesome-pair-jump-right
+    M-[ awesome-pair-wrap-bracket 
+#M-]
+    M-a beginning-of-fun
+    M-s  symbol-overlay-put
+M-d kill-word
+M-f forward-word
+    M-g goto-line-preview
+M-h set-mark-command
+    M-j scroll-up-one-line
+    M-k scroll-down-one-line
+M-l downcase-word
+M-; comment-dwim
+#M-' abbrev-prefix-mark
+    M-z uncase-char
+    M-x counsel-M-x
+M-c capitalize-world
+M-v scrool-down-command
+M-b backward-word
+    M-n awesome-pair-jump-left
+M-m back-to-indentation
+M-, xref-pop-marker-stack
+M-. xref-find-definitions
+#M-/ dabbrev-expand
+
+-------------------------------------------------------
+
+
+
+    
+
+
+

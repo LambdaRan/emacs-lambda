@@ -9,7 +9,7 @@
   ;; 统计启动时间
   (with-temp-message ""                 ;抹掉插件启动的输出
     (require 'init-accelerate)
-    (require 'init-font)                                       
+    (require 'init-font)                                      
     (require 'benchmark-init-modes)
     (require 'benchmark-init)
     (benchmark-init/activate)
@@ -23,16 +23,9 @@
     ;; 按需加载插件
     (require 'lazy-load)
     (require 'one-key)
-    ;; 显示行号
-    (require 'display-line-numbers)
-    (require 'basic-toolkit)
-    (require 'init-highlight-parentheses)
     (require 'init-awesome-pair)
     (require 'init-awesome-tab)
     (require 'init-awesome-tray)
-    ;; 不要自动备份
-    (require 'init-backup)
-    (require 'init-line-number)
     (require 'init-auto-save)
     (require 'init-mode)
     (require 'init-dired)
@@ -47,6 +40,10 @@
     (run-with-idle-timer
      1 nil
      #'(lambda ()
+         ;; 显示行号
+         (require 'display-line-numbers)
+         (require 'init-line-number)         
+         (require 'init-highlight-parentheses)
          ;; 后台自动删除不用的buffer
          (require 'init-tempbuf)
          ;; minibuf中参数提示
@@ -65,12 +62,13 @@
          (require 'init-flycheck)
          (require 'init-idle)
          (require 'init-diff-hl)
-         (require 'init-ffip)
-         (require 'init-etags)
-         (require 'init-ibuffer)
+         ;; (require 'init-ffip)
+         ;; (require 'init-etags)
+         ;; (require 'init-ibuffer)
          (require 'init-autorevert)
          (require 'init-diff)
-         (require 'ran-toolkit)
+         ;; (require 'basic-toolkit)
+         ;; (require 'ran-toolkit)
 
          ;; Restore session at last.
          (require 'init-session)

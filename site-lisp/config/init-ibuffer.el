@@ -94,9 +94,4 @@
 
 ;; (global-set-key (kbd "C-x C-b") 'ibuffer)
 
-(lazy-load-unset-keys '("C-x C-b"))
-(lazy-load-set-keys
- '(
-   ("C-x C-b" . ibuffer)))
-
 (provide 'init-ibuffer)
