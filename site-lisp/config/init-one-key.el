@@ -80,7 +80,6 @@
 ;;
 
 ;;; Require
-(require 'init-const)
 (require 'lazy-load)
 
 ;;; Code:

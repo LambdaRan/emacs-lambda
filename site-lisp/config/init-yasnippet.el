@@ -72,47 +72,35 @@
 ;;
 
 ;;; Require
-(require 'init-const)
 
-;; (add-hook 'prog-mode-hook
-;; (add-hook 'after-init-hook
-          ;; #'(lambda ()
-            (require 'yasnippet)
-            (require 'yasnippet-snippets)
+;; code
+;; (with-)
+;; (with-eval-after-load 'yasnippet
+;;   )
 
-             (defun get-git-user-name ()
-               (interactive)
-               (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.name")))
+(require 'yasnippet)
+(require 'yasnippet-snippets)
 
-             (defun get-git-user-email ()
-               (interactive)
-               (replace-regexp-in-string "\n$" "" (shell-command-to-string "git config --get user.email")))
+(add-to-list `yas-snippet-dirs (concat my-emacs-extension-dir "/yasnippet-snippets/snippets"))
+;; (add-to-list 'yas-snippet-dirs (concat my-emacs-extension-dir "/yasnippet-php-mode"))
 
+;; my private snippets, should be placed before enabling yasnippet
+(setq my-yasnippets (expand-file-name "~/ransysconf/yasnippets"))
 
-              (add-to-list `yas-snippet-dirs (concat my-emacs-extension-dir "/yasnippet-snippets/snippets"))
-              (add-to-list 'yas-snippet-dirs (concat my-emacs-extension-dir "/yasnippet-php-mode"))
+(setq-default mode-require-final-newline nil)
 
+;; 添加自己的模板
+(when (and (file-exists-p my-yasnippets)
+           (not (member my-yasnippets yas-snippet-dirs)))
+  (add-to-list 'yas-snippet-dirs my-yasnippets))
 
-            ;; my private snippets, should be placed before enabling yasnippet
-            (setq my-yasnippets (expand-file-name "~/ransysconf/yasnippets"))
+(yas-global-mode 1)
 
-            ;; http://stackoverflow.com/questions/7619640/emacs-latex-yasnippet-why-are-newlines-inserted-after-a-snippet
-            (setq-default mode-require-final-newline nil)
-
-            ;; 添加自己的模板
-            (when (and (file-exists-p my-yasnippets)
-                       (not (member my-yasnippets yas-snippet-dirs)))
-              (add-to-list 'yas-snippet-dirs my-yasnippets))
-
-            (yas-global-mode 1)
-
-            ;; Disable yasnippet mode on some mode.
-            (dolist (hook (list
-                           'term-mode-hook
-                           ))
-              (add-hook hook '(lambda () (yas-minor-mode -1))))
-
-            ;; ))
+;; Disable yasnippet mode on some mode.
+(dolist (hook (list
+               'term-mode-hook
+               ))
+  (add-hook hook '(lambda () (yas-minor-mode -1))))
 
 (defun ran-yas-reload-all ()
   "Reload yasnippets."

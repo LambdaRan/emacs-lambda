@@ -64,8 +64,8 @@
 ;;; ### Color-Rg ###
 (lazy-load-global-keys
  '(
-   ("g" . color-rg-search-symbol)
-   ("h" . color-rg-search-input)
+   ("u" . color-rg-search-symbol)
+   ("i" . color-rg-search-input)
    ("j" . color-rg-search-symbol-in-project)
    ("k" . color-rg-search-input-in-project)
    ("," . color-rg-search-symbol-in-current-file)
@@ -95,7 +95,7 @@
    ("M-2" . indent-buffer)              ;动格式化当前Buffer
    ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
    ("C-x l" . mark-line)                ;选中整行
-   ("C-q" . kill-and-join-forward)      ;在缩进的行之间删除
+   ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
    ("C->" . remember-init)              ;记忆初始函数
    ("C-<" . remember-jump)              ;记忆跳转函数
    ("M-s-," . point-stack-pop)          ;buffer索引跳转
@@ -273,7 +273,7 @@
 ;;; ### Thingh-edit ###
 ;;; --- 增强式编辑当前光标的对象
 (lazy-load-global-keys
- '(("C-c k" . one-key-menu-thing-edit)  ;thing-edit 菜单
+ '(("C-c x" . one-key-menu-thing-edit)  ;thing-edit 菜单
    )
  "init-thing-edit")
 

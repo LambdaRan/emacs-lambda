@@ -73,10 +73,51 @@ M-. xref-find-definitions
 #M-/ dabbrev-expand
 
 -------------------------------------------------------
+分配给color-rg:
+C-c u
+C-c i
+C-c j
+C-c k
+C-c ,
+C-c .
+C-c [
+C-c ]
+分配给窗口：
+C-c v
+C-c h
+C-c w
+C-c o
 
+C-c q
+C-c Q
 
+分配给Avy:
+C-c n
+C-c p
+C-c l
 
-    
+C-c x thing-edit
+C-c m git
+C-c a 目录
+C-c c xxx browse
+C-c 
+
+分配给ffip：
+C-c e
+C-c f
+C-c s
+C-c d
+C-c r
+
+空闲：
+C-c t
+C-c g
+C-c z
+C-c b
+C-c /
+C-c ;
+C-c '
+
 
 
 
