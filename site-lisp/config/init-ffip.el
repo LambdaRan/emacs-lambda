@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 
 (require 'init-const)
 (require 'find-file-in-project)

@@ -1,7 +1,7 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 
-(require 'counsel-etags)
-(require 'lazy-load)
 (require 'init-const)
+(require 'counsel-etags)
 
 ;; Don't ask before rereading the TAGS files if they have changed
 (setq tags-revert-without-query t)

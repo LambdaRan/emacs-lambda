@@ -1,7 +1,5 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 
-(require 'lazy-load)
-
 (eval-after-load 'ibuffer
   '(progn
     ;; Use human readable Size column instead of original one
