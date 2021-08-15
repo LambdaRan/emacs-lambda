@@ -80,8 +80,7 @@
 ;;
 
 ;;; Require
-(require 'company-tabnine)
-(require 'company-ctags)
+
 ;;; Code:
 
 ;; The free version of TabNine is good enough,
@@ -94,61 +93,46 @@
       (unless (string-match "The free version of TabNine only indexes up to" (funcall company-message-func))
         ad-do-it))))
 
-;; TabNine
-(dolist (mode (list
-               'c-mode-common
-               'c-mode
-               'emacs-lisp-mode
-               'lisp-interaction-mode
-               'lisp-mode
-               'java-mode
-               'asm-mode
-               'haskell-mode
-               ;; 'sh-mode
-               'makefile-gmake-mode
-               'python-mode
-               'js-mode
-               'html-mode
-               'css-mode
-               'tuareg-mode
-               'go-mode
-               'coffee-mode
-               'qml-mode
-               'slime-repl-mode
-               'package-menu-mode
-               'cmake-mode
-               'php-mode
-               'web-mode
-               'coffee-mode
-               'sws-mode
-               'jade-mode
-               'vala-mode
-               'rust-mode
-               'ruby-mode
-               'qmake-mode
-               'lua-mode
-               'swift-mode
-               'llvm-mode
-               'conf-toml-mode
-               'nxml-mode
-               ))
-  (with-eval-after-load mode
-    (unless (catch 'found
-              (dolist (b company-backends)
-                (cond
-                  ((equal b 'company-tabnine)
-                   (throw 'found t))
-                  ((and (listp b) (member 'company-tabnine b))
-                   (throw 'found t))
-                  (t nil))))
-      (add-to-list 'company-backends '(company-tabnine
-                                       :separate company-ctags
-                                       )))))
-;; config company-ctags
-(setq company-ctags-ignore-case t)  ; I use company-ctags instead
-(company-ctags-auto-setup)
+(with-eval-after-load 'company
+  (require 'company-tabnine)
+  (require 'company-ctags)
+  (setq company-tabnine-always-trigger nil) ; 不要一直触发  
+  ;; config company-ctags
+  (setq company-ctags-ignore-case t)  ; I use company-ctags instead
+  (company-ctags-auto-setup)
 
-(setq company-tabnine-always-trigger nil) ; 不要一直触发
+  ;; TabNine
+  (dolist (mode (list
+                 'c-mode-common
+                 'c-mode
+                 'emacs-lisp-mode
+                 'lisp-interaction-mode
+                 'lisp-mode
+                 'makefile-gmake-mode
+                 'python-mode
+                 'go-mode
+                 'cmake-mode
+                 'php-mode
+                 'web-mode
+                 'rust-mode
+                 'lua-mode
+                 'llvm-mode
+                 'conf-toml-mode
+                 ))
+    (with-eval-after-load mode
+      (unless (catch 'found
+                (dolist (b company-backends)
+                  (cond
+                    ((equal b 'company-tabnine)
+                     (throw 'found t))
+                    ((and (listp b) (member 'company-tabnine b))
+                     (throw 'found t))
+                    (t nil))))
+        (add-to-list 'company-backends '(company-tabnine
+                                         :separate company-ctags
+                                         )))))  
+  )
+
 (provide 'init-company-tabnine)
 
 ;;; init-company-tabnine.el ends here

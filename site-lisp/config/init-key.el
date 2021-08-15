@@ -38,7 +38,7 @@
 ;;; --- 工具函数
 (lazy-load-set-keys
  '(
-   ("<f2>" . make_fullscreen) ; 全屏模式   
+   ("<f2>" . make_fullscreen) ; 全屏模式
    ("<f5>" . emacs-session-save)        ;退出emacs
    ("<M-s-return>" . toggle-debug-on-error) ;切换调试模式
    ("s-[" . eval-expression)                ;执行表达式
@@ -306,14 +306,14 @@
 
    ("M-s-n" . ran-comment-line-next-line) ;向下移动注释
    ("M-s-p" . ran-comment-line-prev-line) ;向上移动注释
-   ("M-s-i" . ielm-toggle)                ;切换ielm,Emacs Lisp 解释模式     
-   
+   ("M-s-i" . ielm-toggle)                ;切换ielm,Emacs Lisp 解释模式
+
    ("C-x e" . xah-show-in-desktop)         ;使用系统文件管理器打开文件
    ("C-\\" . comment-or-uncomment-region+) ;注释当前行
-   
+
    ("C-\"" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
    ("C-'" . delete-current-buffer-window)      ;删除当前buffer的窗口
-                                   
+
    )
  "ran-toolkit")
 
@@ -404,5 +404,25 @@
 (lazy-load-global-keys
  '(("C-x C-b" . ibuffer))
  "init-ibuffer")
+
+;;; ### Unset key ###
+(lazy-load-unset-keys                   ; 全局按键卸载
+ '("C-x C-f" "M-x" "C-x b" "M-y"))
+(lazy-load-global-keys
+ '(
+   ("C-x C-f" . counsel-find-file)
+   ("M-x" . counsel-M-x)
+   ("C-x b" . ivy-switch-buffer)
+   ("C-c c s" . swiper-isearch)
+   ("C-c c z" . zlua-jump-to-directory)
+
+   ("M-y" . counsel-yank-pop)
+
+   ("C-c M-l" . counsel-locate)
+   ("C-c M-d" . counsel-dired-jump)
+   ("C-c M-e" . counsel-find-file-extern)
+   ;; ("C-c M-i" . counsel-semantic-or-imenu)
+   )
+ "init-ivy")
 
 (provide 'init-key)

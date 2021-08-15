@@ -37,9 +37,6 @@
 [submodule "magit"]
 	path = site-lisp/extensions/magit
 	url = https://github.com/magit/magit
-[submodule "smooth-scrolling"]
-	 path = site-lisp/extensions/smooth-scrolling
-	 url = https://github.com/aspiers/smooth-scrolling.git
 [submodule "unicode-escape"]
 	path = site-lisp/extensions/unicode-escape
 	url = https://github.com/kosh04/unicode-escape.el.git

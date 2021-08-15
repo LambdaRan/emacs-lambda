@@ -1,113 +1,19 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-company-mode.el --- Company-mode configuration
-
-;; Filename: init-company-mode.el
-;; Description: Company-mode configuration
-;; Author: Andy Stewart lazycat.manatee@gmail.com
-;; Maintainer: Andy Stewart lazycat.manatee@gmail.com
-;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
-;; Created: 2008-10-20 09:56:57
-;; Version: 1.1
-;; Last-Updated: 2018-09-11 01:00:24
-;;           By: Andy Stewart
-;; URL:
-;; Keywords: company-mode
-;; Compatibility: GNU Emacs 23.0.60.1
-;;
-;; Features that might be required by this library:
-;;
-;;
-;;
-
-;;; This file is NOT part of GNU Emacs
-
-;;; License
-;;
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-
-;;; Commentary:
-;;
-;; Company-mode configuration
-;;
-
-;;; Installation:
-;;
-;; Put init-company-mode.el to your load-path.
-;; The load-path is usually ~/elisp/.
-;; It's set in your ~/.emacs like this:
-;; (add-to-list 'load-path (expand-file-name "~/elisp"))
-;;
-;; And the following to your ~/.emacs startup file.
-;;
-;; (require 'init-company-mode)
-;;
-
-;;; Change log:
-;;
-;; 2018/09/11
-;;      * Split lsp configuration to `init-lsp.el'.
-;;
-;; 2018/07/24
-;;      * Add command to install python completion backend.
-;;
-;; 2018/07/23
-;;      * Add `company-elisp' backend when load emacs-lisp mode.
-;;
-;; 2018/07/16
-;;      * Don't downcase completion result from dabbrev.
-;;
-;; 2018/07/12
-;;      * Customize dabbrev backend, to make company can completion any words in all buffer like `dabbrev-expand'.
-;;      * Default add `company-files' backend.
-;;
-;; 2018/07/07
-;;      * Add `company-css' into `company-backends'.
-;;
-;; 2018/07/06
-;;      * Fix ruby mode load error.
-;;      * Fix python mode load error.
-;;      * Use `exec-path-from-shell' avoid LSP can't found server bin path.
-;;
-;; 2018/07/05
-;;      * Config company and company-lsp fronted.
-;;      * Make company works with posframe.
-;;      * Add LSP mode support.
-;;      * Add support for python and rubyl
-;;
-;; 2008/10/20
-;;      * First released.
-;;
-
-;;; Acknowledgements:
-;;
-;;
-;;
-
-;;; TODO
-;;
-;;
-;;
 
 ;;; Require
 
 ;;; Code:
-(add-hook 'after-init-hook
+;; (add-hook 'after-init-hook 'global-company-mode)
+;; (add-hook 'after-init-hook
+;;           #'(lambda ()
+;;               (require company)
+;;               (global-company-mode)))
+
+(add-hook 'prog-mode-hook
           #'(lambda ()
-              (require company)
-              (global-company-mode)
-              ))
+              (require 'company)
+              (global-company-mode)))
 
 (defun company-tabnine-sort-by-detail (candidates)
   "Sort tabnine response by detail value"
@@ -171,19 +77,19 @@
   ;; `compay-dabbrev` search same major mode buffers.
   (setq company-dabbrev-other-buffers t)
   ;; (setq company-dabbrev-minimum-length 4)
-
   ;; (setq company-format-margin-function nil)
-
   ;; Don't downcase the returned candidates.
   (setq company-dabbrev-downcase nil
+        company-dabbrev-ignore-case t       
         ;; make previous/next selection in the popup cycles
         company-selection-wrap-around t
-        company-dabbrev-ignore-case t
         ;; @see https://github.com/company-mode/company-mode/issues/146
         company-tooltip-align-annotations t)
 
   ;; (add-to-list 'company-transformers 'company-sort-by-backend-importance)
   ;; (add-to-list 'company-transformers 'company-sort-by-tabnine-and-ctags t)
+  ;; Remove duplicate candidate.
+  (add-to-list 'company-transformers #'delete-dups)
   ;; NOT to load company-mode for certain major modes.
   ;; Ironic that I suggested this feature but I totally forgot it
   ;; until two years later.
@@ -196,24 +102,25 @@
   ;; Customize company backends.
   ;; (setq company-backends (delete backend company-backends)))
   (setq company-backends '(company-capf
-                           company-files
+                           (company-dabbrev-code company-keywords)                           
                            company-dabbrev
-                           (company-dabbrev-code company-keywords)
+                           company-files                           
                            ;; other backends
                            ))
+
   ;; Add `company-elisp' backend for elisp.
-  (add-hook 'emacs-lisp-mode-hook
-            #'(lambda ()
-                (require 'company-elisp)
-                (unless (catch 'found
-                          (dolist (b company-backends)
-                            (cond
-                              ((equal b 'company-elisp)
-                               (throw 'found t))
-                              ((and (listp b) (member 'company-elisp b))
-                               (throw 'found t))
-                              (t nil))))
-                  (add-to-list 'company-backends 'company-elisp))))
+  (defun setup-company-elisp ()
+    (require 'company-elisp)
+    (unless (catch 'found
+              (dolist (b company-backends)
+                (cond
+                 ((equal b 'company-elisp)
+                  (throw 'found t))
+                 ((and (listp b) (member 'company-elisp b))
+                  (throw 'found t))
+                 (t nil))))
+      (add-to-list 'company-backends 'company-elisp)))
+  (add-hook 'emacs-lisp-mode-hook 'setup-company-elisp)
 
   ;; Use the tab-and-go frontend.
   ;; Allows TAB to select and complete at the same time.
@@ -222,9 +129,6 @@
         '(company-tng-frontend
           company-pseudo-tooltip-frontend
           company-echo-metadata-frontend))
-
-  ;; Enable global.
-  (global-company-mode)
 
   ;; Key settings.
   (lazy-load-unset-keys
@@ -252,21 +156,22 @@
    company-active-map)
   )
 
-(add-hook 'prog-mode-hook
-          #'(lambda ()
-              ;; Add yasnippet support for all company backends.
-              (defvar company-mode/enable-yas t
-                "Enable yasnippet for all backends.")
+(with-eval-after-load 'company-yasnippet
+  ;; Add yasnippet support for all company backends.
+  (defvar company-mode/enable-yas t
+    "Enable yasnippet for all backends.")
 
-              (defun company-mode/backend-with-yas (backend)
-                (if (or (not company-mode/enable-yas)
-                        (and (listp backend) (member 'company-yasnippet backend)))
-                    backend
-                  (append (if (consp backend) backend (list backend))
-                          '(:with company-yasnippet))))
+  (defun company-mode/backend-with-yas (backend)
+    (if (or (not company-mode/enable-yas)
+            (and (listp backend) (member 'company-yasnippet backend)))
+        backend
+      (append (if (consp backend) backend (list backend))
+              '(:with company-yasnippet))))
 
-              (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
-              ))
+  (add-hook 'prog-mode-hook
+            #'(lambda ()
+                (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
+                )))
 
 (provide 'init-company-mode)
 

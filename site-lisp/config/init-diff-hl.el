@@ -2,7 +2,7 @@
 ;; https://github.com/dgutov/diff-hl
 
 ;; (require 'diff-hl)
-(require 'diff-hl-margin)
+;; (require 'diff-hl-margin)
 ;; (global-diff-hl-mode)
 ;; (diff-hl-flydiff-mode)
 
@@ -10,13 +10,6 @@
 ;; `diff-hl-revert-hunk'     C-x v n
 ;; `diff-hl-previous-hunk'   C-x v [
 ;; `diff-hl-next-hunk'       C-x v ]
-
-
-;; right fringe
-(diff-hl-margin-mode)
-(setq diff-hl-side 'right)
-
-(add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
 
 (dolist (hook (list
                'prog-mode-hook
@@ -33,10 +26,18 @@
                ;; 'conf-windows-mode-hook
                ;; 'conf-xdefaults-mode-hook
                ))
-  (add-hook hook 'turn-on-diff-hl-mode))
+  (add-hook hook #'(lambda ()
+                     (require 'diff-hl-margin)
+                     (turn-on-diff-hl-mode))))
 
-(add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-(add-hook 'dired-mode-hook 'diff-hl-dired-mode-unless-remote)
-;; (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+(with-eval-after-load 'diff-hl-margin
+  ;; right fringe
+  (diff-hl-margin-mode)
+  (setq diff-hl-side 'right)
+
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  (add-hook 'dired-mode-hook 'diff-hl-dired-mode-unless-remote)
+  ;; (add-hook 'dired-mode-hook 'diff-hl-dired-
+  )
 
 (provide 'init-diff-hl)

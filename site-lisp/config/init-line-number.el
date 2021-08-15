@@ -80,7 +80,7 @@
 ;;
 
 ;;; Require
-
+(require 'display-line-numbers)
 
 ;;; Code:
 

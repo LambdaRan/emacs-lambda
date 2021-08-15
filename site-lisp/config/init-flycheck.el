@@ -90,56 +90,47 @@
 ;;; Code:
 
 
+;; OS Config
+(when (featurep 'cocoa)
+  ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
+  (require 'exec-path-from-shell)
+  (setq exec-path-from-shell-variables '("PATH" "MANPATH" "GEM_PATH"))
+  (exec-path-from-shell-initialize))
 
-(defun magnars/adjust-flycheck-automatic-syntax-eagerness ()
-  "Adjust how often we check for errors based on if there are any.
+;; Add flycheck for Rust.
+(add-hook 'rust-mode-hook
+          #'(lambda ()
+              (require 'flycheck)
+              (flycheck-mode 1)
+              (require 'flycheck-rust)
+              (flycheck-rust-setup)
+              ))
+
+(with-eval-after-load 'flycheck
+  (setq flycheck-check-syntax-automatically '(idle-change save))
+  (setq flycheck-emacs-lisp-load-path 'inherit)
+  ;; (setq flycheck-indication-mode nil)
+  (setq-default flycheck-temp-prefix ".flycheck")
+
+  (defun magnars/adjust-flycheck-automatic-syntax-eagerness ()
+    "Adjust how often we check for errors based on if there are any.
 This lets us fix any errors as quickly as possible, but in a
 clean buffer we're an order of magnitude laxer about checking."
-  (setq flycheck-idle-change-delay
-        (if flycheck-current-errors 1 3.0)))
-
-(defun ran-init-flycheck()
-  "Initialize the flycheck."
-  (interactive)
-
-  (require 'flycheck)
-  ;; OS Config
-  (when (featurep 'cocoa)
-    ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
-    (require 'exec-path-from-shell)
-    (setq exec-path-from-shell-variables '("PATH" "MANPATH" "GEM_PATH"))
-    (exec-path-from-shell-initialize))
-
+    (setq flycheck-idle-change-delay
+          (if flycheck-current-errors 1 3.0)))
+  
   ;; Each buffer gets its own idle-change-delay because of the
   ;; buffer-sensitive adjustment above.
   (make-variable-buffer-local 'flycheck-idle-change-delay)
   (add-hook 'flycheck-after-syntax-check-hook
             'magnars/adjust-flycheck-automatic-syntax-eagerness)
-
-  ;; (setq flycheck-idle-change-delay 2)
-  (setq flycheck-check-syntax-automatically '(idle-change save))
-
-  (setq flycheck-emacs-lisp-load-path 'inherit)
-  ;; (setq flycheck-indication-mode nil)
-  (setq-default flycheck-temp-prefix ".flycheck")
-
+  ;; (setq flycheck-idle-change-delay 2)  
+  
   ;; rollback Tag v0.85 没有黑窗口
   ;; (with-eval-after-load 'flycheck
   ;;   (require 'flycheck-posframe)
   ;;   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
-
-  (flycheck-mode 1))
-
-
-;; Add flycheck for Rust.
-(add-hook 'rust-mode-hook
-          #'(lambda ()
-              (ran-init-flycheck)
-              (require 'flycheck-rust)
-              (flycheck-rust-setup)
-              ))
-;; (with-eval-after-load 'rust-mode
-;;   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+  )
 
 ;; 设置flycheck参数，推荐使用本地文件方式 .dir-locals.el
 ;; https://stackoverflow.com/questions/30949847/configuring-flycheck-to-work-with-c11
@@ -157,7 +148,6 @@ clean buffer we're an order of magnitude laxer about checking."
 ;;             (setq-default flycheck-gcc-include-path include-path)
 ;;             (setq-default flycheck-cppcheck-include-path include-path)
 ;;             ))
-
 
 (provide 'init-flycheck)
 
