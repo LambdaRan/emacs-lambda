@@ -96,7 +96,7 @@
 (with-eval-after-load 'company
   (require 'company-tabnine)
   (require 'company-ctags)
-  (setq company-tabnine-always-trigger nil) ; ²»ÒªÒ»Ö±´¥·¢  
+  (setq company-tabnine-always-trigger nil) ; ä¸è¦ä¸€ç›´è§¦å‘
   ;; config company-ctags
   (setq company-ctags-ignore-case t)  ; I use company-ctags instead
   (company-ctags-auto-setup)
@@ -130,7 +130,7 @@
                     (t nil))))
         (add-to-list 'company-backends '(company-tabnine
                                          :separate company-ctags
-                                         )))))  
+                                         )))))
   )
 
 (provide 'init-company-tabnine)
