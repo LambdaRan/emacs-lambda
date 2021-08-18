@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-awesome-pair.el --- Awesome-Pair configuration
 
 ;; Filename: init-awesome-pair.el

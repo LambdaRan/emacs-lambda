@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-rebuilder.el --- Init for re-builder
 
 ;; Filename: init-rebuilder.el

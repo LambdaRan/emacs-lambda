@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-symbol-overlay.el --- Configuration for symbol-overlay
 
 ;; Filename: init-symbol-overlay.el

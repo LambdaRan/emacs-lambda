@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-awesome-tray.el --- Configuration for awesome tray
 
 ;; Filename: init-awesome-tray.el

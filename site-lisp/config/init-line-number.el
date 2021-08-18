@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-line-number.el --- Configuration for display line number
 
 ;; Filename: init-line-number.el

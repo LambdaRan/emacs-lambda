@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-yasnippet.el --- Yasnippet configuration
 
 ;; Filename: init-yasnippet.el
@@ -87,7 +88,7 @@
   
   (add-to-list `yas-snippet-dirs (concat my-emacs-extension-dir "/yasnippet-snippets/snippets"))
   ;; (add-to-list 'yas-snippet-dirs (concat my-emacs-extension-dir "/yasnippet-php-mode"))
-  ;; Ìí¼Ó×Ô¼ºµÄÄ£°å
+  ;; æ·»åŠ è‡ªå·±çš„æ¨¡æ¿
   (when (and (file-exists-p my-yasnippets)
              (not (member my-yasnippets yas-snippet-dirs)))
     (add-to-list 'yas-snippet-dirs my-yasnippets))

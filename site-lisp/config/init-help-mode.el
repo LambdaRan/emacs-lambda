@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-help-mode.el --- Init help mode
 
 ;; Filename: init-help-mode.el

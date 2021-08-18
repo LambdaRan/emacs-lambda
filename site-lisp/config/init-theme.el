@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 
 (require 'lazycat-theme)
 ;; (require 'lazycat-dark-theme)

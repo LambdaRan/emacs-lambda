@@ -1,4 +1,4 @@
-
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;; (setq global-auto-revert-mode t)
 ;; (setq auto-revert-interval 5)
 

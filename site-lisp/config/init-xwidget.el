@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 
 ;; https://github.com/canatella/xwwp
 ;; https://github.com/philc/vimium

@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-qt.el --- Setup for qt mode
 
 ;; Filename: init-qt.el

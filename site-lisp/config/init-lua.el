@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-lua.el --- Init lua
 
 ;; Filename: init-lua.el

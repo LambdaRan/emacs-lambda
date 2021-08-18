@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-idle.el --- Configure file that can load when emacs idle.
 
 ;; Filename: init-idle.el

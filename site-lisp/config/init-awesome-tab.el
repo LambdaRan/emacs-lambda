@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-awesome-tab.el --- Configuration for awesome-tab.el
 
 ;; Filename: init-awesome-tab.el

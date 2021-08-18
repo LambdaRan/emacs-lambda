@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-dired.el --- Dired configuration
 
 ;; Filename: init-dired.el

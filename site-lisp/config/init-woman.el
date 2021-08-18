@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-woman.el --- Init woman module
 
 ;; Filename: init-woman.el

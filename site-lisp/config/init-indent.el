@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-indent.el --- Init indent config
 
 ;; Filename: init-indent.el

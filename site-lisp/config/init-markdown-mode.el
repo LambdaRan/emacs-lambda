@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-markdown-mode.el --- Configure for markdown mode.
 
 ;; Filename: init-markdown-mode.el

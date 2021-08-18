@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-flycheck.el --- Configuration for flycheck
 
 ;; Filename: init-flycheck.el

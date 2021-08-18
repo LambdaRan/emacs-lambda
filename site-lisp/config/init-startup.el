@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-startup.el --- Config load when startup
 
 ;; Filename: init-startup.el

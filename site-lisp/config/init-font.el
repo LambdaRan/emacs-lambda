@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-font.el --- Font configuration
 
 ;; Filename: init-font.el

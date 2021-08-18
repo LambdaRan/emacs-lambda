@@ -1,4 +1,5 @@
-;; init-const.el --- Define constants.	-*- lexical-binding: t -*-
+;; -*- coding: utf-8; lexical-binding: t; -*-
+;; init-const.el --- Define constants.
 
 (defconst my-emacs-root-dir (file-name-directory my-init-file)
   "Directory of site-lisp")

@@ -1,4 +1,4 @@
-
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; Require
 
 ;; https://manateelazycat.github.io/emacs/2018/09/17/indium.html

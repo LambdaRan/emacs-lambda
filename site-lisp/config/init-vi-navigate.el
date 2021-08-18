@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-vi-navigate.el --- Confiruation for vi-navigate
 
 ;; Filename: init-vi-navigate.el

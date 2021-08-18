@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-window.el --- Init window
 
 ;; Filename: init-window.el

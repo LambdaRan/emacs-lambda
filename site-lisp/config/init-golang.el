@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-golang.el --- Extensions for go lang mode
 
 ;; Filename: init-golang.el

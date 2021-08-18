@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-one-key.el --- Init one key
 
 ;; Filename: init-one-key.el

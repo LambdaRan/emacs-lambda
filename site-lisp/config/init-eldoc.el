@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-eldoc.el --- Eldoc configuration
 
 ;; Filename: init-eldoc.el

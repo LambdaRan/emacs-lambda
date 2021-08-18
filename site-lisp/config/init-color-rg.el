@@ -1,4 +1,4 @@
-
+;; -*- coding: utf-8; lexical-binding: t; -*-
 (require 'color-rg)
 (require 'lazy-load)
 

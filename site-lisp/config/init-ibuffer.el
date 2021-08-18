@@ -1,7 +1,6 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 
-(eval-after-load 'ibuffer
-  '(progn
+(with-eval-after-load 'ibuffer
     ;; Use human readable Size column instead of original one
     (define-ibuffer-column size-h
         (:name "Size" :inline t)
@@ -72,7 +71,7 @@
                                      (unless (eq ibuffer-sorting-mode 'filename/process)
                                        (ibuffer-do-sort-by-filename/process))
                                      (ibuffer-switch-to-saved-filter-groups "default")))
-    ))
+    )
 
 
 ;; Modify the default ibuffer-formats

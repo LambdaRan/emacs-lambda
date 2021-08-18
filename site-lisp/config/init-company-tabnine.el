@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-company-tabnine.el --- Configure for TabNine
 
 ;; Filename: init-company-tabnine.el

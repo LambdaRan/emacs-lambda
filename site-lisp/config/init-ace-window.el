@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;; Package URL: https://github.com/abo-abo/ace-window
 
 ;;; Require

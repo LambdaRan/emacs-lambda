@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-auto-save.el --- Init for auto-save.el
 
 ;; Filename: init-auto-save.el

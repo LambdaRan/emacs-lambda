@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-session.el --- Init for session save/restore
 
 ;; Filename: init-session.el

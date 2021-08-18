@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-org.el --- Configure for org-mode
 
 ;; Filename: init-org.el

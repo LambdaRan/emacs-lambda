@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-git.el --- Init for git
 
 ;; Filename: init-git.el

@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-generic.el --- Generic config
 
 ;; Filename: init-generic.el
@@ -131,7 +132,7 @@
 (setq ad-redefinition-action 'accept)   ;不要烦人的 redefine warning
 (setq frame-resize-pixelwise t) ;设置缩放的模式,避免Mac平台最大化窗口以后右边和下边有空隙
 (setq delete-by-moving-to-trash t)      ; 删除的文件移动到垃圾篓
-                                        ; 
+(setq switch-to-buffer-preserve-window-point t)
 ;; (set-cursor-color "Red")           ;更改光标颜色
 (add-to-list 'default-frame-alist '(cursor-color . "Red"))
 (setq-default cursor-type 'bar)    ;更改光标类型

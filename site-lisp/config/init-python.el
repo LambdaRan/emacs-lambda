@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-python.el --- Init python
 
 ;; Filename: init-python.el

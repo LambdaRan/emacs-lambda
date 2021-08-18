@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-info.el --- Init for Info-mode
 
 ;; Filename: init-info.el

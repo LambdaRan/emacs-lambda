@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-thing-edit.el --- Thing edit
 
 ;; Filename: init-thing-edit.el

@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 (require 'init-const)
 
 (let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
@@ -53,8 +54,6 @@
          ;; 自动补全
          (require 'init-company-mode)
          (require 'init-company-tabnine)
-         ;; 保存窗口位置与内容，下次启动时直接恢复到上次窗口状态
-         (require 'init-winpoint)
          (require 'init-info)
          (require 'init-c)
          (require 'init-flycheck)

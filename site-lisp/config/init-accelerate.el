@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;; init-accelerate.el --- Accelerate the start Emacs
 
 ;; Filename: init-accelerate.el

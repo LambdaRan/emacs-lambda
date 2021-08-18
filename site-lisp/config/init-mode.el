@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-mode.el --- File mode setup
 
 ;; Filename: init-mode.el

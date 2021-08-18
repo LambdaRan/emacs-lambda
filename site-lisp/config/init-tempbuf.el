@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-tempbuf.el --- Init tempbuf
 
 ;; Filename: init-tempbuf.el
