@@ -238,7 +238,7 @@
         ("M-n" . awesome-pair-jump-left)
         ("M-p" . awesome-pair-jump-right)
         ;; 符号插入
-        ("%" . awesome-pair-match-paren)       ;�?号跳�?
+        ("%" . awesome-pair-match-paren)       ;括号跳转
         ("(" . awesome-pair-open-round)        ;智能 (
         ("[" . awesome-pair-open-bracket)      ;智能 [
         ("{" . awesome-pair-open-curly)        ;智能 {
@@ -408,20 +408,25 @@
 ;;; ### Unset key ###
 (lazy-load-unset-keys                   ; 全局按键卸载
  '("C-x C-f" "M-x" "C-x b" "M-y"))
+
+(lazy-load-global-keys
+ '(("C-c c z" . zlua-jump-to-directory))
+ "zlua")
+(with-eval-after-load 'zlua
+  ;; 设置zlua脚本路径
+  (setq zlua-path "~/ransysconf/zlua/z.lua"))
+
 (lazy-load-global-keys
  '(
    ("C-x C-f" . counsel-find-file)
    ("M-x" . counsel-M-x)
-   ("C-x b" . ivy-switch-buffer)
-   ("C-c c s" . swiper-isearch)
-   ("C-c c z" . zlua-jump-to-directory)
-
    ("M-y" . counsel-yank-pop)
-
    ("C-c M-l" . counsel-locate)
    ("C-c M-d" . counsel-dired-jump)
    ("C-c M-e" . counsel-find-file-extern)
    ;; ("C-c M-i" . counsel-semantic-or-imenu)
+   ("C-x b" . ivy-switch-buffer)
+   ("C-c c s" . swiper-isearch)
    )
  "init-ivy")
 
