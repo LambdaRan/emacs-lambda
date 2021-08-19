@@ -75,8 +75,6 @@
 ;;; Require
 (require 'dired)
 (require 'dired-x)
-(require 'dired-details)                ;Dired详细信息
-(require 'dired-details+)
 
 ;;; Code:
 
@@ -102,6 +100,11 @@
               (require 'dired-extension)
               (dired-omit-method)                 ;隐藏文件的方法
               ))
+
+;; 拷贝文件时猜测目的地
+(setq dired-dwim-target t)
+;; 隐藏详细信息，按左括号键'('切换状态
+(add-hook 'dired-after-readin-hook 'dired-hide-details-mode)
 
 ;; ls does not support --dired; see ‘dired-use-ls-dired’ for more details.
 (when (string= system-type "darwin")
@@ -152,15 +155,14 @@
  dired-mode-map
  "wdired")
 
-(lazy-load-local-keys
+;; search file name only when focus is over file
+(setq dired-isearch-filenames 'dwim)
+(lazy-load-set-keys
  '(
-   ("C-s" . dired-isearch-forward)             ;向后搜索
-   ("C-r" . dired-isearch-backward)            ;向前搜索
-   ("ESC C-s" . dired-isearch-forward-regexp)  ;向前正则表达式搜索
-   ("ESC C-r" . dired-isearch-backward-regexp) ;向后正则表达式搜索
+   ("C-s" . dired-isearch-filenames)
+   ("ESC C-s" . dired-isearch-filenames-regexp)
    )
- dired-mode-map
- "dired-isearch")
+ dired-mode-map)
 
 (lazy-load-local-keys
  '(
