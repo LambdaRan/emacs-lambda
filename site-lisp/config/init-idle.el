@@ -104,6 +104,8 @@ from tradition chinese to simple chinese" t)
 (setq global-mark-ring-max 1024)        ;设置最大的全局标记容量
 (global-hl-line-mode 1)                 ;高亮当前行
 (setq isearch-allow-scroll t)           ;isearch搜索时是可以滚动屏幕的
+(setq isearch-lazy-count t
+      lazy-count-prefix-format "%s/%s ") ;isearch搜索显示匹配个数
 (setq one-key-popup-window nil)         ;禁止自动弹出窗口
 (setq enable-recursive-minibuffers t)   ;minibuffer 递归调用命令
 (setq history-delete-duplicates t)      ;删除minibuffer的重复历史
@@ -142,6 +144,8 @@ from tradition chinese to simple chinese" t)
 (setq package-archives ;设置中国的镜像源，国外的太慢了，偶尔去偷点 *.el 文件
       '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
+
+(add-hook 'after-init-hook 'delete-selection-mode) ; 选中文本可以编辑
 
 (provide 'init-idle)
 

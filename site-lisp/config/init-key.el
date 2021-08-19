@@ -424,6 +424,7 @@
    ("C-c M-l" . counsel-locate)
    ("C-c M-d" . counsel-dired-jump)
    ("C-c M-e" . counsel-find-file-extern)
+   ("C-c M-f" . counsel-recentf)
    ;; ("C-c M-i" . counsel-semantic-or-imenu)
    ("C-x b" . ivy-switch-buffer)
    ("C-c c s" . swiper-isearch)

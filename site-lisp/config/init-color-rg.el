@@ -3,6 +3,7 @@
 (require 'lazy-load)
 
 (setq color-rg-show-function-name-p nil)
+(setq color-rg-search-ignore-file nil)
 
 (defcustom color-rg-project-root nil
   "If non-nil, overrides the project root directory location."
