@@ -129,22 +129,13 @@
    ("n" . dired-next-dirline)           ;下一个目录
    ("p" . dired-prev-dirline)           ;上一个目录
    ("P" . dired-do-kill-lines)          ;删除标记的行
-   ("5" . dired-translate-to-html)      ;转换到HTML格式
-   ("9" . auto-install-from-dired)      ;自动从EmacsWiki安装标记的文件
    ("I" . image-dired)                  ;打开浏览模式
    ("w" . dired-x-find-file)            ;查找文件
-   ;; ("J" . dired-goto-file)              ;跳到某个文件
+   ("z" . dired-goto-file)              ;跳到某个文件
    ("J" . awesome-tab-backward-tab)
    ("K" . awesome-tab-forward-tab)
-   ("X" . traverse-cp-or-mv-extfiles-in-dir) ;拷贝或移动目录下指定扩展名的文件
-   ("V" . traverse-dired-browse-archive)     ;浏览压缩文件
    ("," . dired-diff)                        ;比较文件
-   ("SPC" . scroll-up)                       ;向下翻页
-   ("e" . scroll-down)                       ;向上翻页
    ("c" . kill-this-buffer)                  ;关闭当前标签
-   ("/" . copy-buffer-file-name-as-kill)     ;显示路径或名称
-   ;; ("s" . one-key-menu-dired-sort)           ;排序
-   ;; ("F" . one-key-menu-dired-filter)         ;过滤
    ("W" . wdired-change-to-wdired-mode)      ;切换到dired编辑模式
    )
  dired-mode-map)
@@ -166,19 +157,6 @@
 
 (lazy-load-local-keys
  '(
-   ("/" . copy-buffer-file-name-as-kill))
- dired-mode-map
- "buffer-extension")
-
-(lazy-load-local-keys
- '(
-   ("T" . dired-tar-pack-unpack)
-   )
- dired-mode-map
- "dired-tar")
-
-(lazy-load-local-keys
- '(
    ("M-o" . dired-toggle-omit)          ;切换忽略状态
    ("?" . dired-get-size)               ;得到文件的大小
    ("[" . dired-rename-with-copy)       ;重命名函数
@@ -188,33 +166,22 @@
    ("8" . dired-move-to-first-file)     ;移动到第一个文件
    ("k" . dired-previous-file-line)     ;上一行
    ("j" . dired-next-file-line)         ;下一行
-   ("{" . dired-gnome-open-file)        ;用GNOME方式打开文件
-   ("E" . dired-touch-now)              ;Touch命令
+   ("e" . dired-touch-now)              ;Touch命令
    ("f" . dired-find-file+)             ;打开当前文件或目录
-   ;; ("C-m" . dired-find-file+)           ;打开当前文件或目录
    )
  dired-mode-map
  "dired-extension")
 
+(defun dired-open-file ()
+  "Dired find file function.
+Open file use another tool"
+  (interactive)
+  (dolist (file (dired-get-marked-files))
+    (find-file file)))
+
 (lazy-load-local-keys
- '(
-   ("F" . dired-open-file)              ;批量打开文件
-   )
- dired-mode-map
- "dired-open")
-
-;;; ### Wdired ###
-;;; --- Dired 的编辑模式
-(eval-after-load 'wdired
-  #'(lambda ()
-      (progn
-        (require 'wdired-extension)
-        (lazy-load-set-keys
-         '(
-           ("C-c C-e" . wdired-format-filename) ;格式化文件名
-           )
-         wdired-mode-map))))
-
+ '(("F" . dired-open-file))              ;批量打开文件
+ dired-mode-map)
 
 (provide 'init-dired)
 
