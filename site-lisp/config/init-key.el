@@ -72,7 +72,6 @@
    ("." . color-rg-search-input-in-current-file)
    ("[" . color-rg-search-symbol-with-type)
    ("]" . color-rg-search-project-with-type)
-   ("m" . color-rg-open-file-and-stay-then-quit)
    )
  "init-color-rg"
  "C-c")

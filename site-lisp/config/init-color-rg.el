@@ -1,6 +1,7 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 (require 'color-rg)
 (require 'init-const)
+(require 'lazy-load)
 
 (setq color-rg-show-function-name-p nil)
 (setq color-rg-search-ignore-file nil)
@@ -32,6 +33,9 @@
         ;; Jump to match point.
         (color-rg-move-to-point match-line match-column)))
     ))
+(lazy-load-set-keys
+ '(("m" . color-rg-open-file-and-stay-then-quit))
+ color-rg-mode-map)
 
 ;; 修复windows分隔符不同导致原buffer在color-rg退出后被关闭
 (when sys/windows-p

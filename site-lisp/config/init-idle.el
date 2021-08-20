@@ -145,7 +145,7 @@ from tradition chinese to simple chinese" t)
       '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
 
-(add-hook 'after-init-hook 'delete-selection-mode) ; 选中文本可以编辑
+(delete-selection-mode t) ; 选中文本可以编辑
 
 (provide 'init-idle)
 
