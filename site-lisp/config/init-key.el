@@ -72,6 +72,7 @@
    ("." . color-rg-search-input-in-current-file)
    ("[" . color-rg-search-symbol-with-type)
    ("]" . color-rg-search-project-with-type)
+   ("m" . color-rg-open-file-and-stay-then-quit)
    )
  "init-color-rg"
  "C-c")
@@ -394,8 +395,9 @@
    ("s" . find-file-with-similar-name)
    ("d" . find-directory-in-project-by-selected)
    ;; ("D" . find-directory-in-project)
-   ("r" . find-file-in-current-directory-by-selected)
+   ("t" . find-file-in-current-directory-by-selected)
    ;; ("C" . find-file-in-current-directory)
+   ("r" . ffip-find-files-resume)
    )
  "init-ffip"
  "C-c")

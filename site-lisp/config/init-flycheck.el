@@ -107,6 +107,17 @@
               (flycheck-rust-setup)
               ))
 
+(defun flycheck-luacheck ()
+  (interactive)
+  (require 'flycheck)
+  (flycheck-mode 1)
+  (setq flycheck-check-syntax-automatically '(idle-change))
+  (setq flycheck-idle-change-delay 3)
+  (unless flycheck-lua-luacheck-executable
+    (when (executable-find "luacheck")
+      (setq flycheck-lua-luacheck-executable (executable-find "luacheck"))))
+  )
+
 (with-eval-after-load 'flycheck
   (setq flycheck-check-syntax-automatically '(idle-change save))
   (setq flycheck-emacs-lisp-load-path 'inherit)

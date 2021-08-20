@@ -1,6 +1,6 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 (require 'color-rg)
-(require 'lazy-load)
+(require 'init-const)
 
 (setq color-rg-show-function-name-p nil)
 (setq color-rg-search-ignore-file nil)
@@ -33,9 +33,23 @@
         (color-rg-move-to-point match-line match-column)))
     ))
 
-(lazy-load-local-keys
- '(("m" . color-rg-open-file-and-stay-then-quit))
- color-rg-mode-map
- "init-color-rg")
+;; 修复windows分隔符不同导致原buffer在color-rg退出后被关闭
+(when sys/windows-p
+  (defun color-rg-get-match-buffer@override (filepath)
+    (catch 'find-match
+      (setq project-root (color-rg-project-root-dir))
+      (setq filepath (file-relative-name filepath project-root))
+      (dolist (buffer (buffer-list))
+        (setq bufferfile (buffer-file-name buffer))
+        (when bufferfile
+          (setq bufferfile (file-relative-name bufferfile project-root))
+          (when (string-equal bufferfile filepath)
+            (throw 'find-match buffer))
+          )
+        )
+      nil))
+  (advice-add #'color-rg-get-match-buffer :override #'color-rg-get-match-buffer@override)
+  ;; (advice-remove #'color-rg-get-match-buffer #'color-rg-get-match-buffer@override)
+)
 
 (provide 'init-color-rg)
