@@ -13,9 +13,21 @@
     (require 'ibuffer-vc)
 
     (setq ibuffer-expert t
-     ibuffer-show-empty-filter-groups nil
-     ibuffer-display-summary nil)
-
+          ibuffer-show-empty-filter-groups nil
+          ibuffer-display-summary nil)
+    ;; Modify the default ibuffer-formats
+    (setq ibuffer-formats
+          '((mark modified read-only vc-status-mini " "
+             (name 18 18 :left :elide)
+             " "
+             (size-h 9 -1 :right)
+             " "
+             (mode 16 16 :left :elide)
+             " "
+             (vc-status 16 16 :left)
+             " "
+             filename-and-process)))
+    (setq ibuffer-filter-group-name-face 'font-lock-doc-face)
     (setq ibuffer-saved-filter-groups
      (quote (("default"
               ("code" (or (mode . emacs-lisp-mode)
@@ -71,24 +83,7 @@
                                      (unless (eq ibuffer-sorting-mode 'filename/process)
                                        (ibuffer-do-sort-by-filename/process))
                                      (ibuffer-switch-to-saved-filter-groups "default")))
-    )
-
-
-;; Modify the default ibuffer-formats
-(setq ibuffer-formats
-      '((mark modified read-only vc-status-mini " "
-         (name 18 18 :left :elide)
-         " "
-         (size-h 9 -1 :right)
-         " "
-         (mode 16 16 :left :elide)
-         " "
-         (vc-status 16 16 :left)
-         " "
-         filename-and-process)))
-
-(setq ibuffer-filter-group-name-face 'font-lock-doc-face)
-
+)
 ;; (global-set-key (kbd "C-x C-b") 'ibuffer)
 
 (provide 'init-ibuffer)

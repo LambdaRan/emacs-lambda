@@ -71,7 +71,7 @@
 ;;
 ;; 2018/06/14
 ;;      * Use `desktop.el' instead window.el and revive.el, those two libraries buggy.
-;;      * Move `kill-unused-buffers' to package `basic-tookit.el'
+;;      * Move `es-kill-unused-buffers' to package `basic-tookit.el'
 ;;
 ;; 2013/12/28
 ;;      * First released.
@@ -89,12 +89,22 @@
 
 ;;; Require
 (require 'auto-save)
-(require 'basic-toolkit)
 
 ;;; Code:
 
 (setq desktop-load-locked-desktop t) ; don't popup dialog ask user, load anyway
 (setq desktop-restore-frames nil)    ; don't restore any frame
+
+(defun es-kill-unused-buffers ()
+  (interactive)
+  (ignore-errors
+    (save-excursion
+      (dolist (buf (buffer-list))
+        (set-buffer buf)
+        (if (and (string-prefix-p "*" (buffer-name))
+                 (string-suffix-p "*" (buffer-name)))
+            (kill-buffer buf))
+        ))))
 
 (defun emacs-session-restore ()
   "Restore emacs session."
@@ -103,7 +113,7 @@
     ;; Kill other windows.
     (delete-other-windows)
     ;; Kill unused buffers.
-    (kill-unused-buffers)
+    (es-kill-unused-buffers)
     ;; Restore session.
     (desktop-read "~/.emacs.d/")
     ))
@@ -116,7 +126,7 @@
         ;; Kill all buffers if with prefix argument.
         (mapc 'kill-buffer (buffer-list))
       ;; Kill unused buffers.
-      (kill-unused-buffers)
+      (es-kill-unused-buffers)
       ;; Save all buffers before exit.
       (auto-save-buffers))
     ;; Save session.

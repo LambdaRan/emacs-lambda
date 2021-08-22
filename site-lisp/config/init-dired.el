@@ -179,9 +179,9 @@ Open file use another tool"
   (dolist (file (dired-get-marked-files))
     (find-file file)))
 
-(lazy-load-local-keys
- '(("F" . dired-open-file))              ;批量打开文件
- dired-mode-map)
+(lazy-load-set-keys
+'(("F" . dired-open-file))              ;批量打开文件
+dired-mode-map)
 
 (provide 'init-dired)
 

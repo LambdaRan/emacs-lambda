@@ -18,7 +18,6 @@
   (interactive)
   (ran-xwidget-webkit-browse-url-at-point nil))
 
-
 (with-eval-after-load 'xwidget
   (lazy-load-set-keys
    '(

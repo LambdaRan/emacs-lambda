@@ -104,8 +104,8 @@
    ("q" . Man-quit)                     ;隐藏
    ("Q" . Man-kill)                     ;退出
    )
- Man-mode-map
- )
+ Man-mode-map)
+
 (setq woman-default-indent 7            ;缩进格式
       woman-fill-frame t                ;填充满屏幕
       woman-use-own-frame nil           ;同一个frame

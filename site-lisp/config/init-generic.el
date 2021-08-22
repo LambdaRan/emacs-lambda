@@ -103,9 +103,6 @@
 (setq read-process-output-max (* 1024 1024))
 
 (fset 'yes-or-no-p 'y-or-n-p)           ;以 y/n代表 yes/no
-(blink-cursor-mode -1)                  ;指针不闪动
-(transient-mark-mode 1)                 ;标记高亮
-(global-subword-mode 1)                 ;Word移动支持 FooBar 的格式
 (setq use-dialog-box nil)               ;never pop dialog
 (setq inhibit-startup-screen t)         ;inhibit start screen
 (setq initial-scratch-message "")       ;关闭启动空白buffer, 这个buffer会干扰session恢复
@@ -136,8 +133,6 @@
 ;; (set-cursor-color "Red")           ;更改光标颜色
 (add-to-list 'default-frame-alist '(cursor-color . "Red"))
 (setq-default cursor-type 'bar)    ;更改光标类型
-
-(electric-pair-mode t)                  ;括号自动匹配插入
 
 ;; 平滑地进行半屏滚动，避免滚动后recenter操作
 (setq scroll-step 1)

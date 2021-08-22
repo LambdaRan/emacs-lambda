@@ -34,4 +34,3 @@
  js2-skip-preprocessor-directives t
  js2-strict-inconsistent-return-warning nil ; return <=> return null
  js2-bounce-indent-p t)
-

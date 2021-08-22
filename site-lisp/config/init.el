@@ -58,7 +58,6 @@
          (require 'init-c)
          (require 'init-flycheck)
          (require 'init-diff-hl)
-         (require 'init-autorevert)
 
          ;; Restore session at last.
          (require 'init-session)
