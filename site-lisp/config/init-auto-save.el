@@ -98,7 +98,7 @@
 
 (auto-save-enable)
 (setq auto-save-silent t)
-(setq-local auto-save-delete-trailing-whitespace nil)
+(setq auto-save-delete-trailing-whitespace nil)
 (setq auto-save-idle 1)                 ; idle 2s then to save
 
 (provide 'init-auto-save)

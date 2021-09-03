@@ -154,3 +154,6 @@
 [submodule "gcmh"]
 	path = site-lisp/extensions/gcmh
 	url = https://github.com/emacsmirror/gcmh.git
+[submodule "csharp-mode"]
+	path = site-lisp/extensions/csharp-mode
+	url = https://github.com/emacs-csharp/csharp-mode.git

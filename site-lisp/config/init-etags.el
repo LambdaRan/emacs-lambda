@@ -24,7 +24,6 @@
 
 ;; How many seconds to wait before rerunning tags for auto-update
 ;; (setq counsel-etags-update-interval 180)
-;; Set up auto-update
 
 ;; (setq counsel-etags-debug nil)
 ;; (setq counsel-etags-grep-program (counsel-etags-guess-program "rg"))
@@ -44,4 +43,34 @@
             #'(lambda ()
                 (add-hook 'after-save-hook
                           'counsel-etags-virtual-update-tags 'append 'local))))
+
+(defun counsel-etags-find-tag-at-point-in-specific-directory ()
+  "Find tag using tagname at point.  Use `pop-tag-mark' to jump back.
+Please note parsing tags file containing line with 2K characters could be slow.
+That's the known issue of Emacs Lisp.  The program itself is perfectly fine."
+  (interactive)
+  (let* ((tagname (counsel-etags-tagname-at-point)))
+    (cond
+     (tagname
+      (counsel-etags-find-tag-in-specific-directory tagname buffer-file-name))
+     (t
+      (message "No tag at point")))))
+
+(defun counsel-etags-find-tag-in-specific-directory (tagname current-file)
+  (when (and counsel-etags-extra-tags-files tagname)
+    (dolist (file (ff-list-replace-env-vars counsel-etags-extra-tags-files))
+      (message "load %s in %s" file counsel-etags-extra-tags-files))
+    (let ((tagfiles (ff-list-replace-env-vars counsel-etags-extra-tags-files))
+          (curtagfile (counsel-etags-locate-tags-file)))
+      (setq tagfiles (cons curtagfile tagfiles))
+      (ivy-read "Select tag file then search: "
+                tagfiles
+                :action (lambda (file)
+                          (let ((default-directory (file-name-directory (expand-file-name file))))
+                            (counsel-etags-find-tag-api tagname nil current-file)))
+                :history 'file-name-history
+                :keymap counsel-find-file-map
+                :caller 'counsel-etags-find-tag-in-specific-directory)
+      )))
+
 (provide 'init-etags)
