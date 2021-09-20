@@ -9,20 +9,19 @@
 
   ;; 统计启动时间
   (with-temp-message ""                 ;抹掉插件启动的输出
-    (require 'init-accelerate)
-    (require 'init-font)
     (require 'benchmark-init-modes)
     (require 'benchmark-init)
     (benchmark-init/activate)
 
-    (require 'init-startup)
+    (require 'init-accelerate)
+    ;; 按需加载插件
+    (require 'lazy-load)    
+    (require 'init-font)
     (require 'init-generic)
     (require 'init-theme)
     (when (featurep 'cocoa)
       (require 'cache-path-from-shell))
 
-    ;; 按需加载插件
-    (require 'lazy-load)
     (require 'one-key)
     (require 'init-awesome-pair)
     (require 'init-awesome-tab)
@@ -35,7 +34,7 @@
     ;; 只读模式下使用vi样式的单按键操作
     (require 'init-vi-navigate)
     (require 'init-ivy)
-
+    (require 'init-startup)
     ;; 可以延后加载的
     (run-with-idle-timer
      1 nil

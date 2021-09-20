@@ -85,14 +85,11 @@
 
 ;;; Code:
 
-(autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
-  "Convert a region from simple chinese to tradition chinese or
-from tradition chinese to simple chinese" t)
-(custom-set-variables '(tramp-verbose 0)) ;设置tramp的响应方式, 关闭后不弹出消息
-(setq max-lisp-eval-depth 40000)          ;lisp最大执行深度
-(setq max-specpdl-size 10000)             ;最大容量
-(setq kill-ring-max 1024)                 ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
-(setq mark-ring-max 1024)                 ;设置的mark ring容量
+(setq tramp-verbose 0)                  ;设置tramp的响应方式, 关闭后不弹出消息
+(setq max-lisp-eval-depth 40000)        ;lisp最大执行深度
+(setq max-specpdl-size 10000)           ;最大容量
+(setq kill-ring-max 1024)               ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
+(setq mark-ring-max 1024)               ;设置的mark ring容量
 (setq eval-expression-print-length nil) ;设置执行表达式的长度没有限制
 (setq eval-expression-print-level nil)  ;设置执行表达式的深度没有限制
 (setq read-quoted-char-radix 16)        ;设置 引用字符 的基数
@@ -100,10 +97,10 @@ from tradition chinese to simple chinese" t)
 (setq isearch-allow-scroll t)           ;isearch搜索时是可以滚动屏幕的
 (setq isearch-lazy-count t
       lazy-count-prefix-format "%s/%s ") ;isearch搜索显示匹配个数
-(setq one-key-popup-window nil)         ;禁止自动弹出窗口
-(setq enable-recursive-minibuffers t)   ;minibuffer 递归调用命令
-(setq history-delete-duplicates t)      ;删除minibuffer的重复历史
-(setq minibuffer-message-timeout 1)     ;显示消息超时的时间
+(setq one-key-popup-window nil)          ;禁止自动弹出窗口
+(setq enable-recursive-minibuffers t)    ;minibuffer 递归调用命令
+(setq history-delete-duplicates t)       ;删除minibuffer的重复历史
+(setq minibuffer-message-timeout 1)      ;显示消息超时的时间
 (setq show-paren-style 'parentheses) ;括号匹配显示但不是烦人的跳到另一个括号。
 (setq blink-matching-paren nil)      ;当插入右括号时不显示匹配的左括号
 (setq message-log-max t)         ;设置message记录全部消息, 而不用截去
@@ -131,11 +128,14 @@ from tradition chinese to simple chinese" t)
               )))
 ;; (elf-setup-default)                     ;二进制文件默认用elf模式打开
 (setq echo-keystrokes 0.1)              ;加快快捷键提示的速度
-(tooltip-mode -1)                       ;不要显示任何 tooltips
 (setq package-archives ;设置中国的镜像源，国外的太慢了，偶尔去偷点 *.el 文件
       '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
 
+;; 自带功能
+(add-hook 'after-init-hook
+          #'(lambda ()
+(tooltip-mode -1)                   ; 不要显示任何 tooltips
 (show-paren-mode t)                 ; 显示括号匹配
 (global-hl-line-mode 1)             ; 高亮当前行
 (delete-selection-mode t)           ; 选中文本可以编辑
@@ -144,6 +144,8 @@ from tradition chinese to simple chinese" t)
 (global-subword-mode 1)             ; Word移动支持 FooBar 的格式
 (electric-pair-mode t)              ; 括号自动匹配插入
 (turn-on-auto-revert-mode)          ; 文件被外部程序修改后自动重新加载
+))
+
 (provide 'init-idle)
 
 ;;; init-idle.el ends here

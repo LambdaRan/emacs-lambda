@@ -87,20 +87,13 @@
 
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
-
 (setq jit-lock-defer-time 0)
-
 ;; Restore emacs session.
 (setq initial-buffer-choice t)
 (run-with-timer 1 nil #'(lambda () (bury-buffer)))
-
 ;; 增加长行处理性能
 (setq bidi-inhibit-bpa t)
 (setq-default bidi-paragraph-direction 'left-to-right)
-
-;; 增加IO性能
-(setq process-adaptive-read-buffering nil)
-(setq read-process-output-max (* 1024 1024))
 
 (fset 'yes-or-no-p 'y-or-n-p)           ;以 y/n代表 yes/no
 (setq use-dialog-box nil)               ;never pop dialog
@@ -124,15 +117,14 @@
       '((100 left)
         (19 right ((14 right profiler-format-number)
                    (5 right)))))
-(add-hook 'find-file-hook 'highlight-parentheses-mode t) ;增强的括号高亮
 
-(setq ad-redefinition-action 'accept)   ;不要烦人的 redefine warning
-(setq frame-resize-pixelwise t) ;设置缩放的模式,避免Mac平台最大化窗口以后右边和下边有空隙
+(setq ad-redefinition-action 'accept)   ; 不要烦人的 redefine warning
+(setq frame-resize-pixelwise t) ; 设置缩放的模式,避免Mac平台最大化窗口以后右边和下边有空隙
 (setq delete-by-moving-to-trash t)      ; 删除的文件移动到垃圾篓
 (setq switch-to-buffer-preserve-window-point t)
-;; (set-cursor-color "Red")           ;更改光标颜色
+(setq-default cursor-type 'bar)         ;更改光标类型
+;; (set-cursor-color "Red")                ;更改光标颜色
 (add-to-list 'default-frame-alist '(cursor-color . "Red"))
-(setq-default cursor-type 'bar)    ;更改光标类型
 
 ;; 平滑地进行半屏滚动，避免滚动后recenter操作
 (setq scroll-step 1)
