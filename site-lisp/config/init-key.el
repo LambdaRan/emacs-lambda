@@ -363,6 +363,7 @@
 
 (lazy-load-global-keys
  '(
+   ("C-}" . counsel-etags-find-tag)
    ("C-]" . counsel-etags-find-tag-at-point)
    ("C-c M-i" . ran-counsel-imenu))
  "init-etags")

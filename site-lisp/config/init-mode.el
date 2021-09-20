@@ -172,6 +172,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
                     ("\\.proto$" . protobuf-mode)
                     ("\\.yaml\\'" . yaml-mode)
                     ("\\.yml\\'" . yaml-mode)
+                    ("\\.cs\\'". csharp-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 
@@ -205,6 +206,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
 (autoload 'llvm-mode "llvm-mode")
 (autoload 'protobuf-mode "protobuf-mode")
 (autoload 'yaml-mode "yaml-mode")
+(autoload 'csharp-mode "csharp-mode")
 
 ;;; ### Auto-fill ###
 ;;; --- 自动换行

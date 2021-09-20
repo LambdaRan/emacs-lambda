@@ -135,6 +135,7 @@ from tradition chinese to simple chinese" t)
 (setq package-archives ;设置中国的镜像源，国外的太慢了，偶尔去偷点 *.el 文件
       '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
+
 (show-paren-mode t)                 ; 显示括号匹配
 (global-hl-line-mode 1)             ; 高亮当前行
 (delete-selection-mode t)           ; 选中文本可以编辑
