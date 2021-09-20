@@ -85,13 +85,9 @@
 
 ;;; Code:
 
-;; (browse-kill-ring-default-keybindings)    ;加载默认的按键邦定
-(setq browse-kill-ring-quit-action        ;设置退出动作
-      (quote save-and-restore))           ;保存还原窗口设置
 (autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
   "Convert a region from simple chinese to tradition chinese or
 from tradition chinese to simple chinese" t)
-(autoload 'irfc "init-irfc")
 (custom-set-variables '(tramp-verbose 0)) ;设置tramp的响应方式, 关闭后不弹出消息
 (setq max-lisp-eval-depth 40000)          ;lisp最大执行深度
 (setq max-specpdl-size 10000)             ;最大容量
@@ -99,10 +95,8 @@ from tradition chinese to simple chinese" t)
 (setq mark-ring-max 1024)                 ;设置的mark ring容量
 (setq eval-expression-print-length nil) ;设置执行表达式的长度没有限制
 (setq eval-expression-print-level nil)  ;设置执行表达式的深度没有限制
-(auto-compression-mode 1)               ;打开压缩文件时自动解压缩
 (setq read-quoted-char-radix 16)        ;设置 引用字符 的基数
 (setq global-mark-ring-max 1024)        ;设置最大的全局标记容量
-(global-hl-line-mode 1)                 ;高亮当前行
 (setq isearch-allow-scroll t)           ;isearch搜索时是可以滚动屏幕的
 (setq isearch-lazy-count t
       lazy-count-prefix-format "%s/%s ") ;isearch搜索显示匹配个数
@@ -110,15 +104,12 @@ from tradition chinese to simple chinese" t)
 (setq enable-recursive-minibuffers t)   ;minibuffer 递归调用命令
 (setq history-delete-duplicates t)      ;删除minibuffer的重复历史
 (setq minibuffer-message-timeout 1)     ;显示消息超时的时间
-(setq auto-revert-mode 1)               ;自动更新buffer
-(show-paren-mode t)                     ;显示括号匹配
 (setq show-paren-style 'parentheses) ;括号匹配显示但不是烦人的跳到另一个括号。
-;; (setq blink-matching-paren nil)      ;当插入右括号时不显示匹配的左括号
+(setq blink-matching-paren nil)      ;当插入右括号时不显示匹配的左括号
 (setq message-log-max t)         ;设置message记录全部消息, 而不用截去
 (setq require-final-newline nil) ;不自动添加换行符到末尾, 有些情况会出现错误
 (setq ediff-window-setup-function (quote ediff-setup-windows-plain)) ;比较窗口设置在同一个frame里
 (setq x-stretch-cursor t)         ;光标在 TAB 字符上会显示为一个大方块
-(put 'narrow-to-region 'disabled nil)   ;开启变窄区域
 (setq print-escape-newlines t)          ;显示字符窗中的换行符为 \n
 (setq tramp-default-method "ssh")       ;设置传送文件默认的方法
 (setq void-text-area-pointer nil)       ;禁止显示鼠标指针
@@ -144,13 +135,14 @@ from tradition chinese to simple chinese" t)
 (setq package-archives ;设置中国的镜像源，国外的太慢了，偶尔去偷点 *.el 文件
       '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
-
-(delete-selection-mode t)            ; 选中文本可以编辑
-(blink-cursor-mode -1)               ; 指针不闪动
-(transient-mark-mode 1)              ; 标记高亮
-(global-subword-mode 1)              ; Word移动支持 FooBar 的格式
-(electric-pair-mode t)               ; 括号自动匹配插入
-(turn-on-auto-revert-mode)           ; 文件被外部程序修改后自动重新加载
+(show-paren-mode t)                 ; 显示括号匹配
+(global-hl-line-mode 1)             ; 高亮当前行
+(delete-selection-mode t)           ; 选中文本可以编辑
+(blink-cursor-mode -1)              ; 指针不闪动
+(transient-mark-mode 1)             ; 标记高亮
+(global-subword-mode 1)             ; Word移动支持 FooBar 的格式
+(electric-pair-mode t)              ; 括号自动匹配插入
+(turn-on-auto-revert-mode)          ; 文件被外部程序修改后自动重新加载
 (provide 'init-idle)
 
 ;;; init-idle.el ends here
