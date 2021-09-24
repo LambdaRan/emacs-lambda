@@ -171,10 +171,20 @@
   (setenv "LC_CTYPE" "en_US.UTF-8"))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Recognize-Coding.html#Recognize-Coding
-(prefer-coding-system 'gb18030)
-(prefer-coding-system 'gb2312)
-(prefer-coding-system 'utf-16)
-(prefer-coding-system 'utf-8)
+(unless sys/windows-p
+  (prefer-coding-system 'gb18030)
+  (prefer-coding-system 'gb2312)
+  (prefer-coding-system 'utf-16)
+  (prefer-coding-system 'utf-8)
+  )
+(when sys/windows-p
+  (set-language-environment "Chinese-GBK")
+  (prefer-coding-system 'utf-16)
+  (prefer-coding-system 'utf-8)
+  (prefer-coding-system 'gb18030)
+  (prefer-coding-system 'gb2312)
+  )
+
 
 
 (provide 'init-generic)

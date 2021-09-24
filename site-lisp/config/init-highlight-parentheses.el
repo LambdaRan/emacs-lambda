@@ -4,6 +4,6 @@
 (setq hl-paren-colors '("firebrick1" "DarkOrchid3" "DarkGoldenrod2" "DodgerBlue3")
       hl-paren-highlight-adjacent t)
 
-(highlight-parentheses-mode t)
+(add-hook 'prog-mode-hook #'highlight-parentheses-mode)
 
 (provide 'init-highlight-parentheses)
