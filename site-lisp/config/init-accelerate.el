@@ -3,7 +3,6 @@
 
 ;;; Require
 (require 'init-const)
-(require 'gcmh)
 
 ;;; Code:
 (setq frame-inhibit-implied-resize t    ;;; 不要缩放frame.
@@ -71,12 +70,12 @@
           #'(lambda ()
               "Recover GC values after startup."
               (setq gc-cons-threshold 800000
-                    gc-cons-percentage 0.1)))
-
- ;; Garbage Collector Magic Hack
-(setq gcmh-idle-delay 5
-      gcmh-high-cons-threshold #x1000000) ; 16MB
-(gcmh-mode 1)
+                    gc-cons-percentage 0.1)
+              (require 'gcmh)
+              ;; Garbage Collector Magic Hack
+              (setq gcmh-idle-delay 5
+                    gcmh-high-cons-threshold #x1000000) ; 16MB              
+              (gcmh-mode 1)))
 
 (provide 'init-accelerate)
 

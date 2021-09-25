@@ -73,44 +73,52 @@
 ;;
 
 ;;; Require
-
+(require 'lazy-load)
 
 ;;; Code:
-(require 'awesome-pair)
+(add-hook 'prog-mode-hook
+          #'(lambda ()
+              (require 'awesome-pair)
+              (awesome-pair-mode 1)))
 
-(dolist (hook (list
-               'c-mode-common-hook
-               'c-mode-hook
-               'c++-mode-hook
-               'java-mode-hook
-               'haskell-mode-hook
-               'emacs-lisp-mode-hook
-               'lisp-interaction-mode-hook
-               'lisp-mode-hook
-               'maxima-mode-hook
-               'ielm-mode-hook
-               'sh-mode-hook
-               'makefile-gmake-mode-hook
-               'php-mode-hook
-               'python-mode-hook
-               'js-mode-hook
-               'go-mode-hook
-               'qml-mode-hook
-               'jade-mode-hook
-               'css-mode-hook
-               'ruby-mode-hook
-               'coffee-mode-hook
-               'rust-mode-hook
-               'qmake-mode-hook
-               'cmake-mode-hook
-               'lua-mode-hook
-               'swift-mode-hook
-               'web-mode-hook
-               'markdown-mode-hook
-               'llvm-mode-hook
-               'conf-toml-mode-hook
-               ))
-  (add-hook hook #'(lambda () (awesome-pair-mode 1))))
+(with-eval-after-load 'awesome-pair
+;;; ### Awesome-Pair ###
+;;; --- 结构化编程
+(lazy-load-unset-keys
+ '("M-J" "M-r" "M-s" "M-;" "C-M-f" "C-M-b" "M-)")
+ awesome-pair-mode-map)                 ;卸载按键
+(defvar awesome-pair-key-alist nil)
+(setq awesome-pair-key-alist
+      '(
+        ;; 移动
+        ("M-n" . awesome-pair-jump-left)
+        ("M-p" . awesome-pair-jump-right)
+        ;; 符号插入
+        ("%" . awesome-pair-match-paren)       ;括号跳转
+        ("(" . awesome-pair-open-round)        ;智能 (
+        ("[" . awesome-pair-open-bracket)      ;智能 [
+        ("{" . awesome-pair-open-curly)        ;智能 {
+        (")" . awesome-pair-close-round)       ;智能 )
+        ("]" . awesome-pair-close-bracket)     ;智能 ]
+        ("}" . awesome-pair-close-curly)       ;智能 }
+        ("\"" . awesome-pair-double-quote)     ;智能 "
+        ("=" . awesome-pair-equal)             ;智能 =
+        ("SPC" . awesome-pair-space)           ;智能 Space
+        ;; 删除
+        ("M-o" . awesome-pair-backward-delete) ;向后删除
+        ("C-d" . awesome-pair-forward-delete)  ;向前删除
+        ("C-k" . awesome-pair-kill)            ;向前kill
+        ;; 包围
+        ("M-\"" . awesome-pair-wrap-double-quote) ;用 " " 包围对象, 或跳出字符串
+        ("M-[" . awesome-pair-wrap-bracket)       ;用 [ ] 包围对象
+        ("M-{" . awesome-pair-wrap-curly)         ;用 { } 包围对象
+        ("M-(" . awesome-pair-wrap-round)         ;用 ( ) 包围对象
+        ("M-)" . awesome-pair-unwrap)             ;去掉包围对象
+        ;; 跳出并换行缩进
+        ("M-:" . awesome-pair-jump-out-pair-and-newline) ;跳出括号并换行
+        ))
+(lazy-load-set-keys awesome-pair-key-alist awesome-pair-mode-map)
+)
 
 (provide 'init-awesome-pair)
 

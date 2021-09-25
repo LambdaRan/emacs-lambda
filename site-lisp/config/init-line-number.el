@@ -81,7 +81,7 @@
 ;;
 
 ;;; Require
-(require 'display-line-numbers)
+
 
 ;;; Code:
 
@@ -91,41 +91,10 @@
 ;; 设置超过120字符显示越界指示器
 (setq-default display-fill-column-indicator-column 120)
 
-(dolist (hook (list
-               'c-mode-common-hook
-               'c-mode-hook
-               'emacs-lisp-mode-hook
-               'lisp-interaction-mode-hook
-               'lisp-mode-hook
-               'java-mode-hook
-               'asm-mode-hook
-               'haskell-mode-hook
-               'sh-mode-hook
-               'makefile-gmake-mode-hook
-               'python-mode-hook
-               'js-mode-hook
-               'html-mode-hook
-               'css-mode-hook
-               'go-mode-hook
-               'coffee-mode-hook
-               'markdown-mode-hook
-               'slime-repl-mode-hook
-               'cmake-mode-hook
-               'php-mode-hook
-               'web-mode-hook
-               'sws-mode-hook
-               'jade-mode-hook
-               'rust-mode-hook
-               'ruby-mode-hook
-               'qmake-mode-hook
-               'lua-mode-hook
-               'swift-mode-hook
-               'llvm-mode-hook
-               'conf-toml-mode-hook
-               ))
-  (add-hook hook #'(lambda ()
-                     ;; (display-line-numbers-mode)
-                     (display-line-numbers--turn-on))))
+(add-hook 'prog-mode-hook
+          #'(lambda ()
+              (require 'display-line-numbers)
+              (display-line-numbers--turn-on)))
 
 (provide 'init-line-number)
 
