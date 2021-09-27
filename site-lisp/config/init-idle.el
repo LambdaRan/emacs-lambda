@@ -142,7 +142,7 @@
 (blink-cursor-mode -1)              ; 指针不闪动
 (transient-mark-mode 1)             ; 标记高亮
 (electric-pair-mode t)              ; 括号自动匹配插入
-(turn-on-auto-revert-mode)          ; 文件被外部程序修改后自动重新加载
+(global-auto-revert-mode t)         ; 文件被外部程序修改后自动重新加载
 (global-subword-mode t)             ; Word移动支持 FooBar 的格式
 ))
 
