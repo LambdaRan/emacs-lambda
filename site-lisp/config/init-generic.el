@@ -143,9 +143,7 @@
 
 (when sys/windows-p
   ;; 使用英文day-time
-  (setq system-time-locale "C")
-  (set-default 'process-coding-system-alist
-               '(("[cC][mM][dD][pP][rR][oO][xX][yY]" gbk-dos . gbk-dos))))
+  (setq system-time-locale "C"))
 
 ;; Contrary to what many Emacs users have in their configs, you don't need more
 ;; than this to make UTF-8 the default coding system:
