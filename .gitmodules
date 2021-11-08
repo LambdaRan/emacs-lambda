@@ -130,12 +130,6 @@
 [submodule "ibuffer-vc"]
 	path = site-lisp/extensions/ibuffer-vc
 	url = https://github.com/purcell/ibuffer-vc.git
-[submodule "gotest"]
-	path = site-lisp/extensions/gotest
-	url = https://github.com/nlamirault/gotest.el.git
-[submodule "grip-mode"]
-	path = site-lisp/extensions/grip-mode
-	url = https://github.com/seagle0128/grip-mode.git
 [submodule "rust-mode"]
 	path = site-lisp/extensions/rust-mode
 	url = https://github.com/rust-lang/rust-mode.git
@@ -157,6 +151,3 @@
 [submodule "csharp-mode"]
 	path = site-lisp/extensions/csharp-mode
 	url = https://github.com/emacs-csharp/csharp-mode.git
-[submodule "sort-tab"]
-	path = site-lisp/extensions/sort-tab
-	url = https://github.com/manateelazycat/sort-tab.git
