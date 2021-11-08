@@ -207,6 +207,16 @@
    )
  "awesome-tab")
 
+;; (lazy-load-global-keys
+;;  '(
+;;    ("M-7" . sort-tab-select-prev-tab)    ;选择前一个标签
+;;    ("M-8" . sort-tab-select-next-tab)    ;选择后一个标签
+;;    ("M-s-7" . sort-tab-select-first-tab) ;选择第一个标签
+;;    ("M-s-8" . sort-tab-select-last-tab)  ;选择最后一个标签
+;;    ("C-;" . sort-tab-close-current-tab)  ;关闭当前标签
+;;    )
+;;  "sort-tab")
+
 ;;; ### Help ###
 ;;; --- 帮助模式
 (lazy-load-global-keys

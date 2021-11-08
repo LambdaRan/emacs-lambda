@@ -157,3 +157,6 @@
 [submodule "csharp-mode"]
 	path = site-lisp/extensions/csharp-mode
 	url = https://github.com/emacs-csharp/csharp-mode.git
+[submodule "sort-tab"]
+	path = site-lisp/extensions/sort-tab
+	url = https://github.com/manateelazycat/sort-tab.git

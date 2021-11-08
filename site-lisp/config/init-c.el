@@ -140,16 +140,13 @@
                'c++-mode-hook
                'c-mode-common-hook
                ))
-  (add-hook
-   hook
-   #'(lambda ()
-       (require 'cc-mode)
-       ;; (require 'c-eldoc)
-       (require 'modern-cpp-font-lock)
-       (require 'google-c-style)
-
-       (c-mode-style-setup)
-       )))
+  (add-hook hook
+            #'(lambda ()
+                (require 'cc-mode)
+                ;; (require 'c-eldoc)
+                (require 'modern-cpp-font-lock)
+                (require 'google-c-style)
+                (c-mode-style-setup))))
 
 (add-hook 'c-mode-hook #'(lambda ()
                            (setq-local comment-start "// ")

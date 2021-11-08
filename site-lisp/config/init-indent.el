@@ -110,6 +110,7 @@
                'js-mode-hook
                'protobuf-mode-hook
                'php-mode-hook
+               'csharp-mode-hook
                ))
   (add-hook hook #'(lambda ()
                      (setq indent-tabs-mode nil)

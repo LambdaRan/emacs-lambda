@@ -198,6 +198,22 @@ Version 2020-11-20 2021-01-18"
        ;; (shell-command "xdg-open .") ;; 2013-02-10 this sometimes froze emacs till the folder is closed. eg with nautilus
        ))))
 ;; }}
+
+;; {
+(defun delete-carrage-returns ()
+  (interactive)
+  (save-excursion
+    (goto-char 0)
+    (while (search-forward "\r" nil :noerror)
+      (replace-match ""))))
+;; }
+
+;; {
+(defun ran-kill-all-buffer ()
+  "Kill all buffer."
+  (interactive)
+  (dolist (buffer (buffer-list)) (kill-buffer buffer)))
+;; }
 (provide 'ran-toolkit)
 
 ;;; basic-toolkit.el ends here
