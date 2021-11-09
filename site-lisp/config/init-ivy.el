@@ -20,6 +20,17 @@
   ;; work around ivy issue.
   ;; @see https://github.com/abo-abo/swiper/issues/828
   (setq ivy-display-style 'fancy)
+  ;; https://github.com/redguardtoo/emacs.d/commit/41b8d9feefda14776b24e53bc0454faf7a1794e1
+  (setq ivy-dynamic-exhibit-delay-ms 250)
+  (defvar my-ivy--queue-last-input nil)
+  (defun my-ivy-queue-exhibit-a(f &rest args)
+    (cond
+     ((equal my-ivy--queue-last-input (ivy--input))
+      (ivy--exhibit))
+     (t
+      (apply f args)))
+    (setq my-ivy--queue-last-input (ivy--input)))
+  (advice-add 'ivy--queue-exhibit :around #'my-ivy-queue-exhibit-a)  
 )
 
 (with-eval-after-load 'counsel
