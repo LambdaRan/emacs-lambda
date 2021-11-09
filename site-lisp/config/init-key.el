@@ -172,6 +172,13 @@
    )
  "watch-other-window")
 
+;;; --- 临时最大化当前窗口
+(lazy-load-global-keys
+ '(
+   ("C-c '" . toggle-one-window)              ;切换一个窗口
+   )
+ "toggle-one-window")
+
 ;; xwidget webkit
 (lazy-load-global-keys
  '(

@@ -11,24 +11,17 @@
 ;; `diff-hl-previous-hunk'   C-x v [
 ;; `diff-hl-next-hunk'       C-x v ]
 
-(dolist (hook (list
-               'prog-mode-hook
-               ;; conf
-               'conf-mode-hook
-               'protobuf-mode-hook
-               ;; 'conf-unix-mode-hook
-               ;; 'conf-windows-mode-hook
-               ;; 'conf-javaprop-mode-hook
-               ;; 'conf-space-mode-hook
-               ;; 'conf-colon-mode-hook
-               ;; 'conf-ppd-mode-hook
-               ;; 'conf-toml-mode-hook
-               ;; 'conf-windows-mode-hook
-               ;; 'conf-xdefaults-mode-hook
-               ))
-  (add-hook hook #'(lambda ()
-                     (require 'diff-hl-margin)
-                     (turn-on-diff-hl-mode))))
+(require 'init-const)
+
+(unless sys/windows-p
+  (dolist (hook (list
+                 'prog-mode-hook
+                 'conf-mode-hook
+                 'protobuf-mode-hook
+                 ))
+    (add-hook hook #'(lambda ()
+                       (require 'diff-hl-margin)
+                       (turn-on-diff-hl-mode)))))
 
 (with-eval-after-load 'diff-hl-margin
   ;; right fringe

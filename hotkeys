@@ -90,6 +90,7 @@ C-c o
 
 C-c q
 C-c Q
+C-c '
 
 分配给Avy:
 C-c n
@@ -110,13 +111,12 @@ C-c d
 C-c r
 
 空闲：
-C-c t
 C-c g
 C-c z
 C-c b
 C-c /
 C-c ;
-C-c '
+
 
 
 
