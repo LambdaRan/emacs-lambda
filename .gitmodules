@@ -91,9 +91,6 @@
 [submodule "yasnippet-snippets"]
 	 path = site-lisp/extensions/yasnippet-snippets
 	 url = https://github.com/AndreaCrotti/yasnippet-snippets.git
-[submodule "highlight-parentheses"]
-	path = site-lisp/extensions/highlight-parentheses
-	url = https://github.com/tsdh/highlight-parentheses.el.git
 [submodule "php-mode"]
 	path = site-lisp/extensions/php-mode
 	url = https://github.com/emacs-php/php-mode.git
