@@ -1,5 +1,6 @@
 ;; URL: https://github.com/seagle0128/.emacs.d
-
+;; 需要拷贝到.emacs.d目录中
+ 
 ;; Defer garbage collection further back in the startup process
 (setq gc-cons-threshold most-positive-fixnum
       gc-cons-percentage 0.5)

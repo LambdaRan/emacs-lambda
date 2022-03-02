@@ -117,7 +117,19 @@ C-c b
 C-c /
 C-c ;
 
+C-x q kbd-macro-query
+C-x w 空闲
 
+
+C-z q 空闲
+C-z w 空闲
+C-z e 空闲
+
+C-z m  kill-and-join-forward  ;在缩进的行之间删除
+C-z ; 空闲
+
+C-z k beginning-of-buffer
+C-z j end-of-buffer
 
 
 

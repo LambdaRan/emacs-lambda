@@ -95,7 +95,7 @@
    ("M-2" . indent-buffer)              ;动格式化当前Buffer
    ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
    ("C-x l" . mark-line)                ;选中整行
-   ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
+   ("C-z m" . kill-and-join-forward)    ;在缩进的行之间删除
    ("C->" . remember-init)              ;记忆初始函数
    ("C-<" . remember-jump)              ;记忆跳转函数
    ("M-s-," . point-stack-pop)          ;buffer索引跳转
