@@ -148,3 +148,18 @@
 [submodule "csharp-mode"]
 	path = site-lisp/extensions/csharp-mode
 	url = https://github.com/emacs-csharp/csharp-mode.git
+[submodule "corfu"]
+	path = site-lisp/extensions/corfu
+	url = https://github.com/minad/corfu.git
+[submodule "cape"]
+	path = site-lisp/extensions/cape
+	url = https://github.com/minad/cape.git
+[submodule "tabnine-capf"]
+	path = site-lisp/extensions/tabnine-capf
+	url = https://github.com/50ways2sayhard/tabnine-capf.git
+[submodule "orderless"]
+	path = site-lisp/extensions/orderless
+	url = https://github.com/oantolin/orderless.git
+[submodule "vertico"]
+	path = site-lisp/extensions/vertico
+	url = https://github.com/minad/vertico.git
