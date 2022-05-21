@@ -38,18 +38,17 @@
 ;;; --- 工具函数
 (lazy-load-set-keys
  '(
-   ("<f2>" . make_fullscreen) ; 全屏模式
-   ("<f5>" . emacs-session-save)        ;退出emacs
-   ("<M-s-return>" . toggle-debug-on-error) ;切换调试模式
-   ("s-[" . eval-expression)                ;执行表达式
-   ("M-h" . set-mark-command)               ;Instead C-Space for Chinese input method
+   ("<f2>" . make_fullscreen)               ; 全屏模式
+   ("<f5>" . emacs-session-save)            ; 退出emacs
+   ("<M-s-return>" . toggle-debug-on-error) ; 切换调试模式
+   ("s-[" . eval-expression)                ; 执行表达式
+   ("M-h" . set-mark-command)               ; Instead C-Space for Chinese input method
 
    ("C-z i" . display-fill-column-indicator-mode) ; 120字符限制线
-   ("C-z l" . display-line-numbers-mode) ; 行号模式切换
-   ("C-c C-k". kill-whole-line)
+   ("C-z l" . display-line-numbers-mode)          ; 行号模式切换
+   ("C-c C-k". kill-whole-line)                   ; 在当前行任何位置删除整行
    ))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 搜索
 (lazy-load-global-keys
  '(
@@ -131,18 +130,11 @@
    ("M-SPC" . just-one-space)              ;只有一个空格在光标处
    ))
 
-(lazy-load-global-keys
+(lazy-load-set-keys
  '(
-   ("C-/" . undo-tree-undo)             ;撤销
-   ("C-?" . undo-tree-redo)             ;重做
-   )
- "undo-tree")
-
-(with-eval-after-load 'undo-tree
-  (global-undo-tree-mode)
-  (setq undo-tree-visualizer-timestamps t
-        undo-tree-enable-undo-in-region nil
-        undo-tree-auto-save-history nil))
+   ("C-/" . undo)                       ;撤销
+   ("C-?" . undo-redo)                  ;重做
+   ))
 
  ;;; ### Multi-Scratch
 (lazy-load-global-keys
@@ -214,16 +206,6 @@
    ("s-W" . awesome-tab-kill-match-buffers-in-current-group)
    )
  "awesome-tab")
-
-;; (lazy-load-global-keys
-;;  '(
-;;    ("M-7" . sort-tab-select-prev-tab)    ;选择前一个标签
-;;    ("M-8" . sort-tab-select-next-tab)    ;选择后一个标签
-;;    ("M-s-7" . sort-tab-select-first-tab) ;选择第一个标签
-;;    ("M-s-8" . sort-tab-select-last-tab)  ;选择最后一个标签
-;;    ("C-;" . sort-tab-close-current-tab)  ;关闭当前标签
-;;    )
-;;  "sort-tab")
 
 ;;; ### Help ###
 ;;; --- 帮助模式

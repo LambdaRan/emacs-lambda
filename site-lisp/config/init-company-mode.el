@@ -100,7 +100,6 @@
           minibuffer-inactive-mode))
 
   ;; Customize company backends.
-  ;; (setq company-backends (delete backend company-backends)))
   (setq company-backends '(company-dabbrev
                            company-keywords                           
                            company-files                       
@@ -153,8 +152,7 @@
      ("M-i" . yas-expand)
      ("RET" . company-complete-selection)
      )
-   company-active-map)
-  )
+   company-active-map))
 
 (with-eval-after-load 'company-yasnippet
   ;; Add yasnippet support for all company backends.
