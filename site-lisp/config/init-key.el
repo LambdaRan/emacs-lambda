@@ -46,6 +46,7 @@
 
    ("C-z i" . display-fill-column-indicator-mode) ; 120字符限制线
    ("C-z l" . display-line-numbers-mode) ; 行号模式切换
+   ("C-c C-k". kill-whole-line)
    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

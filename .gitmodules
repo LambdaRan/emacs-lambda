@@ -160,6 +160,3 @@
 [submodule "orderless"]
 	path = site-lisp/extensions/orderless
 	url = https://github.com/oantolin/orderless.git
-[submodule "vertico"]
-	path = site-lisp/extensions/vertico
-	url = https://github.com/minad/vertico.git
