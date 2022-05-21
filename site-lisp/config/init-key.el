@@ -364,11 +364,6 @@
  "init-ffip"
  "C-c")
 
-(lazy-load-unset-keys '("C-x C-b"))
-(lazy-load-global-keys
- '(("C-x C-b" . ibuffer))
- "init-ibuffer")
-
 ;;; ### Unset key ###
 (lazy-load-unset-keys                   ; 全局按键卸载
  '("C-x C-f" "M-x" "C-x b" "M-y"))
