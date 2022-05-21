@@ -101,9 +101,10 @@
 
   ;; Customize company backends.
   ;; (setq company-backends (delete backend company-backends)))
-  (setq company-backends '(company-capf
-                           company-dabbrev
-                           company-files                           
+  (setq company-backends '(company-dabbrev
+                           company-keywords                           
+                           company-files                       
+                           company-capf                           
                            ;; other backends
                            ))
 

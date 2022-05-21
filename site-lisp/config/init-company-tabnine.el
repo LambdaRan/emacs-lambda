@@ -96,11 +96,8 @@
 
 (with-eval-after-load 'company
   (require 'company-tabnine)
-  (require 'company-ctags)
+  (require 'company-dabbrev)
   (setq company-tabnine-always-trigger nil) ; 不要一直触发
-  ;; config company-ctags
-  (setq company-ctags-ignore-case t)  ; I use company-ctags instead
-  (company-ctags-auto-setup)
 
   ;; TabNine
   (dolist (mode (list
@@ -130,7 +127,7 @@
                      (throw 'found t))
                     (t nil))))
         (add-to-list 'company-backends '(company-tabnine
-                                         :separate company-ctags
+                                         :separate company-dabbrev
                                          )))))
   )
 

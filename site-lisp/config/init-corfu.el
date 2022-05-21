@@ -18,8 +18,10 @@
 (setq corfu-auto-prefix 2)
 (setq corfu-auto-delay 0)
 (setq corfu-scroll-margin 5)
-;; (setq corfu-quit-at-boundary t)
+(setq corfu-quit-at-boundary t)
 (setq corfu-quit-no-match t)
+(setq corfu-auto-delay 0)
+
 (setq corfu-excluded-modes '(shell-mode eshell-mode comint-mode erc-mode gud-mode rcirc-mode text-mode minibuffer-inactive-mode))  
 
 ;; 默认补全后端

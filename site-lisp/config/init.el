@@ -34,7 +34,6 @@
     ;; 只读模式下使用vi样式的单按键操作
     (require 'init-vi-navigate)
     (require 'init-ivy)
-    ;; (require 'init-vertico)
     (require 'init-startup)
     ;; 可以延后加载的
     (run-with-idle-timer
@@ -52,11 +51,10 @@
          ;; 模板
          (require 'init-yasnippet)
          ;; 自动补全
-         (require 'init-corfu)         
-         (require 'init-corfu-tabnine)
-
-         ;; (require 'init-company-mode)
-         ;; (require 'init-company-tabnine)
+         ;; (require 'init-corfu)         
+         ;; (require 'init-corfu-tabnine)
+         (require 'init-company-mode)
+         (require 'init-company-tabnine)
          (require 'init-info)
          (require 'init-c)
          (require 'init-flycheck)

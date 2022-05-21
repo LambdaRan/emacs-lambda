@@ -16,14 +16,16 @@
 
 (with-eval-after-load 'corfu
 
-(require 'tabnine-capf)
-(require 'company-ctags) 
+;; (require 'tabnine-capf)
+;; (require 'company-ctags) 
 
-(setq tabnine-capf-always-trigger nil) ; 不要一直触发
+;; (setq tabnine-capf-always-trigger nil) ; 不要一直触发
 ;; config company-ctags
-(setq company-ctags-ignore-case t)  ; I use company-ctags instead
-(company-ctags-auto-setup)
+;; (setq company-ctags-ignore-case t)  ; I use company-ctags instead
+;; (company-ctags-auto-setup)
 
+(require 'company-tabnine)
+  
 ;; 组合不同的补全后端
 (defun Corfu-multi-backends ()
   (setq-local completion-category-defaults nil)
@@ -31,8 +33,9 @@
               (list 
                (cape-capf-buster
                 (cape-super-capf
-                 #'tabnine-completion-at-point
-                 (cape-company-to-capf #'company-ctags)
+                 (cape-company-to-capf #'company-tabnine)
+                 ;; #'tabnine-completion-at-point
+                 ;; (cape-company-to-capf #'company-ctags)
                  #'cape-dabbrev
                  )
                 'equal)               
