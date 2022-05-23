@@ -5,6 +5,7 @@
 
 (setq color-rg-show-function-name-p nil)
 (setq color-rg-search-ignore-file nil)
+(setq color-rg-search-ignore-rules "-g \"!node_modules\" -g \"!dist\" -g \"!TAGS\"")
 
 (defcustom color-rg-project-root nil
   "If non-nil, overrides the project root directory location."
