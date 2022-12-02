@@ -186,7 +186,7 @@
 ;;; --- 多标签浏览
 (lazy-load-set-keys
  '(
-   ("M-i" . awesome-tab-ace-jump)                  ;Ace jump
+   ("M-i" . awesome-tab-ace-mp)                  ;Ace jump
    ("M-7" . awesome-tab-backward-tab)              ;移动到后一个标签
    ("M-8" . awesome-tab-forward-tab)               ;移动到前一个标签
    ("M-9" . awesome-tab-backward-group)            ;移动到后一个标签组
@@ -257,7 +257,6 @@
 
    ("C-\"" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
    ("C-'" . delete-current-buffer-window)      ;删除当前buffer的窗口
-
    )
  "ran-toolkit")
 

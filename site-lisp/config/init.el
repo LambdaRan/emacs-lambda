@@ -49,12 +49,12 @@
          (require 'init-eldoc)
          (require 'init-indent)
          ;; 模板
-         (require 'init-yasnippet)
+         ;; (require 'init-yasnippet)
          ;; 自动补全
-         ;; (require 'init-corfu)         
-         ;; (require 'init-corfu-tabnine)
          (require 'init-company-mode)
          (require 'init-company-tabnine)
+         ;;(require 'init-tree-sitter)
+         ;; (require 'init-lsp-bridge)
          (require 'init-info)
          (require 'init-c)
          (require 'init-flycheck)
@@ -64,7 +64,7 @@
          (require 'init-session)
          (emacs-session-restore)
 
-         (server-start)            ;为emacsclient准备使用场景，比如git
+         ;; (server-start)            ;为emacsclient准备使用场景，比如git
          )))
   ) ;; end let
 

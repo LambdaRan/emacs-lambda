@@ -60,7 +60,7 @@
 
 (with-eval-after-load 'company
   (require 'lazy-load)
-  (require 'company-yasnippet)
+  ;; (require 'company-yasnippet)
   (require 'company-dabbrev)
   (require 'company-files)
   (require 'company-tng)
