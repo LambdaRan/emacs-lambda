@@ -28,9 +28,6 @@
 [submodule "flycheck"]
 	 path = site-lisp/extensions/flycheck
 	 url = https://github.com/flycheck/flycheck.git
-[submodule "flycheck-posframe"]
-	 path = site-lisp/extensions/flycheck-posframe
-	 url = https://github.com/alexmurray/flycheck-posframe.git
 [submodule "goto-line-preview"]
 	path = site-lisp/extensions/goto-line-preview
 	url = https://github.com/jcs090218/goto-line-preview.git
@@ -52,9 +49,6 @@
 [submodule "thing-edit"]
 	path = site-lisp/extensions/thing-edit
 	url = https://github.com/manateelazycat/thing-edit.git
-[submodule "lazy-search"]
-	path = site-lisp/extensions/lazy-search
-	url = https://github.com/manateelazycat/lazy-search.git
 [submodule "lazy-load"]
 	path = site-lisp/extensions/lazy-load
 	url = https://github.com/manateelazycat/lazy-load.git
@@ -67,15 +61,9 @@
 [submodule "symbol-overlay"]
 	path = site-lisp/extensions/symbol-overlay
 	url = https://github.com/wolray/symbol-overlay.git
-[submodule "names"]
-	path = site-lisp/extensions/names
-	url = https://github.com/Malabarba/names.git
 [submodule "company-tabnine"]
 	path = site-lisp/extensions/company-tabnine
 	url = https://github.com/TommyX12/company-tabnine.git
-[submodule "posframe"]
-	path = site-lisp/extensions/posframe
-	url = https://github.com/tumashu/posframe.git
 [submodule "benchmark-init"]
 	path = site-lisp/extensions/benchmark-init
 	url = https://github.com/dholm/benchmark-init-el.git
@@ -115,27 +103,15 @@
 [submodule "markdown-mode"]
 	path = site-lisp/extensions/markdown-mode
 	url = https://github.com/jrblevin/markdown-mode.git
-[submodule "company-ctags"]
-	path = site-lisp/extensions/company-ctags
-	url = https://github.com/redguardtoo/company-ctags.git
 [submodule "find-file-in-project"]
 	path = site-lisp/extensions/find-file-in-project
 	url = https://github.com/technomancy/find-file-in-project.git
-[submodule "ibuffer-vc"]
-	path = site-lisp/extensions/ibuffer-vc
-	url = https://github.com/purcell/ibuffer-vc.git
 [submodule "rust-mode"]
 	path = site-lisp/extensions/rust-mode
 	url = https://github.com/rust-lang/rust-mode.git
 [submodule "flycheck-rust"]
 	path = site-lisp/extensions/flycheck-rust
 	url = https://github.com/flycheck/flycheck-rust.git
-[submodule "js2-mode"]
-	path = site-lisp/extensions/js2-mode
-	url = https://github.com/mooz/js2-mode.git
-[submodule "web-mode"]
-	path = site-lisp/extensions/web-mode
-	url = https://github.com/fxbois/web-mode.git
 [submodule "aweshell"]
 	path = site-lisp/extensions/aweshell
 	url = https://github.com/manateelazycat/aweshell.git
@@ -145,15 +121,3 @@
 [submodule "csharp-mode"]
 	path = site-lisp/extensions/csharp-mode
 	url = https://github.com/emacs-csharp/csharp-mode.git
-[submodule "corfu"]
-	path = site-lisp/extensions/corfu
-	url = https://github.com/minad/corfu.git
-[submodule "cape"]
-	path = site-lisp/extensions/cape
-	url = https://github.com/minad/cape.git
-[submodule "tabnine-capf"]
-	path = site-lisp/extensions/tabnine-capf
-	url = https://github.com/50ways2sayhard/tabnine-capf.git
-[submodule "orderless"]
-	path = site-lisp/extensions/orderless
-	url = https://github.com/oantolin/orderless.git
