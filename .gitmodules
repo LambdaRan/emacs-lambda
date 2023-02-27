@@ -37,9 +37,6 @@
 [submodule "magit"]
 	path = site-lisp/extensions/magit
 	url = https://github.com/magit/magit
-[submodule "unicode-escape"]
-	path = site-lisp/extensions/unicode-escape
-	url = https://github.com/kosh04/unicode-escape.el.git
 [submodule "lazycat-theme"]
 	path = site-lisp/extensions/lazycat-theme
 	url = https://github.com/manateelazycat/lazycat-theme.git

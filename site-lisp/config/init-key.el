@@ -252,7 +252,6 @@
    ("M-s-p" . ran-comment-line-prev-line) ;向上移动注释
    ("M-s-i" . ielm-toggle)                ;切换ielm,Emacs Lisp 解释模式
 
-   ("C-x e" . xah-show-in-desktop)         ;使用系统文件管理器打开文件
    ("C-\\" . comment-or-uncomment-region+) ;注释当前行
 
    ("C-\"" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
