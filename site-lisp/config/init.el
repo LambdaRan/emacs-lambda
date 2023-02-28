@@ -57,7 +57,7 @@
          ;; (require 'init-lsp-bridge)
          (require 'init-info)
          (require 'init-c)
-         (require 'init-flycheck)
+         ;; (require 'init-flycheck)
          (require 'init-diff-hl)
 
          ;; Restore session at last.
