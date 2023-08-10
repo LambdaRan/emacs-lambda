@@ -129,7 +129,10 @@
 ;; 平滑地进行半屏滚动，避免滚动后recenter操作
 (setq scroll-step 1)
 (setq scroll-conservatively 10000)
-
+;; 像素滚动
+(pixel-scroll-precision-mode 1)
+(setq pixel-scroll-precision-large-scroll-height 60)
+(setq pixel-scroll-precision-interpolation-factor 8.0)
 ;; ;; 不显示 *scratch*
 ;; (defun remove-scratch-buffer ()
 ;;  (if (get-buffer "*scratch*")
@@ -142,6 +145,8 @@
             kill-buffer-query-functions))
 
 (when sys/windows-p
+  ;; 禁用双buff
+  (setq w32-disable-double-buffering t)
   ;; 使用英文day-time
   (setq system-time-locale "C"))
 
