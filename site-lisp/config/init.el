@@ -1,5 +1,6 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 (require 'init-const)
+(require 'init-accelerate)
 
 (let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
       (gc-cons-threshold most-positive-fixnum)
@@ -7,13 +8,22 @@
       ;; 清空避免加载远程文件的时候分析文件。
       (file-name-handler-alist nil))
 
+  ;; 让窗口启动更平滑
+  (setq frame-inhibit-implied-resize t)
+  (setq-default inhibit-redisplay t
+                inhibit-message t)
+  (add-hook 'window-setup-hook
+            (lambda ()
+              (setq-default inhibit-redisplay nil
+                            inhibit-message nil)
+              (redisplay)))  
+
   ;; 统计启动时间
   (with-temp-message ""                 ;抹掉插件启动的输出
     (require 'benchmark-init-modes)
     (require 'benchmark-init)
     (benchmark-init/activate)
 
-    (require 'init-accelerate)
     ;; 按需加载插件
     (require 'lazy-load)    
     (require 'init-font)
@@ -23,11 +33,13 @@
       (require 'cache-path-from-shell))
 
     (require 'one-key)
-    (require 'init-awesome-pair)
+    ;; (require 'init-awesome-pair)
+    (require 'init-fingertip)    
     (require 'init-awesome-tab)
-    (require 'init-awesome-tray)
+   (require 'init-awesome-tray)
     (require 'init-auto-save)
     (require 'init-mode)
+    (require 'init-treesit)
     (require 'init-dired)
     (require 'init-one-key)
     (require 'init-key)
@@ -53,12 +65,8 @@
          ;; 自动补全
          (require 'init-company-mode)
          (require 'init-company-tabnine)
-         ;;(require 'init-tree-sitter)
-         ;; (require 'init-lsp-bridge)
          (require 'init-info)
          (require 'init-c)
-         ;; (require 'init-flycheck)
-         (require 'init-diff-hl)
 
          ;; Restore session at last.
          (require 'init-session)

@@ -115,3 +115,6 @@
 [submodule "csharp-mode"]
 	path = site-lisp/extensions/csharp-mode
 	url = https://github.com/emacs-csharp/csharp-mode.git
+[submodule "site-lisp/extensions/fingertip"]
+	path = site-lisp/extensions/fingertip
+	url = https://github.com/manateelazycat/fingertip.git

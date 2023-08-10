@@ -117,7 +117,7 @@
       '((100 left)
         (19 right ((14 right profiler-format-number)
                    (5 right)))))
-
+(setq completion-auto-select nil)       ;避免默认自动选择
 (setq ad-redefinition-action 'accept)   ; 不要烦人的 redefine warning
 (setq frame-resize-pixelwise t) ; 设置缩放的模式,避免Mac平台最大化窗口以后右边和下边有空隙
 (setq delete-by-moving-to-trash t)      ; 删除的文件移动到垃圾篓
