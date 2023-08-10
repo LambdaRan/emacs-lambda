@@ -228,7 +228,7 @@
 ;;
 
 ;;; Require
-(eval-when-compile (require 'cl))
+(eval-when-compile (require 'cl-lib))
 
 ;;; Code:
 
@@ -237,7 +237,7 @@
   "One key."
   :group 'editing)
 
-(defcustom one-key-popup-window t
+(defcustom one-key-popup-window nil
   "Whether popup window when first time run `one-key-menu'."
   :type 'boolean
   :group 'one-key)
@@ -383,6 +383,7 @@ last command when it miss match in key alist."
                   protect-function
                   alternate-function
                   execute-last-command-when-miss-match))))
+        (command-executed this-command)
         last-key)
     ;; Popup help window when first time call
     ;; and option `one-key-popup-window' is `non-nil'.
@@ -411,6 +412,7 @@ last command when it miss match in key alist."
           (cond
            ;; Match user keystrokes.
            ((catch 'match
+              (when (stringp key) (setq key (read-kbd-macro key)))
               (cl-loop for ((k . desc) . command) in info-alist do
                        ;; Get match key.
                        (setq match-key k)
@@ -422,6 +424,7 @@ last command when it miss match in key alist."
                          (setq one-key-menu-call-first-time t)
                          ;; Execute.
                          (call-interactively command)
+                         (setq command-executed command)
                          ;; Set `one-key-menu-call-first-time' with "nil".
                          (setq one-key-menu-call-first-time nil)
                          (throw 'match t)))
@@ -481,7 +484,10 @@ last command when it miss match in key alist."
       (when (and execute-last-command-when-miss-match
                  last-key)
         ;; Execute command corresponding last input key.
-        (one-key-execute-binding-command last-key)))))
+        (one-key-execute-binding-command last-key))
+
+      ;; Make sure this-command is the real command executed
+      (setq this-command command-executed))))
 
 (defun one-key-execute-binding-command (key)
   "Execute the command binding KEY."

@@ -20,9 +20,9 @@
 
   ;; 统计启动时间
   (with-temp-message ""                 ;抹掉插件启动的输出
-    (require 'benchmark-init-modes)
-    (require 'benchmark-init)
-    (benchmark-init/activate)
+    ;; (require 'benchmark-init-modes)
+    ;; (require 'benchmark-init)
+    ;; (benchmark-init/activate)
 
     ;; 按需加载插件
     (require 'lazy-load)    
@@ -36,7 +36,7 @@
     ;; (require 'init-awesome-pair)
     (require 'init-fingertip)    
     (require 'init-awesome-tab)
-   (require 'init-awesome-tray)
+    (require 'init-awesome-tray)
     (require 'init-auto-save)
     (require 'init-mode)
     (require 'init-treesit)

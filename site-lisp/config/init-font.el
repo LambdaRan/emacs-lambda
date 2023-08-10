@@ -60,9 +60,6 @@
             (throw 'end t)))
   )
 
-;; This is hacking to fix Emacs 29 will decrease font after standby.
-(add-function :after after-focus-change-function #'load-font-setup)
-
 ;;; ### Font ###
 ;;; --- 字体命令
 (lazy-load-set-keys
