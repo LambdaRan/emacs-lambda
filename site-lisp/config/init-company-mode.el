@@ -60,7 +60,6 @@
 
 (with-eval-after-load 'company
   (require 'lazy-load)
-  ;; (require 'company-yasnippet)
   (require 'company-dabbrev)
   (require 'company-files)
   (require 'company-tng)
@@ -107,20 +106,6 @@
                            ;; other backends
                            ))
 
-  ;; Add `company-elisp' backend for elisp.
-  (defun setup-company-elisp ()
-    (require 'company-elisp)
-    (unless (catch 'found
-              (dolist (b company-backends)
-                (cond
-                 ((equal b 'company-elisp)
-                  (throw 'found t))
-                 ((and (listp b) (member 'company-elisp b))
-                  (throw 'found t))
-                 (t nil))))
-      (add-to-list 'company-backends 'company-elisp)))
-  (add-hook 'emacs-lisp-mode-hook 'setup-company-elisp)
-
   ;; Use the tab-and-go frontend.
   ;; Allows TAB to select and complete at the same time.
   (company-tng-configure-default)
@@ -153,23 +138,6 @@
      ("RET" . company-complete-selection)
      )
    company-active-map))
-
-(with-eval-after-load 'company-yasnippet
-  ;; Add yasnippet support for all company backends.
-  (defvar company-mode/enable-yas t
-    "Enable yasnippet for all backends.")
-
-  (defun company-mode/backend-with-yas (backend)
-    (if (or (not company-mode/enable-yas)
-            (and (listp backend) (member 'company-yasnippet backend)))
-        backend
-      (append (if (consp backend) backend (list backend))
-              '(:with company-yasnippet))))
-
-  (add-hook 'prog-mode-hook
-            #'(lambda ()
-                (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
-                )))
 
 (provide 'init-company-mode)
 
