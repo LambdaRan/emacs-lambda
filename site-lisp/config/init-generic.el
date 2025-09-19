@@ -175,17 +175,18 @@
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Recognize-Coding.html#Recognize-Coding
 (unless sys/windows-p
-  (prefer-coding-system 'gb18030)
   (prefer-coding-system 'gb2312)
+  (prefer-coding-system 'gb18030)  
   (prefer-coding-system 'utf-16)
   (prefer-coding-system 'utf-8)
   )
 (when sys/windows-p
-  (set-language-environment "Chinese-GBK")
+  (set-language-environment "Chinese-GB18030")
+  (setq locale-coding-system 'chinese-gb18030)
   (prefer-coding-system 'utf-16)
   (prefer-coding-system 'utf-8)
-  (prefer-coding-system 'gb18030)
   (prefer-coding-system 'gb2312)
+  (prefer-coding-system 'gb18030)  
   )
 
 

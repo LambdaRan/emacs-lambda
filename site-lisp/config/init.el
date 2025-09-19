@@ -33,7 +33,6 @@
       (require 'cache-path-from-shell))
 
     (require 'one-key)
-    ;; (require 'init-awesome-pair)
     (require 'init-fingertip)    
     (require 'init-awesome-tab)
     (require 'init-awesome-tray)
@@ -55,18 +54,17 @@
          (require 'init-line-number)
          (require 'init-highlight-parentheses)
          (require 'init-idle)
+         (require 'init-ffip)
          ;; 后台自动删除不用的buffer
          (require 'init-tempbuf)
-         ;; minibuf中参数提示
-         (require 'init-eldoc)
          (require 'init-indent)
-         ;; 模板
-         ;; (require 'init-yasnippet)
          ;; 自动补全
          (require 'init-company-mode)
-         (require 'init-company-tabnine)
+         ;; (require 'init-company-tabnine)
+         ;; (require 'init-lsp-bridge)
          (require 'init-info)
          (require 'init-c)
+         (require 'ran-toolkit)
 
          ;; Restore session at last.
          (require 'init-session)

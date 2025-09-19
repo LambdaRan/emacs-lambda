@@ -32,4 +32,4 @@
 
 (add-subdirs-to-load-path "C:\\emacs-lambda")
 
-(require 'init)
+(require 'start)

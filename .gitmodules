@@ -109,3 +109,6 @@
 [submodule "site-lisp/extensions/fingertip"]
 	path = site-lisp/extensions/fingertip
 	url = https://github.com/manateelazycat/fingertip.git
+[submodule "site-lisp/extensions/treesit-fold"]
+	path = site-lisp/extensions/treesit-fold
+	url = https://github.com/emacs-tree-sitter/treesit-fold.git
