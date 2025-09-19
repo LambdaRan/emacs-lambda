@@ -184,6 +184,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
 (autoload 'qml-mode "qml-mode")
 (autoload 'markdown-mode "init-markdown-mode")
 (autoload 'php-mode "php-mode")
+(autoload 'web-mode "init-web-mode")
 (autoload 'coffee-mode "coffee-mode")
 (autoload 'sws-mode "sws-mode")
 (autoload 'jade-mode "jade-mode")
