@@ -15,7 +15,7 @@
    (sys/mac-p
     '(("JetBrains Mono" . 150) ("SF Mono" . 150) ("Monaco" . 150)))
    (sys/windows-p
-    '(("JetBrains Mono" . 100) ("WenQuanYi Micro Hei Mono" . 101) ("Courier New" . 100)))
+    '(("JetBrains Mono" . 100) ("WenQuanYi Micro Hei Mono" . 101) ("Courier New" . 150)))
    (t
     '(("Source Code Pro" . 100) ("Consolas" . 100) ("Cascadia Mono" . 100))))
   "List of fonts and sizes.  The first one available will be used.")

@@ -100,8 +100,6 @@ The test for presence of the car of ELT-CONS is done with `equal'."
   (symbol-value alist-var))
 
 (dolist (elt-cons '(
-                    ("\\.markdown" . markdown-mode)
-                    ("\\.md" . markdown-mode)
                     ("\\.coffee$" . coffee-mode)
                     ("\\.iced$" . coffee-mode)
                     ("Cakefile" . coffee-mode)
@@ -178,11 +176,18 @@ The test for presence of the car of ELT-CONS is done with `equal'."
 
 (add-to-list 'interpreter-mode-alist '("coffee" . coffee-mode))
 
+;;; Markdown
+(autoload 'markdown-mode "markdown-mode"
+   "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist
+             '("\\.\\(?:md\\|markdown\\|mkd\\|mdown\\|mkdn\\|mdwn\\)\\'" . markdown-mode))
+(autoload 'gfm-mode "markdown-mode"
+   "Major mode for editing GitHub Flavored Markdown files" t)
+(add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
 
 ;;; Mode load.
 (autoload 'cmake-mode "cmake-mode")
 (autoload 'qml-mode "qml-mode")
-(autoload 'markdown-mode "init-markdown-mode")
 (autoload 'php-mode "php-mode")
 (autoload 'web-mode "init-web-mode")
 (autoload 'coffee-mode "coffee-mode")

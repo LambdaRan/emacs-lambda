@@ -25,9 +25,6 @@
 [submodule "goto-line-preview"]
 	path = site-lisp/extensions/goto-line-preview
 	url = https://github.com/jcs090218/goto-line-preview.git
-[submodule "lazycat-theme"]
-	path = site-lisp/extensions/lazycat-theme
-	url = https://github.com/manateelazycat/lazycat-theme.git
 [submodule "vi-navigate"]
 	path = site-lisp/extensions/vi-navigate
 	url = https://github.com/manateelazycat/vi-navigate.git

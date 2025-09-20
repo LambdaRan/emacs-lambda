@@ -151,7 +151,7 @@
  '(
    ("C-c v" . split-window-vertically)   ;纵向分割窗口
    ("C-c h" . split-window-horizontally) ;横向分割窗口
-   ("C-c w" . kill-this-buffer)          ;关闭当前buffer
+   ("C-c w" . kill-current-buffer)       ;关闭当前buffer
    ("C-c o" . delete-other-windows)      ;关闭其它窗口
    ))
 
