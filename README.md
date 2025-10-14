@@ -17,6 +17,7 @@ git submodule foreach git reset --hard
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 sudo apt-get install git-lfs
 git submodule foreach git checkout $(git remote show origin | awk '/HEAD 分支|HEAD branch/ {split($0, a, "："); print a[2]}')
+
 ```
 
 3. 将site-start.el改成.emacs复制到用户目录下
@@ -30,8 +31,23 @@ git submodule foreach git checkout $(git remote show origin | awk '/HEAD 分支|
 * 从[ctags-win32](https://github.com/universal-ctags/ctags-win32)安装windows版本[Universal Ctags](https://github.com/universal-ctags/ctags)
 * 复制.ctags文件到用户目录
 
-## 添加模块
+## 其他命令
 ```
 git submodule add https://github.com/emacs-tree-sitter/treesit-fold.git extensions/treesit-fold
+
+# 将每个子模块更新到最新远程提交：
+# --recursive 递归更新所有子模块中的子模块
+# --remote 将子模块更新到远程仓库的最新提交（基于 .gitmodules 中指定的分支）
+
+git submodule update --remote --recursive
+
+
 ```
+
+## 报错排查
+
+  使用`M-x toggle-debug-on-error`来开启错误调试，当错误发生时，查看backtrace。backtrace会显示函数调用的堆栈，可能其中会包含插件相关的函数名，从而确定是哪个插件的问题。
+  
+  使用`M-x find-function xxfunname`
+  
 

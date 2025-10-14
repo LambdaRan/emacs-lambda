@@ -56,6 +56,8 @@
          ;; (require 'init-treesit-fold)
          (require 'init-idle)
          (require 'init-ffip)
+         (require 'init-color-rg)
+         (require 'init-etags)
          ;; 后台自动删除不用的buffer
          (require 'init-tempbuf)
          (require 'init-indent)
