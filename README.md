@@ -13,6 +13,9 @@ git submodule update --init --recursive
 
 git submodule foreach git reset --hard
 
+# 下面的命令要在WSL中运行，因为windows没有awk
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+sudo apt-get install git-lfs
 git submodule foreach git checkout $(git remote show origin | awk '/HEAD 分支|HEAD branch/ {split($0, a, "："); print a[2]}')
 ```
 

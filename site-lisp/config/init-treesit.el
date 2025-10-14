@@ -107,7 +107,7 @@
         (haskell "https://github.com/tree-sitter/tree-sitter-haskell" "master" "src" nil nil)
         (html . ("https://github.com/tree-sitter/tree-sitter-html"))
         (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
-        (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript" "v0.23.0"))
+        (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
         (json . ("https://github.com/tree-sitter/tree-sitter-json"))
         (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
         (make . ("https://github.com/alemuller/tree-sitter-make"))

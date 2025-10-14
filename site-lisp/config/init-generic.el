@@ -152,42 +152,42 @@
 
 ;; Contrary to what many Emacs users have in their configs, you don't need more
 ;; than this to make UTF-8 the default coding system:
-(set-language-environment "UTF-8")
+;; (set-language-environment "UTF-8")
 
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
 
-(unless sys/windows-p
-  (setq locale-coding-system 'utf-8)
-  (set-language-environment 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-buffer-file-coding-system 'utf-8)
-  (set-clipboard-coding-system 'utf-8)
-  (set-file-name-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-selection-coding-system 'utf-8)
-  (modify-coding-system-alist 'process "*" 'utf-8)
+;; (unless sys/windows-p
+;;   (setq locale-coding-system 'utf-8)
+;;   (set-language-environment 'utf-8)
+;;   (set-default-coding-systems 'utf-8)
+;;   (set-buffer-file-coding-system 'utf-8)
+;;   (set-clipboard-coding-system 'utf-8)
+;;   (set-file-name-coding-system 'utf-8)
+;;   (set-keyboard-coding-system 'utf-8)
+;;   (set-terminal-coding-system 'utf-8)
+;;   (set-selection-coding-system 'utf-8)
+;;   (modify-coding-system-alist 'process "*" 'utf-8)
 
-  ;; Set LANG and LC_* variables
-  (setenv "LC_ALL" "en_US.UTF-8")
-  (setenv "LANG" "en_US.UTF-8")
-  (setenv "LC_CTYPE" "en_US.UTF-8"))
+;;   ;; Set LANG and LC_* variables
+;;   (setenv "LC_ALL" "en_US.UTF-8")
+;;   (setenv "LANG" "en_US.UTF-8")
+;;   (setenv "LC_CTYPE" "en_US.UTF-8"))
 
-;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Recognize-Coding.html#Recognize-Coding
-(unless sys/windows-p
-  (prefer-coding-system 'gb2312)
-  (prefer-coding-system 'gb18030)  
-  (prefer-coding-system 'utf-16)
-  (prefer-coding-system 'utf-8)
-  )
-(when sys/windows-p
-  (set-language-environment "Chinese-GB18030")
-  (setq locale-coding-system 'chinese-gb18030)
-  (prefer-coding-system 'utf-16)
-  (prefer-coding-system 'utf-8)
-  (prefer-coding-system 'gb2312)
-  (prefer-coding-system 'gb18030)  
-  )
+;; ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Recognize-Coding.html#Recognize-Coding
+;; (unless sys/windows-p
+;;   (prefer-coding-system 'gb2312)
+;;   (prefer-coding-system 'gb18030)  
+;;   (prefer-coding-system 'utf-16)
+;;   (prefer-coding-system 'utf-8)
+;;   )
+;; (when sys/windows-p
+;;   (set-language-environment "Chinese-GB18030")
+;;   (setq locale-coding-system 'chinese-gb18030)
+;;   (prefer-coding-system 'utf-16)
+;;   (prefer-coding-system 'utf-8)
+;;   (prefer-coding-system 'gb2312)
+;;   (prefer-coding-system 'gb18030)  
+;;   )
 
 
 

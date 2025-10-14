@@ -53,6 +53,7 @@
          ;; 显示行号
          (require 'init-line-number)
          (require 'init-highlight-parentheses)
+         ;; (require 'init-treesit-fold)
          (require 'init-idle)
          (require 'init-ffip)
          ;; 后台自动删除不用的buffer
