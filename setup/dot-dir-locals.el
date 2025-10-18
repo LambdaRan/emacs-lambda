@@ -5,7 +5,7 @@
 	     (color-rg-project-root . "f:/xxx")
          (indent-tabs-mode . t)
 		 (buffer-file-coding-system . gb18030)
-         ;; (eval . (message "%s" color-rg-project-root))
          ;; (eval . (progn (message "这里可以写逻辑，但不建议这么做！"))
          ))
  )
+

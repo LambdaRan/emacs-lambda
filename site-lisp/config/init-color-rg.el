@@ -12,7 +12,10 @@
 (defcustom color-rg-project-root nil
   "If non-nil, overrides the project root directory location."
   :group 'color-rg
-  :type 'string)
+  :type 'string
+  :safe #'stringp)
+
+;; (progn (put 'color-rg-project-root 'safe-local-variable 'stringp))
 
 (defun color-rg-project-root-dir@around(func &rest args)
     "Return special project root or `color-rg-project-root-dir'."
