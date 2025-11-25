@@ -4,8 +4,9 @@
          (counsel-etags-extra-tags-files . ("f:/xxx/TAGS"))
 	     (color-rg-project-root . "f:/xxx")
          (indent-tabs-mode . t)
-		 (buffer-file-coding-system . gb18030)
+		 ;; (buffer-file-coding-system . gb18030)
          ;; (eval . (progn (message "这里可以写逻辑，但不建议这么做！"))
+         (eval . (prefer-coding-system 'utf-8))
          ))
  )
 
