@@ -415,11 +415,11 @@ theme face specs. These is a simplified spec. For example:
     (compilation-mode-line-fail :inherit 'compilation-error)
 
     ;; custom
-    (custom-button                  :foreground blue   :background bg     :box '(:line-width 1 :style none))
-    (custom-button-unraised         :foreground violet :background bg     :box '(:line-width 1 :style none))
-    (custom-button-pressed-unraised :foreground bg     :background violet :box '(:line-width 1 :style none))
-    (custom-button-pressed          :foreground bg     :background blue   :box '(:line-width 1 :style none))
-    (custom-button-mouse            :foreground bg     :background blue   :box '(:line-width 1 :style none))
+    (custom-button                  :foreground blue   :background bg     :box '(:line-width 1 :style nil))
+    (custom-button-unraised         :foreground violet :background bg     :box '(:line-width 1 :style nil))
+    (custom-button-pressed-unraised :foreground bg     :background violet :box '(:line-width 1 :style nil))
+    (custom-button-pressed          :foreground bg     :background blue   :box '(:line-width 1 :style nil))
+    (custom-button-mouse            :foreground bg     :background blue   :box '(:line-width 1 :style nil))
 
     (custom-variable-button   :foreground green :underline t)
     (custom-saved             :foreground green :background (lazycat-blend green bg 0.2) :bold bold)
