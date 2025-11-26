@@ -415,11 +415,11 @@ theme face specs. These is a simplified spec. For example:
     (compilation-mode-line-fail :inherit 'compilation-error)
 
     ;; custom
-    (custom-button                  :foreground blue   :background bg     :box '(:line-width 1 :style nil))
-    (custom-button-unraised         :foreground violet :background bg     :box '(:line-width 1 :style nil))
-    (custom-button-pressed-unraised :foreground bg     :background violet :box '(:line-width 1 :style nil))
-    (custom-button-pressed          :foreground bg     :background blue   :box '(:line-width 1 :style nil))
-    (custom-button-mouse            :foreground bg     :background blue   :box '(:line-width 1 :style nil))
+    (custom-button                  :foreground blue   :background bg     :box '(:line-width 1 :style none))
+    (custom-button-unraised         :foreground violet :background bg     :box '(:line-width 1 :style none))
+    (custom-button-pressed-unraised :foreground bg     :background violet :box '(:line-width 1 :style none))
+    (custom-button-pressed          :foreground bg     :background blue   :box '(:line-width 1 :style none))
+    (custom-button-mouse            :foreground bg     :background blue   :box '(:line-width 1 :style none))
 
     (custom-variable-button   :foreground green :underline t)
     (custom-saved             :foreground green :background (lazycat-blend green bg 0.2) :bold bold)
@@ -903,7 +903,6 @@ theme face specs. These is a simplified spec. For example:
     (gnus-group-mail-low         :inherit 'gnus-group-mail-1 :weight 'normal)
     (gnus-group-mail-low-empty   :inherit 'gnus-group-mail-1-empty)
     (gnus-group-news-low         :inherit 'gnus-group-mail-1 :foreground base5)
-    (gnus-group-news-low-empty   :inherit 'gnus-group-news-low :weight 'normal)
     (gnus-header-content         :inherit 'message-header-other)
     (gnus-header-from            :inherit 'message-header-other)
     (gnus-header-name            :inherit 'message-header-name)
