@@ -84,7 +84,7 @@
 
 (require 'init-const)
 ;;; Code:
-
+(setq frame-title-format "Emacs")
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
 (setq jit-lock-defer-time 0)

@@ -12,8 +12,7 @@ C-u universal-argument
 C-i 相当于TAB
     C-o new-line-above在上面生成新行
 C-p previous-line 上一行
-C-[ ESC
-    C-] counsel-etags-find-tag-at-point
+C-[ ESC C-] counsel-etags-find-tag-at-point
 C-a move-beginning-of-line
 C-s isearch-forward 正向搜索
 C-d delete-char 

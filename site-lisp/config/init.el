@@ -50,6 +50,7 @@
     (run-with-idle-timer
      1 nil
      #'(lambda ()
+         (require 'init-eaf)
          ;; 显示行号
          (require 'init-line-number)
          (require 'init-highlight-parentheses)

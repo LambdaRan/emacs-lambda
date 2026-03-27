@@ -16,6 +16,8 @@
   ;; the best option is to install latest ctags from sf.net
   (setq ctags-command "/usr/local/bin/ctags -e -R "))
 
+;; 将该变量标记为始终安全（接受任何值）
+(put 'counsel-etags-extra-tags-files 'safe-local-variable #'always)
 ;; Ignore files above 800kb
 (setq counsel-etags-max-file-size 800)
 ;; Ignore build directories for tagging
