@@ -50,7 +50,6 @@
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-         (require 'init-eaf)
          (require 'init-vterm)
          (require 'init-agent-shell)
          ;; 显示行号
