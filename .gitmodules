@@ -109,3 +109,12 @@
 [submodule "site-lisp/extensions/yasnippet"]
 	path = site-lisp/extensions/yasnippet
 	url = https://github.com/joaotavora/yasnippet.git
+[submodule "site-lisp/extensions/shell-maker"]
+	path = site-lisp/extensions/shell-maker
+	url = https://github.com/xenodium/shell-maker.git
+[submodule "site-lisp/extensions/acp"]
+	path = site-lisp/extensions/acp
+	url = https://github.com/xenodium/acp.el
+[submodule "site-lisp/extensions/agent-shell"]
+	path = site-lisp/extensions/agent-shell
+	url = https://github.com/xenodium/agent-shell.git

@@ -52,6 +52,7 @@
      #'(lambda ()
          (require 'init-eaf)
          (require 'init-vterm)
+         (require 'init-agent-shell)
          ;; 显示行号
          (require 'init-line-number)
          (require 'init-highlight-parentheses)
