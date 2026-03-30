@@ -55,7 +55,7 @@
          ;; 显示行号
          (require 'init-line-number)
          (require 'init-highlight-parentheses)
-         ;; (require 'init-treesit-fold)
+         (require 'init-treesit-fold)
          (require 'init-idle)
          (require 'init-ffip)
          (require 'init-color-rg)
