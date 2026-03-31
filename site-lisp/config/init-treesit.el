@@ -70,7 +70,6 @@
         (rust-mode       . rust-ts-mode)
         (java-mode       . java-ts-mode)
         (clojure-mode    . clojure-ts-mode)
-        (markdown-mode   . markdown-ts-mode)
         (csharp-mode     . csharp-ts-mode)
         ))
 
@@ -84,7 +83,6 @@
                                     ("php" 'php))))
                                )))
 
-(add-hook 'markdown-ts-mode-hook #'(lambda () (treesit-parser-create 'markdown)))
 (add-hook 'zig-mode-hook #'(lambda () (treesit-parser-create 'zig)))
 (add-hook 'mojo-mode-hook #'(lambda () (treesit-parser-create 'mojo)))
 (add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))

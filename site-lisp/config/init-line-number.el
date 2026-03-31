@@ -81,7 +81,7 @@
 ;;
 
 ;;; Require
-
+(require 'display-line-numbers)
 
 ;;; Code:
 
@@ -91,10 +91,11 @@
 ;; 设置超过120字符显示越界指示器
 (setq-default display-fill-column-indicator-column 120)
 
-(add-hook 'prog-mode-hook
-          #'(lambda ()
-              (require 'display-line-numbers)
-              (display-line-numbers--turn-on)))
+(dolist (hook (list 
+               'prog-mode-hook
+               'markdown-mode-hook
+               ))
+  (add-hook hook #'(lambda () (display-line-numbers--turn-on))))
 
 (provide 'init-line-number)
 
