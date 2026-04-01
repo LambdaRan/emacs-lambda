@@ -133,12 +133,6 @@
 (pixel-scroll-precision-mode 1)
 (setq pixel-scroll-precision-large-scroll-height 60)
 (setq pixel-scroll-precision-interpolation-factor 8.0)
-;; ;; 不显示 *scratch*
-;; (defun remove-scratch-buffer ()
-;;  (if (get-buffer "*scratch*")
-;;      (kill-buffer "*scratch*")))
-;; (add-hook 'after-change-major-mode-hook 'remove-scratch-buffer)
-
 ;; Don't ask me when kill process buffer
 (setq kill-buffer-query-functions
       (remq 'process-kill-buffer-query-function
@@ -150,9 +144,11 @@
   ;; 使用英文day-time
   (setq system-time-locale "C"))
 
-(setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
-;; 文件编码设置问题
-;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Recognize-Coding.html#Recognize-Coding
+;; UTF-8 优先，同时保留 GBK/GB2312 自动检测（不要用 set-language-environment "UTF-8"，它会清除 GBK 检测）
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(when sys/windows-p
+  (set-selection-coding-system 'utf-8))
 
 (provide 'init-generic)
 
