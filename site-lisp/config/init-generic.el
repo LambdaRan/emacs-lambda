@@ -147,8 +147,8 @@
 ;; UTF-8 优先，同时保留 GBK/GB2312 自动检测（不要用 set-language-environment "UTF-8"，它会清除 GBK 检测）
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
-(when sys/windows-p
-  (set-selection-coding-system 'utf-8))
+;; (when sys/windows-p
+;;   (set-selection-coding-system 'utf-8))
 
 (provide 'init-generic)
 
