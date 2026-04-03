@@ -415,7 +415,7 @@ Otherwise return nil."
     (goto-char (cadar point-stack))
     (setq point-stack (cdr point-stack))))
 
-(defun count-words ()
+(defun count-ce-words-buffer ()
   "Count the number of word in buffer, include Chinese."
   (interactive)
   (let ((begin (point-min))

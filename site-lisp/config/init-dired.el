@@ -166,7 +166,8 @@
    ("8" . dired-move-to-first-file)     ;移动到第一个文件
    ("k" . dired-previous-file-line)     ;上一行
    ("j" . dired-next-file-line)         ;下一行
-   ("e" . dired-touch-now)              ;Touch命令
+   ;; ("e" . dired-touch-now)              ;Touch命令
+   ("e" . dired-create-file)            ;创建文件
    ("f" . dired-find-file+)             ;打开当前文件或目录
    )
  dired-mode-map

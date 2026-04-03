@@ -263,6 +263,18 @@ In a repertory DIR with the name name + the start number start."
   (revert-buffer)
   (dired-goto-file (concat (dired-current-directory) touch-file)))
 
+(defun dired-create-file (filename)
+  "Create FILENAME in current dired directory.
+Unlike `dired-touch-now', this uses Emacs built-in file operations
+to avoid encoding issues with non-ASCII filenames."
+  (interactive "sCreate file: ")
+  (let ((full-path (expand-file-name filename (dired-current-directory))))
+    (if (file-exists-p full-path)
+        (set-file-times full-path)
+      (write-region "" nil full-path nil 'quiet))
+    (revert-buffer)
+    (dired-goto-file full-path)))
+
 (defun dired-gnome-open-file ()
   "Opens the current file in a Dired buffer."
   (interactive)
