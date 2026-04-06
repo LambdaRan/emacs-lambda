@@ -24,7 +24,12 @@
 
 ;;;; 配置Claude code
 (setq agent-shell-anthropic-claude-environment
-      (agent-shell-make-environment-variables :inherit-env t))
+      (agent-shell-make-environment-variables
+       :inherit-env t
+       ;; preload.cjs 会 monkey-patch child_process.spawn，在 Claude Code
+       ;; 子进程启动时自动注入 --require gbk-patch.cjs（绕过 SDK 删除 NODE_OPTIONS 的问题）
+       "NODE_OPTIONS" (concat "--require " (expand-file-name "~/.claude-patch-emacs/preload.cjs"))
+       "NODE_PATH" (expand-file-name "~/.claude-patch-emacs/node_modules")))
 (setq agent-shell-anthropic-authentication
       (agent-shell-anthropic-make-authentication
        :oauth (lambda () (getenv "ANTHROPIC_AUTH_TOKEN"))))
