@@ -2,14 +2,19 @@
 
 ;;; Require
 (require 'ghostel)
+(require 'lazy-load)
 
 ;;; Code:
-
-(add-to-list 'ghostel-keymap-exceptions "C-j")
 ;; url检测，可点击
 (setq ghostel-enable-url-detection t)
 ;; 文件引用检测
 (setq ghostel-enable-file-detection t)
+
+(lazy-load-unset-keys
+ '("C-j")
+ ghostel-mode-map)
+
+(add-to-list 'ghostel-keymap-exceptions "C-j")
 
 ;; 缩短终端 buffer 名称，只保留最后一级目录名
 (defun ghostel--set-title (title)
