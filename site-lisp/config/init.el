@@ -52,6 +52,7 @@
      #'(lambda ()
          (require 'init-vterm)
          (require 'init-agent-shell)
+         (require 'init-ghostel)
          ;; 显示行号
          (require 'init-line-number)
          (require 'init-highlight-parentheses)
