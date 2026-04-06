@@ -118,6 +118,3 @@
 [submodule "site-lisp/extensions/agent-shell"]
 	path = site-lisp/extensions/agent-shell
 	url = https://github.com/xenodium/agent-shell.git
-[submodule "site-lisp/extensions/ghostel"]
-	path = site-lisp/extensions/ghostel
-	url = https://github.com/dakra/ghostel.git
