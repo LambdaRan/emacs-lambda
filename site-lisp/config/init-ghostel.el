@@ -10,6 +10,8 @@
 ;; 文件引用检测
 (setq ghostel-enable-file-detection t)
 
+(setq ghostel-shell "pwsh.exe")
+
 (lazy-load-unset-keys
  '("C-j")
  ghostel-mode-map)
