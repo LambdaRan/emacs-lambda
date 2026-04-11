@@ -66,7 +66,6 @@
          (require 'init-indent)
          ;; 自动补全
          (require 'init-company-mode)
-         ;; (require 'init-company-tabnine)
          ;; (require 'init-lsp-bridge)
          (require 'init-info)
          (require 'init-c)

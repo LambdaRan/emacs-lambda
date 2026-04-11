@@ -43,9 +43,6 @@
 [submodule "symbol-overlay"]
 	path = site-lisp/extensions/symbol-overlay
 	url = https://github.com/wolray/symbol-overlay.git
-[submodule "company-tabnine"]
-	path = site-lisp/extensions/company-tabnine
-	url = https://github.com/TommyX12/company-tabnine.git
 [submodule "benchmark-init"]
 	path = site-lisp/extensions/benchmark-init
 	url = https://github.com/dholm/benchmark-init-el.git
