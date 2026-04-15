@@ -110,13 +110,15 @@
 (setq async-bytecomp-allowed-packages nil) ;避免magit报错
 (setq word-wrap-by-category t)             ;按照中文折行
 (setq profiler-report-cpu-line-format ;让 profiler-report 第一列宽一点
-      '((100 left)
-        (24 right ((19 right)
-                   (5 right)))))
+      '((24 right ((19 right)
+                   (5 right)))
+        (1 left "%s")
+        (0 left)))
 (setq profiler-report-memory-line-format
-      '((100 left)
-        (19 right ((14 right profiler-format-number)
-                   (5 right)))))
+      '((19 right ((14 right profiler-format-number)
+                   (5 right)))
+        (1 left "%s")
+        (0 left)))
 (setq completion-auto-select nil)       ;避免默认自动选择
 (setq ad-redefinition-action 'accept)   ; 不要烦人的 redefine warning
 (setq frame-resize-pixelwise t) ; 设置缩放的模式,避免Mac平台最大化窗口以后右边和下边有空隙
