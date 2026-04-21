@@ -33,7 +33,7 @@ C-n next-line
 C-m 相当于RET
 #C-, 
 #C-. 
-    C-/ undo-tree-undo
+C-/ undo-tree-undo
 
 -------------------------------------------------------
 
@@ -113,7 +113,9 @@ C-c r
 C-c g
 C-c z
 C-c b
-C-c /
+C-c / treesit-fold-toggle
+C-c c c treesit-fold-close-all
+C-c c o treesit-fold-open-all
 C-c ;
 
 C-x q kbd-macro-query
