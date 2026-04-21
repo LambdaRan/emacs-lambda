@@ -4,7 +4,6 @@
 
 ;; Author: Daniel Kraus <daniel@kraus.my>
 ;; URL: https://github.com/dakra/ghostel
-;; Version: 0.2.50
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; This file is NOT part of GNU Emacs.
@@ -31,29 +30,61 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'lisp-mnt)
+(require 'ghostel)
+
+(declare-function ghostel--module-version "ghostel-module")
+(declare-function ghostel--mode-enabled "ghostel-module")
 
 (defvar ghostel-debug--log-buffer nil
   "Buffer used for ghostel debug logging.")
 
+;;;###autoload
 (defun ghostel-debug-start ()
-  "Start logging ghostel filter calls to *ghostel-debug* buffer."
+  "Start logging ghostel events to *ghostel-debug* buffer.
+Logs filter calls, key sends, resize events, redraw decisions
+\(including DEC 2026 skip/force), and `window-start' anchoring."
   (interactive)
   (setq ghostel-debug--log-buffer (get-buffer-create "*ghostel-debug*"))
   (with-current-buffer ghostel-debug--log-buffer
     (erase-buffer)
     (insert "=== Ghostel Debug Log ===\n\n"))
+  ;; Data path
   (advice-add 'ghostel--filter :before #'ghostel-debug--log-filter)
-  (advice-add 'ghostel--send-key :before #'ghostel-debug--log-send)
+  (advice-add 'ghostel--send-string :before #'ghostel-debug--log-send)
   (advice-add 'ghostel--send-encoded :before #'ghostel-debug--log-encoded)
+  ;; Render path
+  (advice-add 'ghostel--delayed-redraw :around #'ghostel-debug--log-redraw)
+  (advice-add 'ghostel--window-adjust-process-window-size
+              :around #'ghostel-debug--log-resize)
+  (when (fboundp 'ghostel--enable-vt-log)
+    (ghostel--enable-vt-log))
   (message "ghostel-debug: logging started, check *ghostel-debug* buffer"))
 
 (defun ghostel-debug-stop ()
   "Stop logging."
   (interactive)
   (advice-remove 'ghostel--filter #'ghostel-debug--log-filter)
-  (advice-remove 'ghostel--send-key #'ghostel-debug--log-send)
+  (advice-remove 'ghostel--send-string #'ghostel-debug--log-send)
   (advice-remove 'ghostel--send-encoded #'ghostel-debug--log-encoded)
+  (advice-remove 'ghostel--delayed-redraw #'ghostel-debug--log-redraw)
+  (advice-remove 'ghostel--window-adjust-process-window-size
+                 #'ghostel-debug--log-resize)
+  (when (fboundp 'ghostel--disable-vt-log)
+    (ghostel--disable-vt-log))
   (message "ghostel-debug: logging stopped"))
+
+(defun ghostel--debug-log-vt (level scope message)
+  "Log a libghostty-vt internal message.
+LEVEL is the severity (error/warning/info/debug).
+SCOPE is the subsystem name.  MESSAGE is the log text.
+Called from the native module's log callback."
+  (when ghostel-debug--log-buffer
+    (with-current-buffer ghostel-debug--log-buffer
+      (goto-char (point-max))
+      (insert (format "[%s] VT [%s](%s): %s\n"
+                      (format-time-string "%T.%3N")
+                      level scope message)))))
 
 (defun ghostel-debug--log-filter (_proc output)
   "Log process filter call with OUTPUT length and preview.
@@ -86,6 +117,92 @@ _PROC is ignored."
       (insert (format "[%s] SEND-ENCODED: key=%S mods=%S utf8=%S\n"
                       (format-time-string "%T.%3N")
                       key-name mods utf8)))))
+
+(defun ghostel-debug--snapshot (buffer)
+  "Return a plist of redraw-relevant state for BUFFER, or nil.
+Captures DEC 2026, force flag, buffer size, trailing-byte flag,
+point, `ghostel--term-rows', `ghostel--last-anchor-position',
+computed viewport-start, and per-window ws/we/wp/body-height."
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer
+      (let* ((pm (point-max))
+             (cb (and (> pm 1) (char-before pm)))
+             (wins (get-buffer-window-list buffer nil t)))
+        (list :sync (and ghostel--term
+                         (ghostel--mode-enabled ghostel--term 2026))
+              :force ghostel--force-next-redraw
+              :snap ghostel--snap-requested
+              :buf-size (buffer-size)
+              :trailing-nl (eq cb ?\n)
+              :point (point)
+              :term-rows ghostel--term-rows
+              :anchor-pos ghostel--last-anchor-position
+              :vs (ghostel--viewport-start)
+              :wins (mapcar (lambda (w)
+                              (list :w w
+                                    :ws (window-start w)
+                                    :we (window-end w t)
+                                    :wp (window-point w)
+                                    :body (window-body-height w)))
+                            wins))))))
+
+(defun ghostel-debug--fmt-wins (wins)
+  "Format per-window entries WINS for the redraw log line."
+  (mapconcat
+   (lambda (w) (format "ws=%d we=%d wp=%d body=%d"
+                       (plist-get w :ws) (plist-get w :we)
+                       (plist-get w :wp) (plist-get w :body)))
+   wins " | "))
+
+(defun ghostel-debug--log-redraw (orig-fn buffer)
+  "Log redraw decisions: skip vs execute, DEC 2026 state, timing.
+ORIG-FN is `ghostel--delayed-redraw', BUFFER is the target buffer."
+  (when ghostel-debug--log-buffer
+    (let ((before (ghostel-debug--snapshot buffer))
+          (t0 (current-time)))
+      (funcall orig-fn buffer)
+      (let* ((elapsed (* 1000 (float-time (time-subtract (current-time) t0))))
+             (after (ghostel-debug--snapshot buffer)))
+        (with-current-buffer ghostel-debug--log-buffer
+          (goto-char (point-max))
+          (if (and (plist-get before :sync) (not (plist-get before :force)))
+              (insert (format "[%s] REDRAW: SKIPPED (DEC2026 active, force=nil)\n"
+                              (format-time-string "%T.%3N")))
+            (insert (format "[%s] REDRAW: %.1fms force=%s→%s snap=%s→%s dec2026=%s buf=%d→%d trailNL=%s→%s pt=%d→%d rows=%s vs=%s→%s anchor=%s→%s\n"
+                            (format-time-string "%T.%3N")
+                            elapsed
+                            (plist-get before :force) (plist-get after :force)
+                            (plist-get before :snap) (plist-get after :snap)
+                            (plist-get before :sync)
+                            (plist-get before :buf-size) (plist-get after :buf-size)
+                            (plist-get before :trailing-nl) (plist-get after :trailing-nl)
+                            (plist-get before :point) (plist-get after :point)
+                            (plist-get after :term-rows)
+                            (plist-get before :vs) (plist-get after :vs)
+                            (plist-get before :anchor-pos) (plist-get after :anchor-pos)))
+            (insert (format "           wins-before: %s\n"
+                            (ghostel-debug--fmt-wins (plist-get before :wins))))
+            (insert (format "           wins-after:  %s\n"
+                            (ghostel-debug--fmt-wins (plist-get after :wins))))))))))
+
+(defun ghostel-debug--log-resize (orig-fn process windows)
+  "Log resize events with old/new dimensions and timing.
+ORIG-FN is `ghostel--window-adjust-process-window-size'.
+PROCESS and WINDOWS are passed through."
+  (let* ((old-rows (when (buffer-live-p (process-buffer process))
+                     (buffer-local-value 'ghostel--term-rows (process-buffer process))))
+         (t0 (current-time))
+         (size (funcall orig-fn process windows))
+         (elapsed (* 1000 (float-time (time-subtract (current-time) t0)))))
+    (when ghostel-debug--log-buffer
+      (with-current-buffer ghostel-debug--log-buffer
+        (goto-char (point-max))
+        (insert (format "[%s] RESIZE: %sx%s → %sx%s (%.1fms)\n"
+                        (format-time-string "%T.%3N")
+                        (and old-rows (cdr size)) old-rows
+                        (car size) (cdr size)
+                        elapsed))))
+    size))
 
 
 ;;; Typing latency measurement
@@ -121,7 +238,7 @@ The latency breakdown shows:
       (erase-buffer)
       (insert "=== Ghostel Typing Latency Measurement ===\n")
       (insert (format "Type %d characters to collect measurements...\n\n" n)))
-    (advice-add 'ghostel--send-key :before #'ghostel-debug--latency-on-send)
+    (advice-add 'ghostel--send-string :before #'ghostel-debug--latency-on-send)
     (advice-add 'ghostel--filter :before #'ghostel-debug--latency-on-echo)
     (advice-add 'ghostel--delayed-redraw :after #'ghostel-debug--latency-on-render)
     (message "ghostel-debug: type %d characters to measure latency" n)))
@@ -157,7 +274,7 @@ The latency breakdown shows:
 
 (defun ghostel-debug--latency-report ()
   "Generate and display the latency report."
-  (advice-remove 'ghostel--send-key #'ghostel-debug--latency-on-send)
+  (advice-remove 'ghostel--send-string #'ghostel-debug--latency-on-send)
   (advice-remove 'ghostel--filter #'ghostel-debug--latency-on-echo)
   (advice-remove 'ghostel--delayed-redraw #'ghostel-debug--latency-on-render)
   (setq ghostel-debug--latency-active nil)
@@ -204,6 +321,130 @@ The latency breakdown shows:
                             (* 1000 pty) (* 1000 rnd) (* 1000 tot)))))
         (insert "\n")))
     (message "ghostel-debug: latency report ready in *ghostel-debug*")))
+
+
+;;; Environment diagnostics
+
+;;;###autoload
+(defun ghostel-debug-info ()
+  "Display diagnostic info about the ghostel environment.
+Collects Emacs version, system info, native module state, terminal
+state, and settings into *ghostel-debug* for pasting into bug reports."
+  (interactive)
+  (let ((out (get-buffer-create "*ghostel-debug*"))
+        (ghostel-buf (when (derived-mode-p 'ghostel-mode) (current-buffer))))
+    (with-current-buffer out
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (insert "=== ghostel-debug-info ===\n\n")
+        ;; System
+        (insert "--- System ---\n")
+        (insert (format "Emacs version:       %s\n" emacs-version))
+        (insert (format "System type:         %s\n" system-type))
+        (insert (format "System config:       %s\n" system-configuration))
+        (insert (format "Window system:       %s\n" (or window-system "terminal")))
+        (when (display-graphic-p)
+          (insert (format "Display pixel size:  %sx%s\n"
+                          (display-pixel-width) (display-pixel-height)))
+          (insert (format "Char size:           %dx%d px\n"
+                          (frame-char-width) (frame-char-height))))
+        (insert (format "Native comp:         %s\n"
+                        (if (and (fboundp 'native-comp-available-p)
+                                 (native-comp-available-p))
+                            "yes" "no")))
+        ;; Ghostel versions
+        (insert "\n--- Ghostel ---\n")
+        (let* ((lib (locate-library "ghostel"))
+               (dir (and lib (file-name-directory lib))))
+          (insert (format "Package version:     %s\n"
+                          (condition-case nil
+                              (lm-version (locate-library "ghostel.el" t))
+                            (error "Unknown"))))
+          (insert (format "Min module version:  %s\n" ghostel--minimum-module-version))
+          (insert (format "Library path:        %s\n" (or lib "not found")))
+          ;; Native module
+          (let ((mod-loaded (fboundp 'ghostel--module-version)))
+            (insert (format "Module loaded:       %s\n" (if mod-loaded "yes" "no")))
+            (when mod-loaded
+              (let ((mod-ver (ghostel--module-version)))
+                (insert (format "Module version:      %s\n" mod-ver))
+                (unless (string= mod-ver ghostel--minimum-module-version)
+                  (insert (format "  *** VERSION MISMATCH: elisp expects >= %s, module is %s ***\n"
+                                  ghostel--minimum-module-version mod-ver)))))
+            (when dir
+              (let ((mod-file (expand-file-name
+                               (concat "ghostel-module" module-file-suffix) dir)))
+                (if (file-exists-p mod-file)
+                    (let ((attrs (file-attributes mod-file)))
+                      (insert (format "Module file:         %s\n" mod-file))
+                      (insert (format "Module size:         %s bytes\n"
+                                      (file-attribute-size attrs)))
+                      (insert (format "Module modified:     %s\n"
+                                      (format-time-string
+                                       "%F %T"
+                                       (file-attribute-modification-time attrs)))))
+                  (insert (format "Module file:         NOT FOUND in %s\n" dir)))))))
+        ;; Terminal state
+        (insert "\n--- Terminal State ---\n")
+        (if ghostel-buf
+            (let (info)
+              (with-current-buffer ghostel-buf
+                (setq info
+                      (list :buffer (buffer-name)
+                            :rows ghostel--term-rows
+                            :buf-size (buffer-size)
+                            :buf-lines (count-lines (point-min) (point-max))
+                            :point (point)
+                            :term ghostel--term
+                            :force ghostel--force-next-redraw
+                            :pending (length ghostel--pending-output)
+                            :timer (and ghostel--redraw-timer t)
+                            :copy ghostel--copy-mode-active
+                            :dec2026 (and ghostel--term
+                                          (ghostel--mode-enabled ghostel--term 2026))))
+                (let ((win (get-buffer-window ghostel-buf)))
+                  (when win
+                    (setq info (plist-put info :win-w (window-body-width win)))
+                    (setq info (plist-put info :win-h (window-body-height win)))
+                    (setq info (plist-put info :win-start (window-start win)))
+                    (setq info (plist-put info :win-end (window-end win t))))))
+              (insert (format "Buffer:              %s\n" (plist-get info :buffer)))
+              (insert (format "Term rows:           %s\n" (plist-get info :rows)))
+              (insert (format "Buffer size:         %d chars, %d lines\n"
+                              (plist-get info :buf-size) (plist-get info :buf-lines)))
+              (insert (format "Point:               %d\n" (plist-get info :point)))
+              (if (plist-get info :win-w)
+                  (progn
+                    (insert (format "Window body:         %dx%d (cols x rows)\n"
+                                    (plist-get info :win-w) (plist-get info :win-h)))
+                    (insert (format "Window start:        %d\n" (plist-get info :win-start)))
+                    (insert (format "Window end:          %d\n" (plist-get info :win-end))))
+                (insert "Window:              not displayed\n"))
+              (if (plist-get info :term)
+                  (progn
+                    (insert (format "DEC 2026 (sync):     %s\n"
+                                    (if (plist-get info :dec2026) "ACTIVE" "off")))
+                    (insert (format "Force next redraw:   %s\n" (plist-get info :force)))
+                    (insert (format "Pending output:      %s chunks\n" (plist-get info :pending)))
+                    (insert (format "Redraw timer:        %s\n"
+                                    (if (plist-get info :timer) "pending" "none")))
+                    (insert (format "Copy mode:           %s\n"
+                                    (if (plist-get info :copy) "active" "off"))))
+                (insert "Term handle:         nil (no terminal)\n")))
+          (insert "(not in a ghostel buffer)\n"))
+        ;; Settings
+        (insert "\n--- Settings ---\n")
+        (insert (format "timer-delay:         %s\n" ghostel-timer-delay))
+        (insert (format "full-redraw:         %s\n" ghostel-full-redraw))
+        (insert (format "adaptive-fps:        %s\n" ghostel-adaptive-fps))
+        (insert (format "immediate-threshold: %s\n" ghostel-immediate-redraw-threshold))
+        (insert (format "immediate-interval:  %s\n" ghostel-immediate-redraw-interval))
+        (insert (format "scroll-conservatively: %s\n"
+                        (if ghostel-buf
+                            (buffer-local-value 'scroll-conservatively ghostel-buf)
+                          scroll-conservatively)))))
+    (display-buffer out)
+    (message "Debug info written to *ghostel-debug*")))
 
 (provide 'ghostel-debug)
 ;;; ghostel-debug.el ends here

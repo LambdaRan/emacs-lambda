@@ -9,8 +9,8 @@
 (setq ghostel-enable-url-detection t)
 ;; 文件引用检测
 (setq ghostel-enable-file-detection t)
-
 (setq ghostel-shell "pwsh.exe")
+(setq ghostel-term "xterm-256color")
 
 (lazy-load-unset-keys
  '("C-j")
