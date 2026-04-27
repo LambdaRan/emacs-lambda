@@ -39,6 +39,8 @@
   '(("opus4.6"   . "claude-opus-4-6")
     ("sonnet4.6" . "claude-sonnet-4-6")
     ("haiku4.5"  . "claude-haiku-4-5-20251001")
+    ("dsv4flash" . "deepseek-v4-flash")
+    ("dsv4pro" . "deepseek-v4-pro")
     ("gemini3.1pro" . "gemini-3.1-pro-preview")
     ("gemini3.1flash" . "gemini-3.1-flash-image-preview")
     ("gemini3.1flashlite" . "gemini-3.1-flash-lite-preview")
