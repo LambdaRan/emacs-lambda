@@ -23,13 +23,40 @@
 ;;  agent-shell-mode-map)
 
 ;;;; 配置Claude code
-(setq agent-shell-anthropic-claude-environment
-      (agent-shell-make-environment-variables
-       :inherit-env t
-       ;; preload.cjs 会 monkey-patch child_process.spawn，在 Claude Code
-       ;; 子进程启动时自动注入 --require gbk-patch.cjs（绕过 SDK 删除 NODE_OPTIONS 的问题）
-       "NODE_OPTIONS" (concat "--require " (expand-file-name "~/.claude-patch-emacs/preload.cjs"))
-       "NODE_PATH" (expand-file-name "~/.claude-patch-emacs/node_modules")))
+(defun ran-agent-shell--find-claude-code-cli-js ()
+  "Return a usable Claude Code `cli.js' path for the GBK patch flow."
+  (let ((paths nil)
+        found)
+    (let ((npm (executable-find "npm")))
+      (when npm
+        (dolist (args '(("root") ("root" "-g")))
+          (let ((root (ignore-errors (car (apply #'process-lines npm args)))))
+            (when root
+              (push (expand-file-name "@anthropic-ai/claude-code/cli.js" root) paths))))))
+    (setq paths
+          (append
+           (list (expand-file-name "~/.claude-patch-emacs/vendor/claude-code-2.1.112/node_modules/@anthropic-ai/claude-code/cli.js"))
+           (nreverse paths)
+           (list (expand-file-name "~/node_modules/@anthropic-ai/claude-code/cli.js")
+                 (expand-file-name "~/scoop/apps/nvm/current/nodejs/nodejs/node_modules/@anthropic-ai/claude-code/cli.js"))))
+    (while (and paths (not found))
+      (let ((path (pop paths)))
+        (when (file-exists-p path)
+          (setq found path))))
+    (or found
+        (expand-file-name "~/node_modules/@anthropic-ai/claude-code/cli.js"))))
+
+(let ((claude-code-cli-js (ran-agent-shell--find-claude-code-cli-js)))
+  (setq agent-shell-anthropic-claude-environment
+        (agent-shell-make-environment-variables
+         :inherit-env t
+         ;; preload.cjs 会 monkey-patch child_process.spawn，在 Claude Code
+         ;; 子进程启动时自动注入 --require gbk-patch.cjs（绕过 SDK 删除 NODE_OPTIONS 的问题）
+         "NODE_OPTIONS" (concat "--require " (expand-file-name "~/.claude-patch-emacs/preload.cjs"))
+         "NODE_PATH" (expand-file-name "~/.claude-patch-emacs/node_modules")
+         ;; 强制 SDK 走 Node.js cli.js 路径而非预编译的 claude.exe，
+         ;; 这样 spawn 命令才是 node，preload.cjs 的拦截才能生效
+         "CLAUDE_CODE_EXECUTABLE" claude-code-cli-js)))
 (setq agent-shell-anthropic-authentication
       (agent-shell-anthropic-make-authentication
        :oauth (lambda () (getenv "ANTHROPIC_AUTH_TOKEN"))))
