@@ -72,6 +72,9 @@
    ("." . color-rg-search-input-in-current-file)
    ("[" . color-rg-search-symbol-with-type)
    ("]" . color-rg-search-project-with-type)
+   ("U" . color-rg-search-symbol-gbk)   
+   ("I" . color-rg-search-input-gbk)
+   ("J" . color-rg-search-symbol-in-project-gbk)   
    )
  "init-color-rg"
  "C-c")

@@ -62,4 +62,46 @@
   ;; (advice-remove #'color-rg-get-match-buffer #'color-rg-get-match-buffer@override)
 )
 
+;; GBK 编码搜索支持
+(defvar color-rg--search-encoding nil
+  "When non-nil, inject '-E ENCODING' into rg command.")
+
+(defun color-rg-build-command@inject-encoding (orig-fn &rest args)
+  "Inject encoding flag into rg command when `color-rg--search-encoding' is set."
+  (let ((cmd (apply orig-fn args)))
+    (if color-rg--search-encoding
+        (replace-regexp-in-string
+         "\\`rg " (format "rg -E %s " color-rg--search-encoding) cmd)
+      cmd)))
+
+(advice-add #'color-rg-build-command :around #'color-rg-build-command@inject-encoding)
+
+;;;###autoload
+(defun color-rg-search-input-gbk (&optional keyword directory)
+  "Search GBK encoded files with input keyword."
+  (interactive)
+  (let ((color-rg--search-encoding "gbk"))
+    (color-rg-search-input keyword directory)))
+
+;;;###autoload
+(defun color-rg-search-symbol-gbk ()
+  "Search symbol at point in GBK encoded files."
+  (interactive)
+  (let ((color-rg--search-encoding "gbk"))
+    (color-rg-search-symbol)))
+
+;;;###autoload
+(defun color-rg-search-project-gbk ()
+  "Search GBK encoded files in project."
+  (interactive)
+  (let ((color-rg--search-encoding "gbk"))
+    (color-rg-search-project)))
+
+;;;###autoload
+(defun color-rg-search-symbol-in-project-gbk ()
+  "Search symbol at point in GBK encoded files in project."
+  (interactive)
+  (let ((color-rg--search-encoding "gbk"))
+    (color-rg-search-symbol-in-project)))
+
 (provide 'init-color-rg)
