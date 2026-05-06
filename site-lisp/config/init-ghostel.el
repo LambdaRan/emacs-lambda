@@ -26,6 +26,12 @@
                           (directory-file-name title)))
                  t))
 
+(defun ghostel@always-fresh (orig-fn &optional arg)
+  "Always create a new ghostel buffer when no prefix arg given."
+  (funcall orig-fn (or arg '(4))))
+
+(advice-add #'ghostel :around #'ghostel@always-fresh)
+
 (provide 'init-ghostel)
 
 ;;; init-ghostel.el ends here
