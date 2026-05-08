@@ -62,6 +62,33 @@
   ;; (advice-remove #'color-rg-get-match-buffer #'color-rg-get-match-buffer@override)
 )
 
+;; PCRE2 正则搜索支持（支持 lookahead/lookbehind）
+(defvar color-rg--search-pcre nil
+  "When non-nil, inject '-P' (PCRE2) into rg command.")
+
+(defun color-rg-build-command@inject-pcre (orig-fn &rest args)
+  "Inject PCRE2 flag when `color-rg--search-pcre' is set."
+  (let ((cmd (apply orig-fn args)))
+    (if color-rg--search-pcre
+        (replace-regexp-in-string "\\`rg " "rg -P " cmd)
+      cmd)))
+
+(advice-add #'color-rg-build-command :around #'color-rg-build-command@inject-pcre)
+
+;;;###autoload
+(defun color-rg-search-input-pcre (&optional keyword directory)
+  "Search with PCRE2 regexp (supports lookahead/lookbehind)."
+  (interactive)
+  (let ((color-rg--search-pcre t))
+    (color-rg-search-input keyword directory)))
+
+;;;###autoload
+(defun color-rg-search-project-pcre ()
+  "Search project with PCRE2 regexp."
+  (interactive)
+  (let ((color-rg--search-pcre t))
+    (color-rg-search-project)))
+
 ;; GBK 编码搜索支持
 (defvar color-rg--search-encoding nil
   "When non-nil, inject '-E ENCODING' into rg command.")
