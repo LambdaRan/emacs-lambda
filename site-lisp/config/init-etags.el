@@ -10,12 +10,6 @@
 ;; Don't warn when TAGS files are large
 (setq large-file-warning-threshold nil)
 
-(when sys/mac-cocoa-p
-  ;; Mac's default ctags does not support -e option
-  ;; If you install Emacs by homebrew, another version of etags is already installed which does not need -e too
-  ;; the best option is to install latest ctags from sf.net
-  (setq ctags-command "/usr/local/bin/ctags -e -R "))
-
 ;; 将该变量标记为始终安全（接受任何值）
 (put 'counsel-etags-extra-tags-files 'safe-local-variable #'always)
 ;; Ignore files above 800kb
@@ -30,14 +24,13 @@
 ;; (setq counsel-etags-debug nil)
 ;; (setq counsel-etags-grep-program (counsel-etags-guess-program "rg"))
 
-;; (setq imenu-create-index-function 'counsel-etags-imenu-default-create-index-function)
 (defun ran-counsel-imenu()
-  "List all imenu tag with counsel-semantic-or-imenu or counsel-etags-list-tag-in-current-file"
+  "List all imenu tag with counsel-semantic-or-imenu or imenu."
   (interactive)
   (require 'semantic/fw)
   (if (and (not (semantic-active-p))
            (seq-empty-p (counsel--imenu-candidates)))
-      (call-interactively 'counsel-etags-list-tag-in-current-file)
+      (call-interactively 'imenu)
     (call-interactively 'counsel-semantic-or-imenu)))
 
 (unless sys/windows-p
