@@ -4,8 +4,7 @@
 (require 'lazy-load)
 
 (setq color-rg-show-function-name-p nil)
-(setq color-rg-search-ignore-file nil)
-(setq color-rg-search-ignore-rules "-g \"!node_modules\" -g \"!dist\" -g \"!TAGS\"")
+(setq color-rg-search-ignore-rules "-g \"!node_modules\" -g \"!dist\" -g \"!TAGS\" -g \"!tags\" -g \"!*~\"")
 ;; (when (eq system-type 'windows-nt)
 ;;   (setq color-rg-command-prefix "powershell"))
 
