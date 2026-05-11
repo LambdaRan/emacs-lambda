@@ -18,13 +18,18 @@
 
 (add-to-list 'ghostel-keymap-exceptions "C-j")
 
-;; 缩短终端 buffer 名称，只保留最后一级目录名
-(defun ghostel--set-title (title)
-  "Update the buffer name with TITLE from the terminal."
-  (rename-buffer (format "*ghostel: %s*"
-                         (file-name-nondirectory
-                          (directory-file-name title)))
-                 t))
+;; buffer 名称使用当前目录名而非终端标题
+(defun ghostel--set-title-directory (_title)
+  "Use current directory as ghostel buffer name."
+  (when (or (null ghostel--managed-buffer-name)
+            (equal (buffer-name) ghostel--managed-buffer-name))
+    (let ((new-name (format "*ghostel: %s*"
+                            (file-name-nondirectory
+                             (directory-file-name default-directory)))))
+      (rename-buffer new-name t)
+      (setq ghostel--managed-buffer-name (buffer-name)))))
+
+(setq ghostel-set-title-function #'ghostel--set-title-directory)
 
 (defun ghostel@always-fresh (orig-fn &optional arg)
   "Always create a new ghostel buffer when no prefix arg given."
