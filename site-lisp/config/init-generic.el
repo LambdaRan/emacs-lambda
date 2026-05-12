@@ -146,11 +146,16 @@
   ;; 使用英文day-time
   (setq system-time-locale "C"))
 
-;; UTF-8 优先，同时保留 GBK/GB2312 自动检测（不要用 set-language-environment "UTF-8"，它会清除 GBK 检测）
-(prefer-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-;; (when sys/windows-p
-;;   (set-selection-coding-system 'utf-8))
+;; prefer-coding-system 后调用的优先级更高；不要用 set-language-environment，会清除 GBK 检测
+;; 项目级编码优先级通过 .dir-locals.el 中 (eval . (prefer-coding-system 'xxx)) 覆盖
+(if sys/windows-p
+    (progn
+      (prefer-coding-system 'utf-8)
+      (prefer-coding-system 'gb18030)
+      (set-default-coding-systems 'gb18030))
+  (prefer-coding-system 'gb18030)
+  (prefer-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8))
 
 (provide 'init-generic)
 
