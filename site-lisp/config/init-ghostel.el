@@ -10,7 +10,7 @@
 ;; 文件引用检测
 (setq ghostel-enable-file-detection t)
 (setq ghostel-shell "pwsh.exe")
-(setq ghostel-term "xterm-256color")
+(setq ghostel-term "xterm-ghostty")
 
 (lazy-load-unset-keys
  '("C-j")
