@@ -130,4 +130,38 @@
   (let ((color-rg--search-encoding "gbk"))
     (color-rg-search-symbol-in-project)))
 
+;; 修复 color-rg-pointer-string: 当 color-rg-current-parse-state 返回 nil
+;; (ignore-errors 吞掉了错误)，但 color-rg-in-string-p 通过 face 检测返回 t 时，
+;; color-rg-string-start+end-points 中 (nth 8 nil) 为 nil，传给 goto-char 报错。
+;; 由于原函数是字节编译的，cl-letf 替换子函数后编译代码仍对 nil 做 (1+ (car nil))，
+;; 故用 :override 接管整个函数，在字符串提取失败时 fallback 到 thing-at-point。
+(defun color-rg-pointer-string@override ()
+  (if (use-region-p)
+      (buffer-substring-no-properties (region-beginning) (region-end))
+    (let* ((current-string
+            (if (color-rg-in-string-p)
+                (condition-case nil
+                    (let ((string-node-bound (color-rg-get-string-node-bound)))
+                      (if string-node-bound
+                          (buffer-substring-no-properties
+                           (car string-node-bound)
+                           (cdr string-node-bound))
+                        (buffer-substring-no-properties
+                         (1+ (car (color-rg-string-start+end-points)))
+                         (cdr (color-rg-string-start+end-points)))))
+                  (error ""))
+              ""))
+           (current-symbol
+            (if (or (string-empty-p current-string)
+                    (and current-string (string-match-p "[[:space:]]" current-string)))
+                (thing-at-point 'symbol)
+              current-string)))
+      (cond ((and current-symbol (string-prefix-p "." current-symbol))
+             (string-remove-prefix "." current-symbol))
+            ((and current-symbol (string-prefix-p "#" current-symbol))
+             (string-remove-prefix "#" current-symbol))
+            (t current-symbol)))))
+
+(advice-add #'color-rg-pointer-string :override #'color-rg-pointer-string@override)
+
 (provide 'init-color-rg)
