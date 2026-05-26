@@ -913,6 +913,7 @@ omit it when the connection itself is the suspected fault."
                                  ("backspace" "meta"      "M-Backspace")
                                  ("f"         "meta"      "M-f")
                                  ("b"         "meta"      "M-b")
+                                 ("."         "meta"      "M-.")
                                  ("f"         "ctrl,meta" "C-M-f")
                                  ("v"         "ctrl,meta" "C-M-v")
                                  ("h"         "ctrl"      "C-h")))
@@ -1769,10 +1770,12 @@ process state."
 
 ;;; ConPTY spawn capture (Windows)
 
-(defun ghostel-debug--capture-conpty-spawn (orig width height &optional extra-env)
+(defun ghostel-debug--capture-conpty-spawn (orig shell shell-args
+                                                  width height &optional extra-env)
   "Around-advice on `ghostel--conpty-proxy-make-process' that snapshots the spawn.
-ORIG is the original function; WIDTH, HEIGHT, EXTRA-ENV are forwarded
-verbatim and recorded into `ghostel-debug--spawn-capture'.
+ORIG is the original function; SHELL, SHELL-ARGS, WIDTH, HEIGHT,
+EXTRA-ENV are forwarded verbatim and recorded into
+`ghostel-debug--spawn-capture'.
 Self-removing — fires at most once.
 
 Mirrors `ghostel-debug--capture-spawn-pty' but for the ConPTY path on
@@ -1797,15 +1800,15 @@ that the PTY path provides on Unix."
                       (setq intercepted-cmd
                             (plist-get plist :command)))
                     (apply orig-make-process plist))))
-              (funcall orig width height extra-env))))
+              (funcall orig shell shell-args width height extra-env))))
       (setq ghostel-debug--spawn-capture
             (list :time spawn-time
                   :spawn-method 'conpty
                   :start-process-time start-process-time
                   :default-directory spawn-dir
                   :remote-p nil
-                  :program ghostel-shell
-                  :program-args nil
+                  :program shell
+                  :program-args shell-args
                   :height height
                   :width width
                   :stty-flags nil

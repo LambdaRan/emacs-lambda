@@ -4,7 +4,7 @@
 
 ;; Author: Daniel Kraus <daniel@kraus.my>
 ;; URL: https://github.com/dakra/ghostel
-;; Version: 0.28.0
+;; Version: 0.30.0
 ;; Keywords: terminals
 ;; Package-Requires: ((emacs "28.1") (compat "30.1.0.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -282,6 +282,14 @@ or backing scale factor."
   :type '(choice (const :tag "Auto-detect from display DPI" auto)
                  (number :tag "Explicit ratio")))
 
+(defcustom ghostel-glyph-scale-floor 0.0
+  "Minimum scale for glyphs whose font metrics don't fit the cell.
+0.0 (default) preserves strict grid alignment.  1.0 disables
+shrinking entirely so CJK and other fallback glyphs render at
+natural size, potentially making rows slightly taller and cells slightly wider."
+  :type '(float 0.0 1.0)
+  :local t)
+
 (defcustom ghostel-kitty-graphics-storage-limit (* 320 1024 1024)  ; 320 MiB
   "Kitty graphics image storage cap, in bytes, per terminal.
 
@@ -465,7 +473,7 @@ for static env entries that don't depend on runtime state."
                                ("dired" dired)
                                ("dired-other-window" dired-other-window)
                                ("message" message))
-  "Whitelisted Emacs functions callable from the terminal via OSC 51.
+  "Whitelisted Emacs functions callable from the terminal via OSC 52;e.
 Each entry is (NAME FUNCTION) where NAME is the string sent from
 the shell and FUNCTION is the Elisp function to invoke.
 All arguments are passed as strings."
@@ -717,7 +725,7 @@ When nil, falls back to `tramp-default-method'."
                  string))
 
 (defcustom ghostel-keymap-exceptions
-  '("C-c" "C-x" "C-u" "C-h" "M-x" "M-o" "M-:" "C-\\")
+  '("C-c" "C-x" "C-u" "C-h" "M-x" "M-:" "C-\\")
   "Key sequences that should not be sent to the terminal.
 These keys pass through to Emacs instead."
   :type '(repeat string))
@@ -1008,7 +1016,7 @@ Used when `cursor-in-non-selected-windows' resolves to box.")
 
 ;;; Automatic download and compilation of native module
 
-(defconst ghostel--minimum-module-version "0.28.0"
+(defconst ghostel--minimum-module-version "0.30.0"
   "Minimum native module version required by this Elisp version.
 Bump this only when the Elisp code requires a newer native module
 \(e.g. new Zig-exported function or changed calling convention).")
@@ -1785,7 +1793,7 @@ When NO-EXCEPTIONS is non-nil, also bind the keys in
   (define-key map (kbd "DEL") #'ghostel--send-event)
   ;; Emacs reports S-TAB as <backtab>
   (define-key map (kbd "<backtab>") #'ghostel--send-event)
-  ;; Control keys — bind all C-<letter> to send ASCII control codes.
+  ;; Control keys - bind all C-<letter> to send ASCII control codes.
   ;; C-i = TAB and C-m = RET are equivalent to <tab>/<return> (bound above).
   ;; C-y is reserved for ghostel-yank in semi-char mode.
   ;; C-g is always handled by `ghostel-send-C-g' so the mark and
@@ -1800,13 +1808,24 @@ When NO-EXCEPTIONS is non-nil, also bind the keys in
                       (let ((code (- c 96)))
                         (lambda () (interactive)
                           (ghostel--send-string (string code)))))))))
-  ;; Meta and Control-Meta keys - bind all (C-)M-<letter> so they reach
-  ;; the terminal instead of running Emacs commands like forward-word.
+  ;; Meta keys - bind M-<printable ASCII> so the full set reaches the terminal.
+  ;; Skip ?\[ and ?O: those are escape-sequence prefixes (CSI / SS3)
+  ;; used by Emacs input decoding for arrow/function keys in TTY mode.
+  (dolist (c (number-sequence ?! ?~))
+    (unless (memq c '(?\[ ?O))
+      (let ((key-str (format "M-%c" c)))
+        (when (or no-exceptions
+                  (not (member key-str ghostel-keymap-exceptions)))
+          (ignore-errors
+            (define-key map (kbd key-str) #'ghostel--send-event))))))
+  ;; M-SPC: `(format "M-%c" ?\s)' yields "M- ", which `kbd' rejects.
+  (let ((key-str "M-SPC"))
+    (when (or no-exceptions
+              (not (member key-str ghostel-keymap-exceptions)))
+      (define-key map (kbd key-str) #'ghostel--send-event)))
+  ;; Control-Meta keys - C-M-<letter> only; C-M-<punct>/<digit> aren't
+  ;; widely supported by terminal apps.
   (dolist (c (number-sequence ?a ?z))
-    (let ((key-str (format "M-%c" c)))
-      (when (or no-exceptions
-                (not (member key-str ghostel-keymap-exceptions)))
-        (define-key map (kbd key-str) #'ghostel--send-event)))
     (let ((key-str (format "C-M-%c" c)))
       (when (or no-exceptions
                 (not (member key-str ghostel-keymap-exceptions)))
@@ -1963,7 +1982,6 @@ top so that \\`q', \\`C-g', or any self-insert key exits."
   "C-w"            #'ghostel-readonly-copy
   "M->"            #'ghostel-readonly-end-of-buffer
   "C-e"            #'ghostel-readonly-end-of-line
-  "C-l"            #'ghostel-readonly-recenter
   "RET"            #'ghostel-open-link-at-point
   "<return>"       #'ghostel-open-link-at-point)
 
@@ -2134,9 +2152,10 @@ Returns the sequence string, or nil for unknown keys."
            (<= ?a (aref key-name 0)) (<= (aref key-name 0) ?z)
            (> (logand mod-num 4) 0))        ; ctrl bit
       (string (- (aref key-name 0) 96)))    ; ctrl-a=1, ctrl-z=26
-     ;; Meta + single letter → ESC + char
+     ;; Meta + printable ASCII → ESC + char (legacy alt encoding)
      ((and (= (length key-name) 1)
-           (<= ?a (aref key-name 0)) (<= (aref key-name 0) ?z)
+           (let ((c (aref key-name 0)))
+             (and (>= c 32) (<= c 126)))
            (> (logand mod-num 2) 0))        ; alt/meta bit
       (format "\e%c" (aref key-name 0)))
      ;; Simple special keys (CSI u encoding for modified variants)
@@ -2510,11 +2529,6 @@ Return non-nil if the event was forwarded (mouse tracking is active)."
   (interactive)
   (end-of-line)
   (skip-chars-backward " \t"))
-
-(defun ghostel-readonly-recenter ()
-  "Recenter the current line in the window."
-  (interactive)
-  (recenter))
 
 
 ;;; Mouse input
@@ -3030,16 +3044,20 @@ press anywhere else exits and forwards a CR to the terminal."
 (defun ghostel--filter-soft-wraps (text)
   "Remove newlines from TEXT that were inserted by soft line wrapping.
 These are newlines with the `ghostel-wrap' text property."
-  (let ((result "")
+  (let ((chunks nil)
+        (chunk-start 0)
         (pos 0)
         (len (length text)))
     (while (< pos len)
-      (if (and (eq (aref text pos) ?\n)
-               (get-text-property pos 'ghostel-wrap text))
-          (setq pos (1+ pos))
-        (setq result (concat result (substring text pos (1+ pos)))
-              pos (1+ pos))))
-    result))
+      (when (and (eq (aref text pos) ?\n)
+                 (get-text-property pos 'ghostel-wrap text))
+        (when (< chunk-start pos)
+          (push (substring text chunk-start pos) chunks))
+        (setq chunk-start (1+ pos)))
+      (setq pos (1+ pos)))
+    (when (< chunk-start len)
+      (push (substring text chunk-start len) chunks))
+    (string-join (nreverse chunks))))
 
 (defun ghostel--clean-copy-text (text)
   "Clean TEXT for copying: remove soft-wrap newlines, strip trailing whitespace."
@@ -4013,23 +4031,47 @@ a line suffix opens at the start of the file or directory."
   (interactive)
   (ghostel--open-link (ghostel--uri-at-pos (point))))
 
+(defun ghostel--find-link-1 (direction from)
+  "Return the start of the next/previous hyperlink from FROM, or nil.
+DIRECTION is `next' or `previous'.
+
+Treats runs sharing a `ghostel-link-id' as one logical link: if FROM is
+inside such a run, other runs with that id are skipped; for `previous',
+the result is walked back to the earliest same-id run so a wrapped URL
+lands at its start, not its last chunk."
+  (let ((search-fn (if (eq direction 'next)
+                       #'text-property-search-forward
+                     #'text-property-search-backward))
+        (skip-id (get-text-property from 'ghostel-link-id)))
+    (save-excursion
+      (goto-char from)
+      (catch 'found
+        (while-let ((match (funcall search-fn 'help-echo nil
+                                    (lambda (_ v) v) t)))
+          (let* ((pos (prop-match-beginning match))
+                 (id (get-text-property pos 'ghostel-link-id)))
+            (unless (and skip-id (equal skip-id id))
+              (when (and (eq direction 'previous) id)
+                (catch 'walked
+                  (while-let ((earlier (text-property-search-backward
+                                        'help-echo nil
+                                        (lambda (_ v) v) t)))
+                    (let ((earlier-pos (prop-match-beginning earlier)))
+                      (if (equal id (get-text-property
+                                     earlier-pos 'ghostel-link-id))
+                          (setq pos earlier-pos)
+                        (throw 'walked nil))))))
+              (throw 'found pos))))))))
+
 (defun ghostel--find-next-link (from)
   "Return start position of the first hyperlink after FROM, or nil.
-A hyperlink is any region with a non-nil `help-echo' property —
-covers OSC 8 links, auto-detected URLs, and `fileref:' references."
-  (save-excursion
-    (goto-char from)
-    (when-let* ((match (text-property-search-forward
-                        'help-echo nil (lambda (_ v) v) t)))
-      (prop-match-beginning match))))
+A hyperlink is any region with a non-nil `help-echo' property.
+Covers OSC 8 links, auto-detected URLs, and `fileref:' references."
+  (ghostel--find-link-1 'next from))
 
 (defun ghostel--find-previous-link (from)
   "Return start position of the first hyperlink before FROM, or nil."
-  (save-excursion
-    (goto-char from)
-    (when-let* ((match (text-property-search-backward
-                        'help-echo nil (lambda (_ v) v) t)))
-      (prop-match-beginning match))))
+  (ghostel--find-link-1 'previous from))
 
 (defun ghostel--goto-hyperlink (direction)
   "Jump to the next/previous hyperlink.  DIRECTION is `next' or `previous'.
@@ -5084,11 +5126,22 @@ indicator and suppression always reach a sane state."
 
 ;;; Callbacks from native module
 
-(defun ghostel--osc51-eval (str)
-  "Handle an OSC 51;E command from the terminal.
-STR is the payload after the E sub-command.
+(defvar-local ghostel--osc52-eval-in-flight nil
+  "Non-nil while an OSC 52;e dispatch is pending.
+Set by `ghostel--filter' when the introducer regex matches; cleared
+by `ghostel--osc52-eval' as its first form, so the dispatch firing
+is the authoritative \"done\" edge.  Used to keep forcing synchronous
+flushes until the OSC completes, even when the introducer and body arrive
+in separate filter chunks (slow producers, SSH, small TCP segments).")
+
+(defun ghostel--osc52-eval (str)
+  "Handle an OSC 52 elisp-eval payload from the terminal.
+STR is the raw payload from OSC 52 with kind \\='e\\='.
 Parses the command and arguments, looks up the command in
 `ghostel-eval-cmds', and calls it if whitelisted."
+  ;; Clear before the body so a callback error still drops the flag —
+  ;; `ghostel--filter' relies on this firing to stop forcing sync flush.
+  (setq ghostel--osc52-eval-in-flight nil)
   (let* ((parts (split-string-and-unquote str))
          (command (car parts))
          (args (cdr parts))
@@ -5377,18 +5430,21 @@ the rest of Emacs (e.g. a dark terminal inside a light Emacs)."
 
 (defun ghostel--face-hex-color (face attr)
   "Extract hex color string from FACE's ATTR (:foreground or :background).
-Falls back to \"#000000\" if the color cannot be resolved."
+Falls back to white (for :foreground) or black (for :background)."
   (or (let ((color (face-attribute face attr nil 'default)))
-        (when (and (stringp color) (not (string= color "unspecified")))
+        (when (and (stringp color)
+                   (not (member color '("unspecified"
+                                        "unspecified-fg"
+                                        "unspecified-bg"))))
           (let ((rgb (color-values color)))
             (if rgb
                 (apply #'format "#%02x%02x%02x"
                        (mapcar (lambda (c) (ash c -8)) rgb))
-              ;; Batch mode: color-values returns nil without a display.
-              ;; If the color is already "#RRGGBB", use it directly.
+              ;; Batch mode / TTY: color-values returns nil without a
+              ;; display.  If the color is already "#RRGGBB", use it.
               (and (string-prefix-p "#" color) (= (length color) 7)
                    color)))))
-      "#000000"))
+      (if (eq attr :foreground) "#ffffff" "#000000")))
 
 (defun ghostel--apply-palette (term)
   "Apply colors from `ghostel-color-palette' faces and default fg/bg to TERM."
@@ -5503,17 +5559,21 @@ the redraw is performed immediately to minimize typing latency."
       (when ghostel--term
         ;; Accumulate output for batched write-input at redraw time.
         (push output ghostel--pending-output)
-        ;; Respond to OSC 51;E or OSC 4/10/11 color queries immediately:
-        ;; programs like `duf' read stdin with a tight timeout and give up if
-        ;; the reply waits for the redraw timer.
-        ;; Flushing runs the extractor in the native module, which writes the reply
-        ;; back through the PTY before this filter returns.
-        ;; Carry a 16-byte tail so an introducer split across reads still matches.
+        ;; Sync-flush OSC 52;e (elisp-eval) and OSC 4/10/11 color queries
+        ;; so producers don't race the redraw timer.  Carry-tail catches
+        ;; mid-introducer splits; the in-flight flag catches the split
+        ;; where the introducer ends chunk 1 (chunk 2 has no `52;e;' to
+        ;; rematch on its own).  The flag is set only for eval - color
+        ;; replies are written back inside the same write-input call.
         (let* ((prev (cadr ghostel--pending-output))
-               (carry (and prev (substring prev (max 0 (- (length prev) 16))))))
-          (when (string-match-p
-                 "\e\\]\\(?:4;[0-9]+;\\?\\|10;\\?\\|11;\\?\\|51;E\\)"
-                 (if carry (concat carry output) output))
+               (carry (and prev (substring prev (max 0 (- (length prev) 16)))))
+               (text (if carry (concat carry output) output))
+               (eval-match (string-match-p "\e\\]52;e;" text)))
+          (when (or eval-match
+                    ghostel--osc52-eval-in-flight
+                    (string-match-p
+                     "\e\\]\\(?:4;[0-9]+;\\?\\|10;\\?\\|11;\\?\\)" text))
+            (when eval-match (setq ghostel--osc52-eval-in-flight t))
             (ghostel--flush-pending-output)))
         ;; Immediate redraw for interactive echo: small output arriving
         ;; within `ghostel-immediate-redraw-interval' of last keystroke.
@@ -5578,8 +5638,11 @@ Search order: `ghostel-conpty-proxy-path', PATH, ghostel resource root."
                   (candidate (expand-file-name "conpty_proxy.exe" root)))
         (and (file-executable-p candidate) candidate))))
 
-(defun ghostel--conpty-proxy-make-process (width height &optional extra-env)
+(defun ghostel--conpty-proxy-make-process (shell shell-args width height
+                                                &optional extra-env)
   "Start a shell process via conpty-proxy for Windows.
+SHELL is the resolved shell program, SHELL-ARGS its argument list
+\(e.g. integration args like \"--posix\" for bash).
 WIDTH and HEIGHT are the terminal dimensions in characters.
 EXTRA-ENV is an optional list of environment variable strings
 \(e.g. shell integration env) prepended to `process-environment'."
@@ -5606,7 +5669,7 @@ EXTRA-ENV is an optional list of environment variable strings
                               "new" ,conpty-id
                               ,(number-to-string width)
                               ,(number-to-string height)
-                              ,ghostel-shell)
+                              ,shell ,@shell-args)
                    :filter #'ghostel--filter
                    :sentinel #'ghostel--sentinel)))
         (process-put proc 'conpty-id conpty-id)
@@ -6211,7 +6274,8 @@ on the remote host."
                        (list (format "EMACS_GHOSTEL_PATH=%s" ghostel-dir)))
                      integration-env))
          (proc (if (eq system-type 'windows-nt)
-                   (ghostel--conpty-proxy-make-process width height extra-env)
+                   (ghostel--conpty-proxy-make-process shell shell-args
+                                                       width height extra-env)
                  (let* ((spawn-spec (if (and ghostel-macos-login-shell
                                              (not remote-p)
                                              (eq system-type 'darwin))
@@ -6335,9 +6399,9 @@ position COL columns into the first matched line."
   (when ghostel--pending-output
     (let ((combined (apply #'concat (nreverse ghostel--pending-output))))
       (setq ghostel--pending-output nil)
-      ;; An OSC 51;E callback dispatched synchronously from the native
-      ;; parser (e.g. `find-file-other-window') can change the current
-      ;; buffer via `select-window'.  Isolate that so callers keep
+      ;; An OSC 52;e (elisp-eval) callback dispatched synchronously from
+      ;; the native parser (e.g. `find-file-other-window') can change the
+      ;; current buffer via `select-window'.  Isolate that so callers keep
       ;; reading buffer-locals — notably `ghostel--term' — from the
       ;; ghostel buffer after this returns.
       (save-current-buffer
@@ -6740,6 +6804,15 @@ PROCESS is the shell process, WINDOWS is the list of windows."
            ;; No change — skip entirely.
            ((and (eql height ghostel--term-rows)
                  (eql width ghostel--term-cols))
+            (setq size nil))
+           ;; Don't resize on minibuffer-induced rows-only change.
+           ;; E.g. fish clears and re-emits its prompt on every SIGWINCH;
+           ;; a `consult-buffer'/`M-x' cycle that grows then shrinks the body
+           ;; would otherwise produce two prompt repaints in quick succession.
+           ;; Skip the deferral on the alt screen TUIs.
+           ((and (active-minibuffer-window)
+                 (eql width ghostel--term-cols)
+                 (not (ghostel--alt-screen-p ghostel--term)))
             (setq size nil))
            ;; Real resize — update the terminal model and redraw.
            (t
