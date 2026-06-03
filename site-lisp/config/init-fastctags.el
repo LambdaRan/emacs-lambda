@@ -25,13 +25,9 @@
                           'fastctags-virtual-update-tags 'append 'local))))
 
 (defun ran-fastctags-imenu ()
-  "List all imenu tags with semantic/imenu fallback."
+  "List all imenu tags."
   (interactive)
-  (require 'semantic/fw)
-  (if (and (not (semantic-active-p))
-           (seq-empty-p (imenu--make-index-alist t)))
-      (call-interactively 'imenu)
-    (call-interactively 'imenu)))
+  (call-interactively 'imenu))
 
 (defun fastctags-nav-find-tag-at-point-in-specific-directory ()
   "Find tag using tagname at point, selecting from specific tags files.
