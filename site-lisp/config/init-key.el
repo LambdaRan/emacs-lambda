@@ -325,12 +325,19 @@
    ("M-o" . isearch-del-char))
  isearch-mode-map)
 
+;; (lazy-load-global-keys
+;;  '(
+;;    ("C-}" . counsel-etags-find-tag)
+;;    ("C-]" . counsel-etags-find-tag-at-point)
+;;    ("C-c M-i" . ran-counsel-imenu))
+;;  "init-etags")
+
 (lazy-load-global-keys
  '(
-   ("C-}" . counsel-etags-find-tag)
-   ("C-]" . counsel-etags-find-tag-at-point)
-   ("C-c M-i" . ran-counsel-imenu))
- "init-etags")
+   ("C-}" . fastctags-nav-find-tag)
+   ("C-]" . fastctags-nav-find-tag-at-point)
+   ("C-c M-i" . ran-fastctags-imenu))
+ "init-fastctags")
 
 (lazy-load-global-keys
  '(

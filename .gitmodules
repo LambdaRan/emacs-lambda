@@ -115,3 +115,6 @@
 [submodule "site-lisp/extensions/agent-shell"]
 	path = site-lisp/extensions/agent-shell
 	url = https://github.com/xenodium/agent-shell.git
+[submodule "site-lisp/extensions/fastctags"]
+	path = site-lisp/extensions/fastctags
+	url = https://github.com/redguardtoo/fastctags.git

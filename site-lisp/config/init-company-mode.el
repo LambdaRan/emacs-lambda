@@ -99,10 +99,9 @@
           minibuffer-inactive-mode))
 
   ;; Customize company backends.
-  (setq company-backends '(company-dabbrev
-                           company-keywords                           
-                           company-files                       
-                           company-capf                           
+  (setq company-backends '((company-capf company-dabbrev)
+                           company-keywords
+                           company-files
                            ;; other backends
                            ))
 

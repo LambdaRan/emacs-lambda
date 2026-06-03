@@ -2,6 +2,7 @@
          ;; only search files with following extensions
          ;; (ffip-patterns . ("*.lua" "*.cpp" "*.h"))
          (counsel-etags-extra-tags-files . ("f:/xxx/TAGS"))
+         (fastctags-extra-tags-files . ("f:/xxx/TAGS"))
 	     (color-rg-project-root . "f:/xxx")
          (indent-tabs-mode . t)
 		 ;; (buffer-file-coding-system . gb18030)
