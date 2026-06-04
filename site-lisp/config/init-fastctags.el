@@ -9,6 +9,11 @@
 ;; Don't warn when TAGS files are large
 (setq large-file-warning-threshold nil)
 
+;; Use ripgrep instead of git grep for fallback searching
+(setq fastctags-use-git-grep-p nil)
+(setq fastctags-use-ripgrep-force t)
+(setq fastctags-grep-program "rg")
+
 ;; 将该变量标记为始终安全（接受任何值）
 (put 'fastctags-extra-tags-files 'safe-local-variable #'always)
 
