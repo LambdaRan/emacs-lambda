@@ -336,7 +336,8 @@
  '(
    ("C-}" . fastctags-nav-find-tag)
    ("C-]" . fastctags-nav-find-tag-at-point)
-   ("C-c M-i" . ran-fastctags-imenu))
+   ("C-c M-i" . ran-fastctags-imenu)
+   ("C-M-]" . fastctags-nav-find-tag-at-point-in-specific-directory))
  "init-fastctags")
 
 (lazy-load-global-keys

@@ -8,7 +8,7 @@
 (setq tags-case-fold-search nil) ;; t=case-insensitive, nil=case-sensitive
 ;; Don't warn when TAGS files are large
 (setq large-file-warning-threshold nil)
-
+(setq fastctags-stop-auto-update-tags t)
 ;; Use ripgrep instead of git grep for fallback searching
 (setq fastctags-use-git-grep-p nil)
 (setq fastctags-use-ripgrep-force t)
@@ -22,17 +22,15 @@
           (lambda ()
             (add-hook 'completion-at-point-functions #'fastctags-completion-at-point nil t)))
 
-;; Auto-update tags on save (skip on Windows due to file locking issues)
-(unless sys/windows-p
-  (add-hook 'prog-mode-hook
-            #'(lambda ()
-                (add-hook 'after-save-hook
-                          'fastctags-virtual-update-tags 'append 'local))))
-
-(defun ran-fastctags-imenu ()
-  "List all imenu tags."
+(defun ran-fastctags-imenu()
+  "List all imenu tag with counsel-semantic-or-imenu or imenu."
   (interactive)
-  (call-interactively 'imenu))
+  (require 'semantic/fw)
+  (if (and (not (semantic-active-p))
+           (seq-empty-p (counsel--imenu-candidates)))
+      (call-interactively 'imenu)
+    (call-interactively 'counsel-semantic-or-imenu)))
+
 
 (defun fastctags-nav-find-tag-at-point-in-specific-directory ()
   "Find tag using tagname at point, selecting from specific tags files.

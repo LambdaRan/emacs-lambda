@@ -1,0 +1,6 @@
+*.el   text eol=lf
+*.gif  filter=lfs diff=lfs merge=lfs -text
+*.png  filter=lfs diff=lfs merge=lfs -text
+*.dll  binary
+*.exe  binary
+*.ttf  binary

@@ -84,7 +84,7 @@
 
 ;;; Code:
 
-(setq-default indent-tabs-mode nil)
+(setq-default indent-tabs-mode t)
 (setq-default tab-width 4)
 
 ;; (setq-default c-electric-flag nil)

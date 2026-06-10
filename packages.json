@@ -1,0 +1,243 @@
+{
+  "packages": [
+    {
+      "name": "auto-save",
+      "repo": "manateelazycat/auto-save",
+      "ref": "master"
+    },
+    {
+      "name": "awesome-tab",
+      "repo": "manateelazycat/awesome-tab",
+      "ref": "master"
+    },
+    {
+      "name": "awesome-tray",
+      "repo": "manateelazycat/awesome-tray",
+      "ref": "master",
+	  "ignores":["screenshots/"]
+    },
+    {
+      "name": "company-mode",
+      "repo": "company-mode/company-mode",
+      "ref": "master"
+    },
+    {
+      "name": "dash",
+      "repo": "magnars/dash.el",
+      "ref": "master"
+    },
+    {
+      "name": "diff-hl",
+      "repo": "dgutov/diff-hl",
+      "ref": "master"
+    },
+    {
+      "name": "exec-path-from-shell",
+      "repo": "purcell/exec-path-from-shell",
+      "ref": "master"
+    },
+    {
+      "name": "expand-region",
+      "repo": "magnars/expand-region.el",
+      "ref": "master",
+	  "ignores":["*.sh","watch-tests.watchr","features"]
+    },
+    {
+      "name": "goto-line-preview",
+      "repo": "jcs090218/goto-line-preview",
+      "ref": "master"
+    },
+    {
+      "name": "vi-navigate",
+      "repo": "manateelazycat/vi-navigate",
+      "ref": "master"
+    },
+    {
+      "name": "go-mode",
+      "repo": "dominikh/go-mode.el",
+      "ref": "master",
+	  "ignores":["*.sh",".mailmap","AUTHORS*"]
+    },
+    {
+      "name": "color-rg",
+      "repo": "manateelazycat/color-rg",
+      "ref": "master",
+	  "ignores":["screenshot/"]
+    },
+    {
+      "name": "thing-edit",
+      "repo": "manateelazycat/thing-edit",
+      "ref": "master"
+    },
+    {
+      "name": "lazy-load",
+      "repo": "manateelazycat/lazy-load",
+      "ref": "master"
+    },
+    {
+      "name": "symbol-overlay",
+      "repo": "wolray/symbol-overlay",
+      "ref": "master"
+    },
+    {
+      "name": "benchmark-init",
+      "repo": "dholm/benchmark-init-el",
+      "ref": "master"
+    },
+    {
+      "name": "sly-el-indent",
+      "repo": "cireu/sly-el-indent",
+      "ref": "master"
+    },
+    {
+      "name": "php-mode",
+      "repo": "emacs-php/php-mode",
+      "ref": "master",
+	  "ignores":["etc/","script",".mailmap","AUTHORS*"]
+    },
+    {
+      "name": "modern-cpp-font-lock",
+      "repo": "ludwigpacifici/modern-cpp-font-lock",
+      "ref": "master",
+	  "ignores":["cpp","img/"]
+    },
+    {
+      "name": "ace-window",
+      "repo": "abo-abo/ace-window",
+      "ref": "master"
+    },
+    {
+      "name": "all-the-icons",
+      "repo": "domtronn/all-the-icons.el",
+      "ref": "master",
+	  "ignores":[".editorconfig"]
+    },
+    {
+      "name": "avy",
+      "repo": "abo-abo/avy",
+      "ref": "master"
+    },
+    {
+      "name": "lua-mode",
+      "repo": "immerrr/lua-mode",
+      "ref": "master",
+	  "ignores":["travis/"]
+    },
+    {
+      "name": "counsel-etags",
+      "repo": "redguardtoo/counsel-etags",
+      "ref": "master"
+    },
+    {
+      "name": "swiper",
+      "repo": "abo-abo/swiper",
+      "ref": "master",
+	  "ignores":[".mailmap"]
+    },
+    {
+      "name": "markdown-mode",
+      "repo": "jrblevin/markdown-mode",
+      "ref": "master"
+    },
+    {
+      "name": "find-file-in-project",
+      "repo": "technomancy/find-file-in-project",
+      "ref": "master"
+    },
+    {
+      "name": "rust-mode",
+      "repo": "rust-lang/rust-mode",
+      "ref": "master",
+	  "ignores":["*.sh"]
+    },
+    {
+      "name": "aweshell",
+      "repo": "manateelazycat/aweshell",
+      "ref": "master"
+    },
+    {
+      "name": "gcmh",
+      "repo": "emacsmirror/gcmh",
+      "ref": "master"
+    },
+    {
+      "name": "csharp-mode",
+      "repo": "emacs-csharp/csharp-mode",
+      "ref": "master"
+    },
+    {
+      "name": "fingertip",
+      "repo": "manateelazycat/fingertip",
+      "ref": "master"
+    },
+    {
+      "name": "treesit-fold",
+      "repo": "emacs-tree-sitter/treesit-fold",
+      "ref": "master",
+	  "ignores":["_scripts/","etc/"]
+    },
+    {
+      "name": "web-mode",
+      "repo": "fxbois/web-mode",
+      "ref": "master",
+	  "ignores":["issues/","*.sh"]
+    },
+    {
+      "name": "rainbow-mode",
+      "repo": "emacsmirror/rainbow-mode",
+      "ref": "master"
+    },
+    {
+      "name": "yasnippet",
+      "repo": "joaotavora/yasnippet",
+      "ref": "master",
+	  "ignores":[".gitmodules"]
+    },
+    {
+      "name": "shell-maker",
+      "repo": "xenodium/shell-maker",
+      "ref": "master",
+	  "ignores":["demos/"]
+    },
+    {
+      "name": "acp",
+      "repo": "xenodium/acp.el",
+      "ref": "master"
+    },
+    {
+      "name": "agent-shell",
+      "repo": "xenodium/agent-shell",
+      "ref": "master"
+    },
+    {
+      "name": "fastctags",
+      "repo": "redguardtoo/fastctags",
+      "ref": "main"
+    },
+    {
+      "name": "ghostel",
+      "manual": true,
+      "note": "手动维护，含 native dll"
+    },
+    {
+      "name": "vterm",
+      "manual": true,
+      "note": "手动维护，含 native dll"
+    },
+    {
+      "name": "lazycat",
+      "manual": true,
+      "note": "个人工具集合"
+    },
+    {
+      "name": "lazycat-theme",
+      "manual": true,
+      "note": "个人主题包"
+    },
+    {
+      "name": "ran",
+      "manual": true,
+      "note": "个人工具集合"
+    }
+  ]
+}
