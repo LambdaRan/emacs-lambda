@@ -4,7 +4,7 @@
 
 ;; Author: Daniel Kraus <daniel@kraus.my>
 ;; URL: https://github.com/dakra/ghostel
-;; Version: 0.32.0
+;; Version: 0.34.0
 ;; Keywords: terminals
 ;; Package-Requires: ((emacs "28.1") (compat "30.1.0.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -95,6 +95,7 @@
 (require 'tramp)
 (require 'url-parse)
 (require 'face-remap)
+(require 'ghostel-kitty)
 
 (declare-function bash-completion-capf-nonexclusive "bash-completion")
 (declare-function bash-completion-require-process "bash-completion")
@@ -290,45 +291,21 @@ natural size, potentially making rows slightly taller and cells slightly wider."
   :type '(float 0.0 1.0)
   :local t)
 
-(defcustom ghostel-kitty-graphics-storage-limit (* 320 1024 1024)  ; 320 MiB
-  "Kitty graphics image storage cap, in bytes, per terminal.
-
-Caps how much memory libghostty's kitty-graphics image store can
-hold per ghostel buffer.  Each transmitted image (PNG bytes or raw
-pixels) counts; libghostty evicts the oldest image when a new
-transmission would exceed this limit.
-
-Set to 0 to disable kitty graphics entirely — image transmissions
-are then ignored and no storage is allocated.  Useful on low-memory
-systems or for terminals you know won't display images."
-  :type 'integer)
-
-(defcustom ghostel-kitty-graphics-mediums nil
-  "Image-loading mediums to enable for the Kitty graphics protocol.
-
-The kitty protocol supports four ways for a program to ship image
-data to the terminal:
-- direct: base64-encoded inline (always enabled, what timg / yazi use)
-- file: program names a local file, terminal reads it
-- temp-file: program names a temp file, terminal reads and unlinks it
-- shared-mem: program names a POSIX shared-memory region
-
-The non-direct mediums let a *remote* program (over SSH, tmux
-passthrough, etc.) instruct ghostel to read arbitrary paths or shared
-memory regions on the local machine — a privilege-escalation surface.
-The default is nil (none enabled), keeping ghostel safe in remote
-sessions while still supporting timg, yazi, and other tools that ship
-data inline.  Enable individual mediums by adding `file', `temp-file',
-or `shared-mem' to the list, e.g. `(file)' for trusted local-only use."
-  :type '(set (const :tag "Local file medium" file)
-              (const :tag "Temp-file medium" temp-file)
-              (const :tag "Shared-memory medium" shared-mem)))
-
 (defcustom ghostel-timer-delay 0.033
   "Delay in seconds before redrawing after output (roughly 30fps).
 When `ghostel-adaptive-fps' is non-nil, this serves as the base
 delay between frames during sustained output."
   :type 'number)
+
+(defcustom ghostel-inhibit-redraw-functions nil
+  "Abnormal hook run before a ghostel buffer redraw.
+Each function is called with the buffer as its sole argument, with
+that buffer current.  If any function returns non-nil, the redraw
+is deferred and rescheduled.  Errors are demoted and treated as nil.
+Add-on features can use this to keep core ghostel from rewriting the
+buffer during transient states such as Emacs Lisp input-method
+composition."
+  :type 'hook)
 
 (defcustom ghostel-adaptive-fps t
   "Use adaptive frame rate for terminal redraw.
@@ -488,7 +465,7 @@ for static env entries that don't depend on runtime state."
 Each entry is (NAME FUNCTION) where NAME is the string sent from
 the shell and FUNCTION is the Elisp function to invoke.
 All arguments are passed as strings."
-  :type '(alist :key-type string :value-type function))
+  :type '(repeat (list (string :tag "Name") (function :tag "Function"))))
 
 (defcustom ghostel-enable-osc52 nil
   "Allow terminal applications to set the clipboard via OSC 52.
@@ -799,7 +776,7 @@ Customize the faces `ghostel-fake-cursor' and
   :type 'boolean)
 
 (defcustom ghostel-mouse-drag-input-mode 'copy
-  "Input mode to switch to after a left-button drag or multi-click selects text.
+  "Input mode to switch to after a left-button mouse click or selection.
 
 - `copy' (default): enter `ghostel-copy-mode'.  Pauses redraws -
   the selection is stable and the buffer is read-only.
@@ -811,7 +788,7 @@ Customize the faces `ghostel-fake-cursor' and
 
 Has no effect when a DEC mouse-tracking mode (1000/1002/1003) is
 active (the press is forwarded to the program) or when the buffer
-is not in semi-char-mode when the drag completes."
+is not in semi-char-mode when the gesture completes."
   :type '(choice (const :tag "Copy mode (default)" copy)
                  (const :tag "Emacs mode"          emacs)
                  (const :tag "Do not switch"       nil)))
@@ -1069,7 +1046,7 @@ Used when `cursor-in-non-selected-windows' resolves to box.")
 
 ;;; Automatic download and compilation of native module
 
-(defconst ghostel--minimum-module-version "0.32.0"
+(defconst ghostel--minimum-module-version "0.34.0"
   "Minimum native module version required by this Elisp version.
 Bump this only when the Elisp code requires a newer native module
 \(e.g. new Zig-exported function or changed calling convention).")
@@ -1618,14 +1595,6 @@ One of `semi-char', `char', `copy', `emacs', or `line'.  See
 (defvar-local ghostel--force-next-redraw nil
   "When non-nil, redraw regardless of synchronized output mode.")
 
-(defvar-local ghostel--kitty-active nil
-  "Non-nil when kitty image overlays are present in the buffer.")
-
-(defvar-local ghostel--kitty-last-error nil
-  "Last error raised inside a kitty display callback, or nil.
-Captured here instead of being lost to a fleeting message so it can be
-inspected when image rendering misbehaves.")
-
 (defvar-local ghostel--last-send-time nil
   "Time of the last `ghostel--send-string' call, for immediate-redraw detection.")
 
@@ -1746,7 +1715,7 @@ the buffer is either read-only or consumes keys locally."
   "Non-nil when live output is propagated into the Emacs buffer.
 False only in copy mode, which freezes the terminal entirely.
 Line mode keeps redrawing — the snapshot/restore path in
-`ghostel--delayed-redraw' preserves the user's in-progress input
+`ghostel--redraw-now' preserves the user's in-progress input
 across the rewrite."
   (not (eq ghostel--input-mode 'copy)))
 
@@ -1818,13 +1787,15 @@ When NO-EXCEPTIONS is non-nil, also bind the keys in
     (when (or no-exceptions
               (not (member key-str ghostel-keymap-exceptions)))
       (define-key map (kbd key-str) #'ghostel--send-event)))
-  ;; Control-Meta keys - C-M-<letter> only; C-M-<punct>/<digit> aren't
-  ;; widely supported by terminal apps.
-  (dolist (c (number-sequence ?a ?z))
-    (let ((key-str (format "C-M-%c" c)))
-      (when (or no-exceptions
-                (not (member key-str ghostel-keymap-exceptions)))
-        (define-key map (kbd key-str) #'ghostel--send-event))))
+  ;; C-M-<letter>, plus C-] / C-/ and their C-M- forms.
+  ;; The non-letter keys the encoder maps to a control byte.
+  (dolist (key-str (append
+                    (mapcar (lambda (c) (format "C-M-%c" c))
+                            (number-sequence ?a ?z))
+                    '("C-]" "C-/" "C-M-]" "C-M-/")))
+    (when (or no-exceptions
+              (not (member key-str ghostel-keymap-exceptions)))
+      (define-key map (kbd key-str) #'ghostel--send-event)))
   ;; M-DEL: TTY Emacs delivers Alt-Backspace as ESC + 0x7f, which
   ;; resolves to ?\M-\d.  The `M-<backspace>' form above only covers
   ;; the `[M-backspace]' symbol path; without this binding, TTY
@@ -2216,23 +2187,18 @@ Returns the sequence string, or nil for unknown keys."
       (format "\e[%d;%d~" param (1+ mod-num))
     (format "\e[%d~" param)))
 
-(defun ghostel--snap-to-input ()
-  "Return the window to the live viewport on user input.
-Uses `ghostel--anchor-window'.
-
-Fires regardless of input mode: in semi-char/char/line modes
-each typed key calls this before forwarding; in Emacs mode
-typing is disabled but explicit paste (`\\`C-y'') still routes
-through `ghostel--paste-text' which calls this before sending.
-Pure-navigation commands do not call this, so reading scrollback
-without sending anything to the shell preserves point."
+(defun ghostel--on-user-input ()
+  "Handle common state before explicit user input reaches the terminal."
+  (when (and ghostel-readonly-fast-exit
+             (memq ghostel--input-mode '(copy emacs)))
+    (ghostel-readonly-exit))
   (when (and ghostel-scroll-on-input ghostel--term)
     (ghostel--anchor-window)))
 
 (defun ghostel--self-insert ()
   "Send the last typed character to the terminal."
   (interactive)
-  (ghostel--snap-to-input)
+  (ghostel--on-user-input)
   (let* ((keys (this-command-keys))
          (char (aref keys (1- (length keys))))
          (str (if (and (characterp char) (< char 128))
@@ -2250,7 +2216,7 @@ In TTY Emacs, `M-<key>' arrives as two events (ESC then <key>) via
 `esc-map'; `last-command-event' is just <key> and has no meta bit.
 Detect that case via `this-command-keys-vector' and re-inject meta."
   (interactive)
-  (ghostel--snap-to-input)
+  (ghostel--on-user-input)
   (let* ((event last-command-event)
          (keys (this-command-keys-vector))
          (via-esc (and (> (length keys) 1) (eq (aref keys 0) 27)))
@@ -2299,6 +2265,7 @@ is passed through unchanged, including any embedded control
 characters; callers are responsible for UTF-8 encoding if needed."
   (unless (derived-mode-p 'ghostel-mode)
     (user-error "Must be called from a ghostel buffer"))
+  (ghostel--on-user-input)
   (ghostel--send-string string))
 
 (defun ghostel-send-key (key-name &optional mods)
@@ -2311,6 +2278,7 @@ mode (application cursor keys, Kitty keyboard protocol, etc.).
 Signals a `user-error' when called outside a ghostel buffer."
   (unless (derived-mode-p 'ghostel-mode)
     (user-error "Must be called from a ghostel buffer"))
+  (ghostel--on-user-input)
   (ghostel--send-encoded key-name (or mods "")))
 
 (defun ghostel-paste-string (string)
@@ -2323,6 +2291,7 @@ paste mode (mode 2004), so the shell treats the input as an atomic
 paste rather than character-by-character typed keystrokes."
   (unless (derived-mode-p 'ghostel-mode)
     (user-error "Must be called from a ghostel buffer"))
+  (ghostel--on-user-input)
   (ghostel--paste-text string))
 
 
@@ -2331,21 +2300,25 @@ paste rather than character-by-character typed keystrokes."
 (defun ghostel-send-C-c ()
   "Send interrupt signal to the terminal."
   (interactive)
+  (ghostel--on-user-input)
   (ghostel--send-encoded "c" "ctrl"))
 
 (defun ghostel-send-C-z ()
   "Send suspend signal to the terminal."
   (interactive)
+  (ghostel--on-user-input)
   (ghostel--send-encoded "z" "ctrl"))
 
 (defun ghostel-send-C-backslash ()
   "Send C-\\ (quit) to the terminal."
   (interactive)
+  (ghostel--on-user-input)
   (ghostel--send-string "\x1c"))
 
 (defun ghostel-send-C-d ()
   "Send EOF to the terminal."
   (interactive)
+  (ghostel--on-user-input)
   (ghostel--send-encoded "d" "ctrl"))
 
 (defun ghostel-send-C-g ()
@@ -2372,7 +2345,6 @@ overlay clears the way \\`keyboard-quit' would in other buffers."
 (defun ghostel--paste-text (text)
   "Send TEXT to the terminal, using bracketed paste if the terminal wants it."
   (when (and text ghostel--process (process-live-p ghostel--process))
-    (ghostel--snap-to-input)
     (process-send-string ghostel--process
                          (if (ghostel--bracketed-paste-p)
                              (concat "\e[200~" text "\e[201~")
@@ -2383,6 +2355,7 @@ overlay clears the way \\`keyboard-quit' would in other buffers."
 Uses bracketed paste mode so that shells can distinguish
 pasted text from typed input."
   (interactive)
+  (ghostel--on-user-input)
   (ghostel--paste-text (current-kill 0)))
 
 (defun ghostel-yank ()
@@ -2390,6 +2363,7 @@ pasted text from typed input."
 Use `ghostel-yank-pop' afterwards to cycle through older kills."
   (interactive)
   (setq ghostel--yank-index 0)
+  (ghostel--on-user-input)
   (ghostel--paste-text (current-kill 0))
   (setq this-command 'ghostel-yank))
 
@@ -2404,6 +2378,7 @@ pastes the selected entry into the terminal."
       (let* ((prev-text (current-kill ghostel--yank-index t))
              (prev-len (length prev-text)))
         (setq ghostel--yank-index (1+ ghostel--yank-index))
+        (ghostel--on-user-input)
         ;; Erase previous paste: send backspaces
         (when (and ghostel--process (process-live-p ghostel--process))
           (process-send-string ghostel--process
@@ -2414,6 +2389,7 @@ pastes the selected entry into the terminal."
     ;; No preceding yank: browse kill ring and paste selection
     (when-let* ((text (completing-read "Paste from kill ring: "
                                        kill-ring nil t)))
+      (ghostel--on-user-input)
       (ghostel--paste-text text))))
 
 (defun ghostel-xterm-paste (event)
@@ -2429,10 +2405,8 @@ parity with `xterm-paste'."
   (interactive "e")
   (unless (eq (car-safe event) 'xterm-paste)
     (error "This command must be bound to an xterm-paste event"))
-  (when (and (eq ghostel--input-mode 'copy)
-             ghostel-readonly-fast-exit)
-    (ghostel-readonly-exit))
   (when-let* ((text (nth 1 event)))
+    (ghostel--on-user-input)
     (when (bound-and-true-p xterm-store-paste-on-kill-ring)
       (kill-new text))
     (ghostel--paste-text text)))
@@ -2453,6 +2427,7 @@ pasted using bracketed paste."
       (when (and arg (not (eq arg 'lambda)))
         (let ((type (car arg))
               (objects (cddr arg)))
+          (ghostel--on-user-input)
           (if (eq type 'file)
               (ghostel--send-string
                (mapconcat #'shell-quote-argument objects " "))
@@ -2519,6 +2494,11 @@ Return non-nil if the event was forwarded (mouse tracking is active)."
 
 
 ;;; Mouse input
+
+(defvar ghostel--mouse-press-was-selected nil
+  "Non-nil if the window under the last left-press was already selected.
+Set at press, read at release to tell a focus click (which only focuses)
+from a click in an already-focused window (which enters copy mode).")
 
 (defvar-local ghostel--mouse-drag-button nil
   "Button number held during an in-progress mouse-tracking drag.
@@ -2675,36 +2655,47 @@ to consume mouse input."
 
 (defun ghostel-mouse-press-or-copy-mode (event)
   "Forward EVENT to the terminal, or hand off to `mouse-drag-region'.
-When a DEC mouse-tracking mode (1000/1002/1003) is enabled, behaves
-like `ghostel--mouse-press' and forwards the press to the running
-program.  Otherwise hands EVENT off to `mouse-drag-region' so Emacs's
-standard click-to-set-point and drag-to-select work.  Copy mode is
-not entered here - a pure click should only focus the window and
-move point.  When the press grows into a drag,
-`ghostel-mouse-drag-or-set-region' enters copy mode after the region
-is set so subsequent terminal output cannot clobber the selection."
+With a DEC mouse-tracking mode (1000/1002/1003) on, forwards the press
+to the program; otherwise hands off to `mouse-drag-region'.  Records in
+`ghostel--mouse-press-was-selected' whether the window was already
+selected before focusing it, for `ghostel-mouse-release-or-set-point'."
   (interactive "e")
-  (select-window (posn-window (event-start event)))
-  (if (ghostel--mouse-tracking-active-p)
-      (ghostel--mouse-press event)
-    (mouse-drag-region event)))
+  (let ((win (posn-window (event-start event))))
+    (setq ghostel--mouse-press-was-selected (eq win (selected-window)))
+    (select-window win)
+    (if (ghostel--mouse-tracking-active-p)
+        (ghostel--mouse-press event)
+      (mouse-drag-region event))))
 
 (defun ghostel-mouse-release-or-set-point (event &optional promote-to-region)
-  "Forward EVENT to the terminal, or hand off to `mouse-set-point'.
-Companion to `ghostel-mouse-press-or-copy-mode' for the left-button
-release event.  With tracking off, defers to Emacs's standard
-click handler so the release of a non-drag click sets point normally.
-PROMOTE-TO-REGION is passed through to `mouse-set-point' so that
-double-click and triple-click events keep the word/line selection."
+  "Forward EVENT to the terminal, or set point / switch input mode.
+With tracking off, sets point (PROMOTE-TO-REGION keeps the word/line
+selection of a multi-click) and, in semi-char mode, switches to
+`ghostel-mouse-drag-input-mode' after a multi-click or a single click
+in an already-selected window.  A single click that only focuses a
+previously-unselected window instead snaps point to the live cursor and
+stays in semi-char (skipped when `ghostel-mouse-drag-input-mode' is nil)."
   (interactive "e\np")
-  (if (ghostel--mouse-tracking-active-p)
-      (ghostel--mouse-release event)
-    (mouse-set-point event promote-to-region)
-    (when (and (eq ghostel--input-mode 'semi-char)
-               (> (event-click-count event) 1))
-      (pcase ghostel-mouse-drag-input-mode
-        ('copy  (ghostel-copy-mode))
-        ('emacs (ghostel-emacs-mode))))))
+  (let ((active (and ghostel-mouse-drag-input-mode
+                     (eq ghostel--input-mode 'semi-char))))
+    (cond
+     ((ghostel--mouse-tracking-active-p)
+      (ghostel--mouse-release event))
+     ;; Pure focus click of a previously-unselected window: just focus,
+     ;; snapping point to the live input cursor instead of the click.
+     ((and active
+           (= (event-click-count event) 1)
+           (not ghostel--mouse-press-was-selected))
+      (goto-char (or ghostel--cursor-char-pos (point-max)))
+      (deactivate-mark))
+     ;; Multi-click, or a single click in an already-selected window: set
+     ;; point/selection, then freeze (a focus click never reaches here).
+     (t
+      (mouse-set-point event promote-to-region)
+      (when active
+        (pcase ghostel-mouse-drag-input-mode
+          ('copy  (ghostel-copy-mode))
+          ('emacs (ghostel-emacs-mode))))))))
 
 (defun ghostel-mouse-drag-or-set-region (event)
   "Forward EVENT to the terminal, or hand off to `mouse-set-region'.
@@ -2749,9 +2740,7 @@ the prompt."
       (ghostel--mouse-release event)
     (let ((text (gui-get-primary-selection)))
       (when (and text (not (string-empty-p text)))
-        (when (and (memq ghostel--input-mode '(copy emacs))
-                   ghostel-readonly-fast-exit)
-          (ghostel-readonly-exit))
+        (ghostel--on-user-input)
         (ghostel--paste-text text)))))
 
 
@@ -2765,7 +2754,7 @@ the prompt."
 Covers both `global-hl-line-mode' and buffer-local `hl-line-mode'.")
 
 (defvar-local ghostel--line-mode-paused nil
-  "Snapshot plist captured when alt-screen forced line mode to pause.
+  "Sentinel plist marking line mode as paused, awaiting alt-screen exit.
 Nil when not paused.  Set by `ghostel--line-mode-pause' (auto-pause
 when an alt-screen TUI starts) and by `ghostel--line-mode-defer-entry'
 \(when the user invokes `ghostel-line-mode' while a TUI is already
@@ -3238,6 +3227,12 @@ renderer (chars typed via the PTY in a previous mode).  Cleared to
 many backspaces to erase them — keeps a subsequent send from
 duplicating the prefix when the shell echoes our line back.")
 
+(defvar-local ghostel--line-mode-on-alt-screen nil
+  "Non-nil when line mode was entered deliberately on the alt screen.
+Set by `ghostel--line-mode-enter'; tells `ghostel--line-mode-pre-redraw'
+not to auto-pause line mode merely because the alt screen is up.
+Cleared by `ghostel--line-mode-teardown'.")
+
 (defun ghostel--regex-prompt-end (pos)
   "Return position past the prompt prefix on POS's line, or nil.
 Matches `ghostel-prompt-regexp' anchored at BOL of POS's line.
@@ -3378,6 +3373,16 @@ modes used by less, htop, vim, etc.)."
        (or (ghostel--mode-enabled ghostel--term 1049)
            (ghostel--mode-enabled ghostel--term 1047))))
 
+(defun ghostel--line-mode-prompt-on-screen-p ()
+  "Return non-nil when a real OSC 133 prompt char sits on the cursor's row.
+Only a `ghostel-prompt' property counts (no regex or cursor fallback),
+so line mode can tell an inner shell prompt reached via tmux/screen passthrough
+from a raw fullscreen TUI when deciding whether to enter on the alt screen."
+  (when-let* ((cursor ghostel--cursor-char-pos)
+              (bol (save-excursion (goto-char cursor)
+                                   (line-beginning-position))))
+    (and (text-property-not-all bol cursor 'ghostel-prompt nil) t)))
+
 (defun ghostel--line-mode-apply-readonly (marker-pos)
   "Mark `[point-min, MARKER-POS)' read-only with the rear-nonsticky trick.
 The non-sticky flag lands on the last protected character so
@@ -3436,6 +3441,10 @@ bar below the prompt — stays untouched."
                                (<= mark-pos end-pos)
                                (- mark-pos start-pos)))
              (input (buffer-substring-no-properties start-pos end-pos)))
+        ;; Disarm undo for the rest of the redraw pass: this delete, the
+        ;; native redraw, and the re-insert in `ghostel--line-mode-restore'
+        ;; are renderer bookkeeping, not user edits.  `restore' re-arms.
+        (setq buffer-undo-list t)
         (let ((inhibit-read-only t))
           (delete-region start-pos end-pos))
         (list :input input
@@ -3455,7 +3464,9 @@ status bar)."
   (when snapshot
     (let ((prompt-end (ghostel-input-start-point)))
       (when prompt-end
+        ;; Keep the re-insert out of the undo list.
         (let ((inhibit-read-only t)
+              (buffer-undo-list t)
               (input (plist-get snapshot :input)))
           (ghostel--line-mode-trim-trailing-blank prompt-end)
           (when (markerp ghostel--line-input-start)
@@ -3488,6 +3499,9 @@ status bar)."
                 (goto-char (+ start-pos po)))
               (when mo
                 (set-mark (+ start-pos mo))))))
+        ;; Re-arm an empty history at the input's new location; the old
+        ;; positions are stale now the redraw has moved it.
+        (setq buffer-undo-list nil)
         t))))
 
 (defun ghostel--line-mode-enter ()
@@ -3552,6 +3566,10 @@ in line mode (the interactive entry validates these)."
         (setq ghostel--line-mode-adopted-count (- input-end prompt-end)))
       (setq ghostel--line-mode-history-index nil)
       (setq ghostel--char-mode-override-active nil)
+      ;; A deliberate alt-screen entry must survive the next redraw's
+      ;; auto-pause, and supersedes any armed sentinel.
+      (setq ghostel--line-mode-on-alt-screen (ghostel--line-mode-alt-screen-p))
+      (setq ghostel--line-mode-paused nil)
       (setq ghostel--input-mode 'line)
       (use-local-map ghostel-line-mode-map)
       (setq ghostel--mode-line-tag (ghostel--mode-line-tag-make 'line ":Line"))
@@ -3576,10 +3594,13 @@ in line mode (the interactive entry validates these)."
       ;; Place point at end of (any adopted) input so the user
       ;; continues typing where the shell left them.
       (goto-char (marker-position ghostel--line-input-end))
+      ;; Arm undo recording now that the entry plumbing is done, so the
+      ;; user's first edit is the first thing recorded.
+      (setq buffer-undo-list nil)
       (ghostel--line-mode-maybe-prespawn-bash-completion)
       t)))
 
-(defun ghostel-line-mode ()
+(defun ghostel-line-mode (&optional force)
   "Switch to line mode — edit input locally, send to shell on RET.
 The user types into an editable region between the last prompt
 and `point-max'.  Full Emacs editing (yank, `kill-word',
@@ -3589,7 +3610,7 @@ executes it normally.
 
 The terminal stays live: output streaming in around the prompt
 keeps rendering, and the snapshot/restore path in
-`ghostel--delayed-redraw' preserves the user's in-progress input
+`ghostel--redraw-now' preserves the user's in-progress input
 across each redraw cycle.  After RET, line mode stays active so
 the user just keeps editing at the next prompt.
 
@@ -3605,17 +3626,30 @@ without OSC 133 (python3, irb, sqlite3, …) work too.  When OSC
 133 markers are present on the cursor's row, the prompt prefix is
 recognised and the input boundary lands right after it.
 
-While a fullscreen TUI is on the alt screen, line mode cannot
-edit (the TUI needs every keystroke raw); calling this command
-during an alt-screen session arms a deferred-activation sentinel
-instead, and line mode resumes automatically when the TUI exits."
-  (interactive)
+On the alt screen, line mode enters at an inner shell prompt whose
+OSC 133 markers reach Ghostel (tmux/screen passthrough); over a raw
+TUI (vim, less) it instead arms and resumes when the TUI exits.  A
+prefix arg (FORCE) forces immediate entry regardless — use it at an
+inner prompt whose OSC 133 does not pass through the multiplexer."
+  (interactive "P")
   (unless ghostel--term
     (user-error "No terminal in this buffer"))
   (cond
-   ((eq ghostel--input-mode 'line))
+   ((eq ghostel--input-mode 'line))     ; already in line mode
+   ;; Forced: trust the user, bypass the alt-screen gate.
+   (force
+    (if (ghostel--line-mode-enter)
+        (message "Line mode: RET sends the whole line; C-c C-j to exit")
+      (user-error "Line mode could not locate the cursor or a prompt")))
+   ;; Alt screen with a real prompt on the cursor row (inner shell) — enter.
+   ((and (ghostel--line-mode-alt-screen-p)
+         (ghostel--line-mode-prompt-on-screen-p)
+         (ghostel--line-mode-enter))
+    (message "Line mode: RET sends the whole line; C-c C-j to exit"))
+   ;; Alt screen, no detectable prompt (raw TUI) — arm instead.
    ((ghostel--line-mode-alt-screen-p)
     (ghostel--line-mode-defer-entry))
+   ;; Primary screen — normal entry.
    ((ghostel--line-mode-enter)
     (message "Line mode: RET sends the whole line; C-c C-j to exit"))
    (t
@@ -3680,10 +3714,12 @@ forces a final redraw so the buffer truncation done at entry is
 re-materialized from libghostty.
 
 When PAUSE is non-nil, skip forwarding pending input to the PTY,
-skip the readline-clearing backspaces (the alt-screen TUI would
-receive them), and skip the trailing redraw — used by
-`ghostel--line-mode-pause' which has already snapshotted the input
-and is running inside `ghostel--delayed-redraw'."
+skip the readline-clearing backspaces (the alt-screen TUI would receive them),
+and skip the trailing redraw; used by `ghostel--line-mode-pause',
+which discards any type-ahead and runs inside `ghostel--redraw-now'."
+  ;; Undo is off outside line mode; disable it before the teardown edits
+  ;; below so none of them are recorded.
+  (setq buffer-undo-list t)
   (unless pause
     (let ((input (ghostel--line-mode-input-text)))
       ;; Erase the adopted prefix from the shell's readline before
@@ -3709,6 +3745,7 @@ and is running inside `ghostel--delayed-redraw'."
   (setq ghostel--line-input-end nil)
   (setq ghostel--line-mode-history-index nil)
   (setq ghostel--line-mode-adopted-count nil)
+  (setq ghostel--line-mode-on-alt-screen nil)
   (when ghostel--line-mode-saved-full-redraw
     (if (car ghostel--line-mode-saved-full-redraw)
         (setq-local ghostel-full-redraw
@@ -3724,21 +3761,21 @@ and is running inside `ghostel--delayed-redraw'."
         (ghostel--redraw ghostel--term t)))))
 
 (defun ghostel--line-mode-pause ()
-  "Snapshot in-progress input, tear down line mode, switch to semi-char.
-Called by `ghostel--line-mode-pre-redraw' on a 1049/1047 transition
-into the alt screen.  Stashes the snapshot in
-`ghostel--line-mode-paused' so a later alt-screen-off cycle can
-re-enter line mode at the new prompt with the user's typing
-restored."
-  (let ((snapshot (or (ghostel--line-mode-snapshot)
-                      (list :input "" :point-offset nil :mark-offset nil))))
-    (ghostel--line-mode-teardown 'pause)
-    (setq ghostel--char-mode-override-active nil)
-    (setq ghostel--input-mode 'semi-char)
-    (use-local-map ghostel-semi-char-mode-map)
-    (setq ghostel--mode-line-tag nil)
-    (ghostel--mode-line-refresh)
-    (setq ghostel--line-mode-paused snapshot)))
+  "Drop line mode to semi-char while a full-screen app holds the alt screen.
+Called by `ghostel--line-mode-pre-redraw' on a 1049/1047 transition into
+the alt screen.  Arms `ghostel--line-mode-paused' so the alt-screen-off cycle
+re-enters line mode at the new prompt."
+  (ghostel--line-mode-teardown 'pause)
+  (setq ghostel--char-mode-override-active nil)
+  (setq ghostel--input-mode 'semi-char)
+  (use-local-map ghostel-semi-char-mode-map)
+  (setq ghostel--mode-line-tag nil)
+  (ghostel--mode-line-refresh)
+  (setq ghostel--line-mode-paused
+        (list :input "" :point-offset nil :mark-offset nil))
+  (message "Line mode paused; resumes when the TUI exits (%s to force now)"
+           (substitute-command-keys
+            "\\<ghostel-mode-map>\\[universal-argument] \\[ghostel-line-mode]")))
 
 (defun ghostel--line-mode-try-resume ()
   "Re-enter line mode and restore the paused snapshot, if possible.
@@ -3763,24 +3800,27 @@ input captured by an earlier auto-pause)."
   (unless ghostel--line-mode-paused
     (setq ghostel--line-mode-paused
           (list :input "" :point-offset nil :mark-offset nil)))
-  (message "Line mode armed — will activate when the TUI exits"))
+  (message "Line mode armed; will activate when the TUI exits (%s to force now)"
+           (substitute-command-keys
+            "\\<ghostel-mode-map>\\[universal-argument] \\[ghostel-line-mode]")))
 
 (defun ghostel--line-mode-pre-redraw ()
-  "Pause line mode if alt-screen is on while in line mode.
-Runs at the top of `ghostel--delayed-redraw' after process output has
-already been fed to the terminal, but before the renderer paints.
-Pausing here lets us snapshot the
-in-progress input before libghostty's grid (which does not contain
-it) drives the renderer over the buffer.  After pausing,
-`ghostel--input-mode' is no longer `line', so subsequent calls
-fall through — there is no need for an explicit transition cache."
-  (when (and (eq ghostel--input-mode 'line)
-             (ghostel--line-mode-alt-screen-p))
-    (ghostel--line-mode-pause)))
+  "Pause line mode when the alt screen comes up under it.
+Runs atop `ghostel--redraw-now' before the renderer paints, so line
+mode tears down before libghostty's grid (which lacks the input)
+overwrites the buffer.  A deliberate alt-screen entry
+\(`ghostel--line-mode-on-alt-screen') is exempt; the flag clears
+once the alt screen goes away so a later TUI pauses normally."
+  (when (eq ghostel--input-mode 'line)
+    (if (ghostel--line-mode-alt-screen-p)
+        (unless ghostel--line-mode-on-alt-screen
+          (ghostel--line-mode-pause))
+      ;; Back on the primary screen — re-arm the pause for the next TUI.
+      (setq ghostel--line-mode-on-alt-screen nil))))
 
 (defun ghostel--line-mode-post-redraw ()
   "Resume line mode if alt-screen is off and a paused snapshot is armed.
-Runs at the bottom of `ghostel--delayed-redraw' (after the renderer
+Runs at the bottom of `ghostel--redraw-now' (after the renderer
 paints) so `ghostel-input-start-point' sees the
 post-TUI buffer state.  Re-attempts every redraw cycle until a
 prompt is locatable — covers the case where the shell prints its
@@ -3829,7 +3869,9 @@ input marker to wherever the new prompt lands."
     (when (and ghostel--process (process-live-p ghostel--process))
       (when (> (length input) 0)
         (process-send-string ghostel--process input))
-      (ghostel--send-encoded "return" ""))))
+      (ghostel--send-encoded "return" ""))
+    ;; Drop this line's undo history so the next line starts clean.
+    (setq buffer-undo-list nil)))
 
 (defun ghostel-line-mode-interrupt ()
   "Discard local input and send SIGINT (\\`C-c') to the shell.
@@ -3842,6 +3884,8 @@ marker."
   ;; C-c discards readline's input buffer shell-side, so any adopted
   ;; prefix is gone — just zero our count, no backspaces needed.
   (setq ghostel--line-mode-adopted-count 0)
+  ;; The line is discarded; clear its undo history too (mirrors send).
+  (setq buffer-undo-list nil)
   (when (and ghostel--process (process-live-p ghostel--process))
     (process-send-string ghostel--process "\C-c")))
 
@@ -4313,365 +4357,6 @@ when called from the deferred-detection timer outside the redraw scope."
                               (current-buffer)))))))
 
 
-;;; Kitty graphics protocol
-
-(defun ghostel--kitty-mediums-bits ()
-  "Encode `ghostel-kitty-graphics-mediums' as a bitfield for the module."
-  (let ((bits 0)
-        (mediums ghostel-kitty-graphics-mediums))
-    (when (memq 'file mediums) (setq bits (logior bits 1)))
-    (when (memq 'temp-file mediums) (setq bits (logior bits 2)))
-    (when (memq 'shared-mem mediums) (setq bits (logior bits 4)))
-    bits))
-
-(define-error 'ghostel-kitty-unsupported-source-rect
-              "Kitty graphics atlas-style source rect not supported"
-              'error)
-
-(defun ghostel--kitty-check-source-rect (src-x src-y src-w src-h pixel-w pixel-h)
-  "Signal `ghostel-kitty-unsupported-source-rect' for non-default crops.
-SRC-X / SRC-Y / SRC-W / SRC-H are the requested source-rect crop in image
-pixels; PIXEL-W / PIXEL-H are the rendered pixel dimensions.  All zeros
-means the whole image (the common case from timg/yazi).
-
-Atlas-style placements (sub-region of the source image) aren't supported
-because Emacs's image system can't crop pre-scale; refuse explicitly so
-mis-rendering is visible as an error instead of silent."
-  (when (or (> src-x 0) (> src-y 0)
-            (and (> src-w 0) (/= src-w pixel-w))
-            (and (> src-h 0) (/= src-h pixel-h)))
-    (signal 'ghostel-kitty-unsupported-source-rect
-            (list src-x src-y src-w src-h pixel-w pixel-h))))
-
-(defun ghostel--kitty-apply-row-slice (row cw ch img
-                                            vp-col-clamped visible-cols
-                                            slice-x slice-w)
-  "Apply one row of the sliced image at point.
-ROW is the slice index (0-based) into the image's grid of cells.
-CW / CH are the cell pixel dimensions.  IMG is the Emacs image object.
-VP-COL-CLAMPED is the placement's column origin clamped to >= 0;
-VISIBLE-COLS is how many columns of that row are on-screen; SLICE-X is
-the slice's x-origin in image pixels (non-zero only when the placement
-is partially scrolled off the left); SLICE-W is the fallback slice
-width when the buffer line is shorter than the placement.
-
-Decides between the text-property and overlay paths based on whether
-the buffer line is long enough to hold the placement's column range."
-  (let* ((line-pos (point))
-         (line-end-pos (line-end-position))
-         (start (min (+ line-pos vp-col-clamped) line-end-pos))
-         (end (min (+ line-pos vp-col-clamped visible-cols) line-end-pos))
-         ;; The slice's pixel width must match the cell-range width Emacs
-         ;; gives us; otherwise the display engine renders the slice at
-         ;; its declared size and either overlaps subsequent cells or
-         ;; truncates.  This bites when `vp-col + g-cols' exceeds the
-         ;; terminal width (line-end-pos clamps `end` shorter than the
-         ;; slice the placement asked for) and shows up as a ghosted
-         ;; copy of the image bleeding to the right.
-         (range-cols (- end start))
-         (clamped-slice-w (* range-cols cw))
-         (slice (list 'slice slice-x (* row ch)
-                      (if (> range-cols 0) clamped-slice-w slice-w)
-                      ch))
-         (spec (list slice img)))
-    (cond
-     ;; Range is empty (line shorter than vp-col) — use an overlay so we
-     ;; don't eat the newline.
-     ((<= end start)
-      (let ((ov (make-overlay start start)))
-        (overlay-put ov 'before-string (propertize " " 'display spec))
-        (overlay-put ov 'ghostel-kitty t)))
-     ;; Line has enough text — use text property.
-     (t
-      (add-text-properties start end
-                           (list 'display spec 'ghostel-kitty t))))
-    (when (< line-end-pos (point-max))
-      (add-text-properties line-end-pos (1+ line-end-pos)
-                           (list 'line-height ch 'ghostel-kitty t)))
-    (setq ghostel--kitty-active t)))
-
-(defun ghostel--kitty-display-image (data is-png abs-row vp-col grid-cols grid-rows pixel-w pixel-h
-                                          src-x src-y src-w src-h)
-  "Display a kitty graphics image placement in the buffer.
-Called from the native module during redraw for each visible placement.
-DATA is a unibyte string (PNG or PPM).
-IS-PNG is non-nil for PNG, nil for PPM.
-ABS-ROW is the absolute buffer row (0-indexed from `point-min'),
-already accounting for materialized scrollback (the C side adds
-`scrollback_in_buffer' to libghostty's viewport-relative row before
-passing it here).  Without that pre-shift, an image at viewport row 0
-would render at the top of the scrollback, jumping into the past as
-soon as anything scrolled.  May be negative when the image's top is
-above the buffer's first line (rare — only when libghostty's scrollback
-got trimmed below the placement's anchor).
-VP-COL is the column (may be negative — image partially off the left).
-GRID-COLS and GRID-ROWS are the cell dimensions.
-PIXEL-W and PIXEL-H are the rendered pixel dimensions.
-SRC-X / SRC-Y / SRC-W / SRC-H are the source-rect crop in image pixels;
-all zero means the whole image (the common case from timg/yazi).
-
-The image is sized to fill its grid cells and then sliced per row, with
-each slice applied on its own buffer line.  Slicing — rather than a
-single multi-line `display' property — is required for the image to
-actually occupy each cell row (otherwise Emacs draws the image once at
-the first character of the range and the remaining rows show the
-underlying text or stay blank).  Mirrors the virtual-placeholder path's
-`:ascent \\='center' and `line-height' clamping so slices tile flush
-across rows.
-
-Falls back to PIXEL-W/PIXEL-H when GRID-COLS/GRID-ROWS arrive as 0 —
-libghostty hasn't computed the cell layout yet on the first redraw
-after a placement (a subsequent layout change would fix it, but the
-user shouldn't have to trigger one)."
-  (when (display-graphic-p)
-    (condition-case err
-        (progn
-          (ghostel--kitty-check-source-rect src-x src-y src-w src-h pixel-w pixel-h)
-          (let* ((cw (frame-char-width))
-                 (ch (frame-char-height))
-                 (g-cols (if (> grid-cols 0) grid-cols
-                           (max 1 (/ (+ pixel-w cw -1) cw))))
-                 (g-rows (if (> grid-rows 0) grid-rows
-                           (max 1 (/ (+ pixel-h ch -1) ch))))
-                 (img (create-image data (if is-png 'png 'pbm) t
-                                    :width (* g-cols cw)
-                                    :height (* g-rows ch)
-                                    :ascent 'center))
-                 (skip (max 0 abs-row))
-                 (start-row (max 0 (- abs-row)))
-                 ;; Clamp negative vp-col (image partially scrolled off
-                 ;; the left edge): start the buffer range at column 0
-                 ;; and skip the off-screen pixel columns inside the
-                 ;; slice.
-                 (vp-col-clamped (max 0 vp-col))
-                 (start-col (max 0 (- vp-col)))
-                 (slice-x (* start-col cw))
-                 (visible-cols (max 0 (- g-cols start-col)))
-                 (slice-w (* visible-cols cw)))
-            (when (> visible-cols 0)
-              (save-excursion
-                (goto-char (point-min))
-                (when (zerop (forward-line skip))
-                  ;; Skip rows already in materialized scrollback — they
-                  ;; got their overlays in an earlier emit and
-                  ;; `kitty-clear' preserves scrollback overlays.
-                  ;; Re-applying here would stack a second overlay on
-                  ;; every scrolled-in row.
-                  (let ((row start-row)
-                        (more t)
-                        (vp-start (or (ghostel--viewport-start) (point-min))))
-                    (while (and more (< row g-rows))
-                      (when (>= (point) vp-start)
-                        (ghostel--kitty-apply-row-slice
-                         row cw ch img
-                         vp-col-clamped visible-cols slice-x slice-w))
-                      (setq row (1+ row))
-                      (unless (zerop (forward-line 1))
-                        (setq more nil)))))))))
-      (error
-       (setq ghostel--kitty-last-error err)
-       (message "ghostel: kitty image error: %S" err)))))
-
-(defun ghostel--kitty-display-virtual (data is-png)
-  "Display a virtual kitty graphics placement (unicode placeholders).
-Searches the buffer for U+10EEEE placeholder characters and overlays
-per-row image slices on the placeholder regions of each line.
-DATA is a unibyte string (PNG or PPM).  IS-PNG is non-nil for PNG."
-  (when (display-graphic-p)
-    (condition-case err
-        (let ((placeholder (string #x10EEEE))
-              (cw (frame-char-width))
-              (ch (frame-char-height))
-              grid-cols grid-rows img)
-          (save-excursion
-            ;; First pass: measure the grid by walking the buffer line by
-            ;; line and counting placeholders.  Tracks the *maximum* count
-            ;; across rows so a short first row doesn't undersize the
-            ;; image.  Avoids `line-number-at-pos' in the search loop —
-            ;; that's O(buffer size) per call and was the dominant cost
-            ;; for large yazi previews.
-            (goto-char (point-min))
-            (let ((max-line-cols 0)
-                  (total-rows 0))
-              (while (not (eobp))
-                (let ((eol (line-end-position))
-                      (this-row 0))
-                  (save-excursion
-                    (while (search-forward placeholder eol t)
-                      (setq this-row (1+ this-row))))
-                  (when (> this-row 0)
-                    (setq total-rows (1+ total-rows))
-                    (when (> this-row max-line-cols)
-                      (setq max-line-cols this-row))))
-                (forward-line 1))
-              (setq grid-cols (max 1 max-line-cols))
-              (setq grid-rows (max 1 total-rows)))
-            ;; Create the image sized to the full grid.  `:ascent center'
-            ;; aligns each slice around the line's vertical center so it
-            ;; tiles flush with adjacent slices regardless of the line's
-            ;; baseline (the default `:ascent 50' splits the slice across
-            ;; the baseline, leaving visible offsets between rows).
-            (setq img (create-image data (if is-png 'png 'pbm) t
-                                    :width (* grid-cols cw)
-                                    :height (* grid-rows ch)
-                                    :ascent 'center))
-            ;; Second pass: apply per-row slices on placeholder regions.
-            ;; Walks line by line — `line-end-position' is O(1) with no
-            ;; full-buffer scan per placeholder.
-            (goto-char (point-min))
-            (let ((row 0))
-              (while (not (eobp))
-                (let* ((eol (line-end-position))
-                       (line-start (save-excursion
-                                     (search-forward placeholder eol t))))
-                  (when line-start
-                    (let ((line-end eol))
-                      (setq line-start (1- line-start))
-                      (when (> line-end line-start)
-                        (add-text-properties
-                         line-start line-end
-                         (list 'display (list (list 'slice 0 (* row ch)
-                                                    (* grid-cols cw) ch)
-                                              img)
-                               'ghostel-kitty t))
-                        ;; Clamp the placeholder line to `ch' so the slice
-                        ;; tiles flush and the file-list column on the same
-                        ;; line doesn't grow taller than non-image lines.
-                        ;; The U+10EEEE fallback font and any Nerd Font
-                        ;; icons would otherwise pull line height above
-                        ;; `frame-char-height', leaving gaps below the
-                        ;; slice and above the next line's content.
-                        (when (< line-end (point-max))
-                          (add-text-properties line-end (1+ line-end)
-                                               (list 'line-height ch
-                                                     'ghostel-kitty t)))
-                        (setq ghostel--kitty-active t)))
-                    (setq row (1+ row))))
-                (forward-line 1)))))
-      (error
-       (setq ghostel--kitty-last-error err)
-       (message "ghostel: kitty virtual image error: %S" err)))))
-
-(defun ghostel--kitty-clear ()
-  "Remove kitty image overlays and per-line clamps from the viewport.
-Both display paths tag the regions/overlays with the `ghostel-kitty'
-property so this strips only kitty-applied `display' and `line-height',
-leaving other consumers of `display' (e.g. wide-char compensation)
-alone.
-
-Only the viewport region is cleared — overlays on rows that have
-already been promoted to materialized scrollback are preserved so
-images stay visible after they scroll past the live viewport.
-libghostty stops reporting placements once they're fully out of the
-viewport (`viewport_visible' goes false), so wiping scrollback would
-leave nothing to re-emit and the image would vanish from history."
-  (when ghostel--kitty-active
-    (let* ((inhibit-read-only t)
-           (vp-start (or (ghostel--viewport-start) (point-min)))
-           (end (point-max))
-           (pos vp-start))
-      (dolist (ov (overlays-in pos end))
-        (when (and (overlay-get ov 'ghostel-kitty)
-                   (>= (overlay-start ov) pos))
-          (delete-overlay ov)))
-      (while (< pos end)
-        (let ((next (next-single-property-change pos 'ghostel-kitty nil end)))
-          (when (get-text-property pos 'ghostel-kitty)
-            (remove-text-properties
-             pos next '(display nil line-height nil ghostel-kitty nil)))
-          (setq pos next)))
-      ;; Drop any image fragment left over by scrollback eviction (see
-      ;; `ghostel--kitty-strip-orphan-top').
-      (ghostel--kitty-strip-orphan-top)
-      ;; Sticky-flag hygiene: once we've stripped the viewport, anything
-      ;; remaining must be in scrollback.  If there's nothing left at all,
-      ;; clear the flag so future redraws skip the buffer scan entirely.
-      (unless (ghostel--kitty-any-remaining-p (point-min) vp-start)
-        (setq ghostel--kitty-active nil)))))
-
-(defun ghostel--kitty-slice-y-at (pos)
-  "Return the slice y-offset of a kitty image at POS, or nil if absent.
-Looks at both the buffer text-property `display' and at any
-`ghostel-kitty'-tagged overlay's `before-string' display property."
-  (let ((display
-         (or (get-text-property pos 'display)
-             (cl-loop for ov in (overlays-at pos)
-                      when (overlay-get ov 'ghostel-kitty)
-                      thereis
-                      (let ((bs (overlay-get ov 'before-string)))
-                        (and bs (get-text-property 0 'display bs)))))))
-    ;; Display spec is `((slice X Y W H) IMAGE)'.
-    (when (and (consp display)
-               (consp (car display))
-               (eq (car (car display)) 'slice)
-               (numberp (nth 2 (car display))))
-      (nth 2 (car display)))))
-
-(defun ghostel--kitty-strip-orphan-top ()
-  "Strip kitty image debris left at point-min by scrollback eviction.
-
-Two distinct artifacts both surface here:
-
-1. Collapsed overlays.  `delete-region' clamps overlays inside the
-   deleted range to its start instead of deleting them, so an evicted
-   row's zero-width kitty overlays all snap onto the new point-min and
-   stack there (dozens for a tall image).  Detected by counting
-   zero-width kitty overlays per start-position — more than one at the
-   same position is never legitimate (the placement loop emits at most
-   one overlay per row).
-
-2. Orphan text-property slices.  When eviction straddles an image, the
-   surviving rows keep their `display' slices into a now-incomplete
-   image.  Detected by a slice y-offset > 0 at point-min (y=0 would
-   mean the row IS the image's top, so it's an intact image's first
-   row, not an orphan)."
-  (let ((inhibit-read-only t))
-    ;; (1) Eviction-collapsed overlay stacks.
-    (let ((counts (make-hash-table)))
-      (dolist (ov (overlays-in (point-min) (point-max)))
-        (when (and (overlay-get ov 'ghostel-kitty)
-                   (= (overlay-start ov) (overlay-end ov)))
-          (let ((pos (overlay-start ov)))
-            (puthash pos (1+ (gethash pos counts 0)) counts))))
-      (dolist (ov (overlays-in (point-min) (point-max)))
-        (when (and (overlay-get ov 'ghostel-kitty)
-                   (= (overlay-start ov) (overlay-end ov))
-                   (> (gethash (overlay-start ov) counts 0) 1))
-          (delete-overlay ov))))
-    ;; (2) Orphan text-property slices at point-min.
-    (let ((slice-y (ghostel--kitty-slice-y-at (point-min))))
-      (when (and slice-y (> slice-y 0))
-        (let ((start (point-min))
-              (end (save-excursion
-                     (goto-char (point-min))
-                     (while (and (< (point) (point-max))
-                                 (or (get-text-property (point) 'ghostel-kitty)
-                                     (cl-some
-                                      (lambda (ov) (overlay-get ov 'ghostel-kitty))
-                                      (overlays-at (point)))))
-                       (forward-line 1))
-                     (point))))
-          (when (> end start)
-            (remove-text-properties
-             start end '(display nil line-height nil ghostel-kitty nil))
-            (dolist (ov (overlays-in start end))
-              (when (overlay-get ov 'ghostel-kitty)
-                (delete-overlay ov)))))))))
-
-(defun ghostel--kitty-any-remaining-p (start end)
-  "Non-nil if any kitty-tagged overlay or text property exists in [START, END)."
-  (catch 'found
-    (dolist (ov (overlays-in start end))
-      (when (overlay-get ov 'ghostel-kitty)
-        (throw 'found t)))
-    (let ((pos start))
-      (while (< pos end)
-        (when (get-text-property pos 'ghostel-kitty)
-          (throw 'found t))
-        (setq pos (next-single-property-change pos 'ghostel-kitty nil end))))
-    nil))
-
-
 ;;; Prompt navigation (OSC 133)
 
 (defun ghostel--osc133-marker (type param)
@@ -5100,7 +4785,7 @@ edge, so we no-op."
 
 (defun ghostel--detect-password-prompt ()
   "Update `ghostel--password-mode-p' and arm the confirm timer.
-Called from `ghostel--delayed-redraw' once the buffer reflects the
+Called from `ghostel--redraw-now' once the buffer reflects the
 latest output.  No-op when `ghostel-detect-password-prompts' is nil
 \(e.g. ghostel-compile buffers, which run the pty in `canonical+!echo'
 on purpose).  Suppresses re-fires while the cursor is still on the
@@ -5583,7 +5268,7 @@ Call this after changing the Emacs theme so terminals match."
         (ghostel--apply-bold-config ghostel--term)
         (when (ghostel--terminal-live-p)
           (setq ghostel--force-next-redraw t)
-          (ghostel--delayed-redraw buf))))))
+          (ghostel--redraw-now buf))))))
 
 (defun ghostel--on-theme-change (&rest _args)
   "Hook function to sync terminal colors after theme change."
@@ -5662,12 +5347,7 @@ the redraw is performed immediately to minimize typing latency."
                  (< (float-time (time-subtract (current-time)
                                                ghostel--last-send-time))
                     ghostel-immediate-redraw-interval))
-            (progn
-              ;; Cancel pending timer — we're drawing now.
-              (when ghostel--redraw-timer
-                (cancel-timer ghostel--redraw-timer)
-                (setq ghostel--redraw-timer nil))
-              (ghostel--delayed-redraw (current-buffer)))
+            (ghostel--redraw-now (current-buffer))
           ;; Bulk output: schedule a later redraw.
           (ghostel--invalidate))))))
 
@@ -6411,7 +6091,7 @@ frame after idle to improve interactive responsiveness."
       (setq ghostel--last-output-time (current-time))
       (setq ghostel--redraw-timer
             (run-with-timer delay nil
-                            #'ghostel--delayed-redraw
+                            #'ghostel--redraw-now
                             (current-buffer))))))
 
 (defun ghostel--query-font-cached (font)
@@ -6442,19 +6122,23 @@ remain handled inside the renderer."
      (or begin (ghostel--viewport-start) (point-min))
      (or end (point-max)))))
 
-(defun ghostel--window-anchored-p (window &optional pixel-height)
-  "Non-nil if WINDOW is auto-following the new output.
-When PIXEL-HEIGHT is non-nil, that value is used for calculation rather than
-`(window-pixel-height)'."
+(defun ghostel--window-anchored-p (window &optional body-pixel-height)
+  "Non-nil if WINDOW is scrolled to follow the live terminal output.
+WINDOW follows the output when the lines from its `window-start' to
+`point-max' fit within its body, measured from BODY-PIXEL-HEIGHT (default
+`window-body-height' in pixels, excluding the mode-line and header-line to
+match the terminal grid), plus one line of tolerance for the partial top
+line the graphical anchor leaves via `window-vscroll'."
   (with-current-buffer (window-buffer window)
     (when-let* (((derived-mode-p 'ghostel-mode))
                 ((not (eq ghostel--input-mode 'emacs)))
                 (dlh (default-line-height))
-                (pixel-height (or pixel-height (window-pixel-height window)))
-                (line-count (/ (float pixel-height) (float dlh)))
+                (body-pixel-height (or body-pixel-height
+                                       (window-body-height window t)))
+                (screen-lines (/ (float body-pixel-height) (float dlh)))
                 (ws (window-start window))
                 (ws-lines-to-end (count-lines ws (point-max))))
-      (<= ws-lines-to-end line-count))))
+      (<= ws-lines-to-end (1+ (floor screen-lines))))))
 
 (defconst ghostel--set-window-vscroll-preserve-supported-p
   (let ((max-args (cdr (subr-arity (symbol-function 'set-window-vscroll)))))
@@ -6471,31 +6155,61 @@ supported."
              (list preserve-vscroll-p))
     (set-window-vscroll window vscroll pixels-p)))
 
+(defconst ghostel--pixel-anchor-supported-p
+  (let ((max-args (cdr (subr-arity (symbol-function 'window-text-pixel-size)))))
+    (and (integerp max-args) (>= max-args 7)))
+  "Non-nil when `window-text-pixel-size' accepts the cons FROM form.
+Emacs 29 shipped the cons FROM that `ghostel--pixel-anchor' needs together
+with IGNORE-LINE-AT-END (arity 7), so the arity probes for it; `fboundp'
+would not, since the function predates the form.  Emacs 28 falls back to
+line-count anchoring, exact for ghostel's uniform row heights.")
+
+(defun ghostel--pixel-anchor (window target)
+  "Return (START . VSCROLL) anchoring TARGET at WINDOW's bottom.
+Ask Emacs redisplay for the exact pixel position that places TARGET at
+the bottom of WINDOW."
+  (when-let* ((body-height (window-body-height window t))
+              ((> body-height 0))
+              (size (window-text-pixel-size
+                     window (cons target (- body-height)) target nil nil))
+              (start (nth 2 size)))
+    (cons start (max 0 (- (nth 1 size) body-height)))))
+
 (defun ghostel--anchor-window (&optional window)
   "Scroll WINDOW so that the last row is aligned to the bottom of the window.
-In graphics mode, the bottom line is anchored to the bottom of the window using
-vscroll if there are more rows than can fit into the window."
+In graphical frames, use Emacs's pixel layout for exact bottom alignment.
+In text frames, use line-count geometry with no vscroll."
   (when-let* ((window (or window (selected-window)))
               (buffer (window-buffer window)))
     (with-selected-window window
       (with-current-buffer buffer
-        (let ((lines (window-screen-lines)))
-          (goto-char (point-max))
-          (forward-line (- (floor lines)))
-          (if (and (> (point) (point-min))
-                   (display-graphic-p (window-frame window)))
+        (let ((target (point-max)))
+          (if-let* ((anchor (and (display-graphic-p (window-frame window))
+                                 ghostel--pixel-anchor-supported-p
+                                 (ghostel--pixel-anchor window target))))
               (progn
-                (forward-line -1)
-                (set-window-start window (point))
-                (let ((pixels (round (* (- 1.0 (- lines (floor lines)))
-                                        (default-line-height)))))
-                  (ghostel--set-window-vscroll window pixels t t)))
-            (set-window-start window (point))
-            (ghostel--set-window-vscroll window 0 t t)))
-        (set-window-point window (or ghostel--cursor-char-pos
-                                     (point-max)))))))
+                (set-window-start window (car anchor))
+                (ghostel--set-window-vscroll window (cdr anchor) t t))
+            (let ((lines (window-screen-lines)))
+              (goto-char target)
+              (forward-line (- (floor lines)))
+              (set-window-start window (point))
+              (ghostel--set-window-vscroll window 0 t t)))
+          (set-window-point window (or ghostel--cursor-char-pos target)))))))
 
-(defun ghostel--delayed-redraw (buffer)
+(defun ghostel--maybe-defer-redraw (buffer)
+  "Defer BUFFER's redraw if a `ghostel-inhibit-redraw-functions' hook asks.
+Return non-nil when deferred, after rescheduling `ghostel--redraw-now'
+for BUFFER; return nil to let the redraw proceed."
+  (when (with-demoted-errors "ghostel-inhibit-redraw-functions error: %S"
+          (run-hook-with-args-until-success
+           'ghostel-inhibit-redraw-functions buffer))
+    (setq ghostel--redraw-timer
+          (run-with-timer ghostel-timer-delay nil
+                          #'ghostel--redraw-now buffer))
+    t))
+
+(defun ghostel--redraw-now (buffer)
   "Perform the actual redraw in BUFFER.
 Flushes pending PTY output and runs the native renderer.  The
 renderer preserves buffer positions while applying terminal
@@ -6503,8 +6217,12 @@ mutations; this function anchors windows that were following the
 live viewport."
   (when (buffer-live-p buffer)
     (with-current-buffer buffer
-      (setq ghostel--redraw-timer nil)
-      (when (and ghostel--term (ghostel--terminal-live-p))
+      (when ghostel--redraw-timer
+        (cancel-timer ghostel--redraw-timer)
+        (setq ghostel--redraw-timer nil))
+      (when (and ghostel--term
+                 (ghostel--terminal-live-p)
+                 (not (ghostel--maybe-defer-redraw buffer)))
         ;; Skip during synchronized output unless forced by scroll/resize.
         (unless (and (not ghostel--force-next-redraw)
                      (ghostel--mode-enabled ghostel--term 2026))
@@ -6564,10 +6282,7 @@ live viewport."
 Cancels any pending redraw timer and schedules an immediate one.
 Requires the buffer to be visible in a window; has no effect otherwise."
   (interactive)
-  (when ghostel--redraw-timer
-    (cancel-timer ghostel--redraw-timer)
-    (setq ghostel--redraw-timer nil))
-  (ghostel--delayed-redraw (current-buffer)))
+  (ghostel--redraw-now (current-buffer)))
 
 
 ;;; Window resize
@@ -6657,10 +6372,7 @@ PROCESS is the shell process, WINDOWS is the list of windows."
             (setq ghostel--force-next-redraw t)
             ;; Redraw synchronously so the buffer is updated before
             ;; Emacs displays the stale content at the new window size.
-            (when ghostel--redraw-timer
-              (cancel-timer ghostel--redraw-timer)
-              (setq ghostel--redraw-timer nil))
-            (ghostel--delayed-redraw buffer))))))
+            (ghostel--redraw-now buffer))))))
     ;; Return size — Emacs calls set-process-window-size (SIGWINCH)
     ;; after this function returns.  nil suppresses the call.
     ;; On Windows, ConPTY resize is handled above instead.
@@ -6681,11 +6393,11 @@ and the TTY display that needs it off keeps working in parallel)."
         (setq-local auto-composition-mode tt)))))
 
 (defun ghostel--window-buffer-change (window)
-  "Anchor window and force redraw when buffer gets displayed in WINDOW."
+  "Anchor WINDOW and redraw it immediately when its buffer is displayed."
   (when (and (window-live-p window)
              (eq (window-buffer window) (current-buffer)))
     (ghostel--anchor-window window)
-    (ghostel--invalidate)))
+    (ghostel--redraw-now (current-buffer))))
 
 (defun ghostel--anchor-on-resize (window)
   "Scroll WINDOW to the active area if it was already anchored.
@@ -6693,7 +6405,7 @@ If WINDOW was already anchored at the active area before resizing, WINDOW will
 scroll to active area to keep it focused even during resize."
   (with-current-buffer (window-buffer window)
     (when (ghostel--window-anchored-p window
-                                      (window-old-pixel-height window))
+                                      (window-old-body-pixel-height window))
       (ghostel--anchor-window window))))
 
 (defun ghostel--minibuffer-exit ()
