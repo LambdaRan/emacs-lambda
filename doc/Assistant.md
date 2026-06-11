@@ -1,3 +1,44 @@
+
+# assistant.py 命令参考
+
+## sync — 同步依赖包
+
+```bash
+python assistant.py sync --all                        # 更新全部包
+python assistant.py sync --all --clean                # 更新全部包并清理临时目录
+python assistant.py sync company-mode                 # 只更新指定包
+python assistant.py sync company-mode yasnippet       # 更新多个包
+```
+
+同步时下载的临时文件存放在项目同级目录 `{project}_temp/`，默认保留不删除。加 `--clean` 参数在同步完成后自动删除。
+
+## add — 添加新依赖包
+
+```bash
+# 添加包（name 自动从 repo 推导）
+python assistant.py add company-mode/company-mode
+
+# 指定分支
+python assistant.py add company-mode/company-mode --ref main
+
+# 指定包名
+python assistant.py add company-mode/company-mode --name company
+
+# 添加后立即下载
+python assistant.py add company-mode/company-mode --sync
+
+# 指定 files
+python assistant.py add someone/pkg --files "pkg.el" "pkg-utils.el"
+
+# 指定额外排除
+python assistant.py add someone/pkg --ignores "examples/" "benchmarks/"
+
+# 添加手动维护包
+python assistant.py add someone/pkg --manual --note "手动维护"
+```
+
+---
+
 # packages.json 配置说明
 
 `packages.json` 是 Emacs 依赖包的声明文件，放在仓库根目录。`assistant.py` 脚本根据此文件从 GitHub 下载和管理依赖包。
@@ -177,42 +218,4 @@ CONTRIBUTING*  CHANGELOG*       NEWS*
 }
 ```
 
----
 
-## assistant.py 命令参考
-
-### sync — 同步依赖包
-
-```bash
-python assistant.py sync --all                        # 更新全部包
-python assistant.py sync --all --clean                # 更新全部包并清理临时目录
-python assistant.py sync company-mode                 # 只更新指定包
-python assistant.py sync company-mode yasnippet       # 更新多个包
-```
-
-同步时下载的临时文件存放在项目同级目录 `{project}_temp/`，默认保留不删除。加 `--clean` 参数在同步完成后自动删除。
-
-### add — 添加新依赖包
-
-```bash
-# 添加包（name 自动从 repo 推导）
-python assistant.py add company-mode/company-mode
-
-# 指定分支
-python assistant.py add company-mode/company-mode --ref main
-
-# 指定包名
-python assistant.py add company-mode/company-mode --name company
-
-# 添加后立即下载
-python assistant.py add company-mode/company-mode --sync
-
-# 指定 files
-python assistant.py add someone/pkg --files "pkg.el" "pkg-utils.el"
-
-# 指定额外排除
-python assistant.py add someone/pkg --ignores "examples/" "benchmarks/"
-
-# 添加手动维护包
-python assistant.py add someone/pkg --manual --note "手动维护"
-```
