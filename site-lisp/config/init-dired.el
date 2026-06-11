@@ -101,8 +101,6 @@
               (dired-omit-method)                 ;隐藏文件的方法
               ))
 
-;; 拷贝文件时猜测目的地
-(setq dired-dwim-target t)
 ;; 隐藏详细信息，按左括号键'('切换状态
 (add-hook 'dired-after-readin-hook 'dired-hide-details-mode)
 
@@ -113,12 +111,12 @@
 (setq dired-guess-shell-alist-user      ;设置文件默认打开的模式
       '(
         ;; 压缩包
-        (list "\\.rar$" "unrar e -ad")
-        (list "\\.tar.bz2$" "tar jxvf")
-        (list "\\.gz$" "gzip -d")
-        (list "\\.tar.gz$" "tar zxvf")
+        ("\\.rar$" . "unrar e -ad")
+        ("\\.tar.bz2$" . "tar jxvf")
+        ("\\.gz$" . "gzip -d")
+        ("\\.tar.gz$" . "tar zxvf")
         ;; 其他
-        (list "\\.exe$" "wine")))
+        ("\\.exe$" . "wine")))
 
 ;;; ### Dired ###
 ;;; --- 文件浏览器

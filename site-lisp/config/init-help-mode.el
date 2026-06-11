@@ -120,14 +120,14 @@
    (("w" . "Describe No Warranty") . describe-no-warranty)
    (("M-f" . "Describe Face") . describe-face)
    (("M-c" . "Describe Copying") . describe-copying)
-   (("M-f" . "Describe File") . describe-file)
+   (("M-F" . "Describe File") . describe-file)
    (("M-k" . "Describe Keymap") . describe-keymap)
    (("M-t" . "Describe Option Of Type") . describe-option-of-type)
    ;; Info.
    (("M-i" . "Info") . info)
    (("M-o" . "Info Other Window") . info-other-window)
    (("M-s" . "Info Lookup Symbol") . info-lookup-symbol)
-   (("M-k" . "Info Goto Emacs Key Command Node") . Info-goto-emacs-key-command-node)
+   (("M-K" . "Info Goto Emacs Key Command Node") . Info-goto-emacs-key-command-node)
    (("M-m" . "Info Emacs Manual") . info-emacs-manual)
    ;; Xray.
    (("M-B" . "Xray Help Buffer") . xray-help-buffer)
@@ -151,7 +151,6 @@
    (("C-r" . "View Order Manuals") . view-order-manuals)
    (("C-E" . "View Echo Area Messages") . view-echo-area-messages)
    (("C-l" . "View Lossage") . view-lossage)
-   (("C-n" . "View Emacs News") . view-emacs-news)
    ;; Misc.
    (("C-F" . "Eyedropper Background") . eyedropper-background)
    (("C-B" . "Eyedropper Foreground") . eyedropper-foreground)

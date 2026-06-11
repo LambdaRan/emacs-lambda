@@ -118,7 +118,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
                     ("\\.a90\\'" . intel-hex-mode)
                     ("\\.hex\\'" . intel-hex-mode)
                     ("\\.py$" . python-mode)
-                    ("SConstruct". python-mode)
+                    ("SConstruct\\'" . python-mode)
                     ("\\.ml\\'" . tuareg-mode)
                     ("\\.mli\\'" . tuareg-mode)
                     ("\\.mly\\'" . tuareg-mode)
@@ -245,8 +245,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
 
               (setq tab-width 4
                     c-basic-offset 4
-                    c-hanging-comment-ender-p nil
-                    indent-tabs-mode nil)
+                    c-hanging-comment-ender-p nil)
               (php-enable-pear-coding-style)
               ;; (php-enable-default-coding-style)
               ))

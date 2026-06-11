@@ -92,7 +92,7 @@
 ;;
 
 ;;; Require
-(require 'cl)
+(require 'cl-lib)
 
 ;;; Code:
 
@@ -124,10 +124,10 @@ Load `lisp-interaction' mode when PREFIX is nil."
   (or prefix (setq prefix current-prefix-arg))
   ;; Create new scratch.
   (let* ((scratch-buffer (multi-scratch-get-buffer)))
-    (set-buffer scratch-buffer)
-    ;; Load `lisp-interaction' mode when prefix is nil.
-    (unless prefix
-      (lisp-interaction-mode))
+    (with-current-buffer scratch-buffer
+      ;; Load `lisp-interaction' mode when prefix is nil.
+      (unless prefix
+        (lisp-interaction-mode)))
     ;; Switch scratch buffer
     (switch-to-buffer scratch-buffer)))
 
@@ -154,14 +154,12 @@ If OFFSET is `non-nil', will switch previous OFFSET scratch buffer."
 
 (defun multi-scratch-list ()
   "The scratch buffers presently active."
-  ;; Autload command `remove-if-not'.
-  (autoload 'remove-if-not "cl-seq")
   (sort
-   (remove-if-not (lambda (b)
-                    (string-match
-                     (concat "^\*" multi-scratch-buffer-name)
-                     (buffer-name b)))
-                  (buffer-list))
+   (cl-remove-if-not (lambda (b)
+                       (string-match
+                        (concat "^\*" multi-scratch-buffer-name)
+                        (buffer-name b)))
+                     (buffer-list))
    (lambda (a b)
      (< (string-to-number
          (cadr (split-string (buffer-name a) "[<>]")))
@@ -184,7 +182,7 @@ if have any scratch buffer exist."
     (if (consp scratchs)
         (progn
           (setf (cdr (last scratchs)) scratchs)
-          (setq this-buffer (position (current-buffer) (multi-scratch-list)))
+          (setq this-buffer (cl-position (current-buffer) (multi-scratch-list)))
           (if this-buffer
               (if (eql direction 'NEXT)
                   (switch-to-buffer (nth (+ this-buffer offset) scratchs))

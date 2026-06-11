@@ -132,8 +132,6 @@
     ;; Save session.
     (make-directory "~/.emacs.d/" t)
     (desktop-save "~/.emacs.d/")
-    ;; Exit emacs.
-    (tabnine-capf-kill-process)
     (kill-emacs)))
 
 (provide 'init-session)

@@ -115,7 +115,7 @@
 
 (let ((path "/private/etc/"))
   (when (file-directory-p path)
-    (add-to-list 'woman-man.conf-path path)))
+    (add-to-list 'woman-manpath path)))
 
 (setq cache-woman-manpath nil)
 
@@ -125,7 +125,7 @@
     (when (executable-find cmd)
       (setq command (format "%s" (executable-find cmd)))
       (when (memq system-type '(cygwin windows-nt ms-dos))
-        (setq command-line (encode-coding-string command-line locale-coding-system))))
+        (setq command (encode-coding-string command locale-coding-system))))
     command))
 
 (defun woman-get-manpath ()

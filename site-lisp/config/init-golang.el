@@ -88,7 +88,7 @@
 
 (defun go-run-buffer()
   (interactive)
-  (shell-command (concat "go run " (buffer-name))))
+  (shell-command (concat "go run " (buffer-file-name))))
 
 ;;; ### Golang ###
 (lazy-load-unset-keys

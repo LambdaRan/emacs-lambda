@@ -83,7 +83,6 @@
 ;;; Require
 
 (require 're-builder)
-(require 're-builder+)
 
 ;;; Code:
 
@@ -98,7 +97,6 @@
    ("C-c w" . reb-copy)                 ;拷贝
    ("C-c q" . reb-quit)                 ;退出
    ("C-c TAB" . reb-change-syntax)      ;改变语法
-   ("C-c M-%" . reb-query-replace-this-regxp) ;直接替换
    )
  reb-mode-map)
 

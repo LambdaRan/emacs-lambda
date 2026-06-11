@@ -66,7 +66,7 @@
 
   ;; Config for company mode.
   ;; Trigger completion immediately.
-  (setq company-idle-delay 0)
+  (setq company-idle-delay 0.2)
   ;; 补全的最小前缀长度
   (setq company-minimum-prefix-length 2) ; pop up a completion menu by tapping a character
   ;; Number the candidates (use M-1, M-2 etc to select completions).

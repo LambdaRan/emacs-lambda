@@ -86,6 +86,7 @@
 
 (setq tempbuf-kill-message nil)         ;不在Mode-line显示删除临时buffer提示消息
 (setq tempbuf-minimum-timeout 30)       ;删除 buffer 的最低期限
+(setq timer-max-repeats 2)              ;先前的调用被延迟时，连续重复调用计时器函数的最大次数。
 (dolist (hook (list
                'compilation-mode-hook     ;编译模式
                'comint-mode-hook          ;comint 模式
@@ -102,7 +103,6 @@
   (add-hook hook
             #'(lambda ()
                 (require 'tempbuf)
-                (setq timer-max-repeats 2) ; 先前的调用被延迟时，连续重复调用计时器函数的最大次数。
                 (turn-on-tempbuf-mode))))  ; 加载自动清理临时buffer
 
 (provide 'init-tempbuf)

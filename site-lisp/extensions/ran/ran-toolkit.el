@@ -166,7 +166,7 @@ Argument BUFFER-NAME the buffer name that will delete."
 ;;}}
 
 ;; {
-(defun delete-carrage-returns ()
+(defun delete-carriage-returns ()
   (interactive)
   (save-excursion
     (goto-char 0)
@@ -178,7 +178,8 @@ Argument BUFFER-NAME the buffer name that will delete."
 (defun ran-kill-all-buffer ()
   "Kill all buffer."
   (interactive)
-  (dolist (buffer (buffer-list)) (kill-buffer buffer)))
+  (when (y-or-n-p "Kill ALL buffers? ")
+    (dolist (buffer (buffer-list)) (kill-buffer buffer))))
 ;; }
 (provide 'ran-toolkit)
 

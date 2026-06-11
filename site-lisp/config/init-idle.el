@@ -86,15 +86,15 @@
 ;;; Code:
 
 (setq tramp-verbose 0)                  ;设置tramp的响应方式, 关闭后不弹出消息
-(setq max-lisp-eval-depth 40000)        ;lisp最大执行深度
-(setq max-specpdl-size 10000)           ;最大容量
+(setq max-lisp-eval-depth 4000)          ;lisp最大执行深度
+(setq max-specpdl-size 4000)             ;最大容量
 (setq kill-ring-max 1024)               ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
 (setq mark-ring-max 1024)               ;设置的mark ring容量
 (setq eval-expression-print-length nil) ;设置执行表达式的长度没有限制
 (setq eval-expression-print-level nil)  ;设置执行表达式的深度没有限制
 (setq read-quoted-char-radix 16)        ;设置 引用字符 的基数
 (setq global-mark-ring-max 1024)        ;设置最大的全局标记容量
-(setq isearch-allow-scroll t)           ;isearch搜索时是可以滚动屏幕的
+(setq isearch-allow-prefix t)            ;isearch搜索时允许前缀操作
 (setq isearch-lazy-count t
       lazy-count-prefix-format "%s/%s ") ;isearch搜索显示匹配个数
 (setq one-key-popup-window nil)          ;禁止自动弹出窗口

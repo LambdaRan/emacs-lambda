@@ -13,7 +13,6 @@
 
 (with-eval-after-load 'ivy
   (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t)
   (setq ivy-wrap t)
   ;; Show #/total when scrolling buffers
   (setq ivy-count-format "%d/%d ")

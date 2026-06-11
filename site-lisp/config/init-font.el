@@ -52,12 +52,12 @@
             (when (font-installed-p font)
               (set-fontset-font t 'unicode font nil 'prepend)
               (throw 'end t))))
-  (catch 'end                      ;给相应的字符集设置中文字体，这里的字体是。
+  (catch 'end                      ;给相应的字符集设置中文字体
     (dolist (font '("Microsoft Yahei"))
-            (when (font-installed-p font))
-            (dolist (charset '(kana han cjk-misc bopomofo chinese-gbk))
-              (set-fontset-font t charset (font-spec :name font :size 12)))
-            (throw 'end t)))
+      (when (font-installed-p font)
+        (dolist (charset '(kana han cjk-misc bopomofo chinese-gbk))
+          (set-fontset-font t charset (font-spec :name font :size 12)))
+        (throw 'end t))))
   )
 
 ;;; ### Font ###

@@ -42,7 +42,7 @@
            (read-string
             (format "ZLUA Jump Directory (%s): " current-symbol)
             nil
-            'color-rg-read-input-history
+            'zlua-read-input-history
             ))))
     (when (string-blank-p input-string)
       (setq input-string current-symbol))

@@ -97,7 +97,6 @@
 (add-hook 'php-mode-hook #'(lambda () (treesit-parser-create 'php)))
 (add-hook 'php-ts-mode-hook #'(lambda () (treesit-parser-create 'php)))
 (add-hook 'lua-mode-hook #'(lambda () (treesit-parser-create 'lua)))
-(add-hook 'java-ts-mode-hook #'(lambda () (treesit-parser-create 'java)))
 (add-hook 'haskell-mode-hook #'(lambda () (treesit-parser-create 'haskell)))
 (add-hook 'kotlin-mode-hook #'(lambda () (treesit-parser-create 'kotlin)))
 (add-hook 'ruby-mode-hook #'(lambda () (treesit-parser-create 'ruby)))

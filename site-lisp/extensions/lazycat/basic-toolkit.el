@@ -452,7 +452,7 @@ Otherwise return nil."
 (defun forward-indent ()
   "Backward indent."
   (interactive)
-  (insert-string "    "))
+  (insert "    "))
 
 (defun backward-indent ()
   "Backward indent."

@@ -98,17 +98,18 @@
   "The list that matching omit file's extension.")
 
 ;; Advice `dired-run-shell-command' with asynchronously.
-(defadvice dired-run-shell-command (around dired-run-shell-command-async activate)
-  "Postfix COMMAND argument of `dired-run-shell-command' with an ampersand.
-If there is none yet, so that it is run asynchronously."
-  (let* ((cmd (ad-get-arg 0))
-         (cmd-length (length cmd))
-         (last-cmd-char (substring cmd
+(defun dired-run-shell-command-async (orig-fun command &rest args)
+  "Postfix COMMAND argument with an ampersand so that it is run asynchronously."
+  (let* ((cmd-length (length command))
+         (last-cmd-char (substring command
                                    (max 0 (- cmd-length 1))
                                    cmd-length)))
     (unless (string= last-cmd-char "&")
-      (ad-set-arg 0 (concat cmd "&")))
-    (save-window-excursion ad-do-it)))
+      (setq command (concat command "&")))
+    (save-window-excursion
+      (apply orig-fun command args))))
+
+(advice-add 'dired-run-shell-command :around #'dired-run-shell-command-async)
 
 (defun dired-sort-method ()
   "The sort method of `dired'."

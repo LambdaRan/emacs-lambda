@@ -94,12 +94,14 @@
 
 (defvar cache-path-from-shell-loaded-p nil)
 
-(defadvice exec-path-from-shell-initialize (around cache-path-from-shell-advice activate)
+(defun cache-path-from-shell--initialize (orig-fun &rest args)
+  "Cache wrapper: only call ORIG-FUN once."
   (if cache-path-from-shell-loaded-p
       (message "All shell environment variables has loaded in Emacs, yow!")
     (setq cache-path-from-shell-loaded-p t)
-    ad-do-it
-    ))
+    (apply orig-fun args)))
+
+(advice-add 'exec-path-from-shell-initialize :around #'cache-path-from-shell--initialize)
 
 (provide 'cache-path-from-shell)
 

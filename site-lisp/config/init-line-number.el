@@ -91,11 +91,11 @@
 ;; 设置超过120字符显示越界指示器
 (setq-default display-fill-column-indicator-column 120)
 
-(dolist (hook (list 
+(dolist (hook (list
                'prog-mode-hook
                'markdown-mode-hook
                ))
-  (add-hook hook #'(lambda () (display-line-numbers--turn-on))))
+  (add-hook hook #'display-line-numbers-mode))
 
 (provide 'init-line-number)
 
