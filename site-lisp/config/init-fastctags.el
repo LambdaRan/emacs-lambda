@@ -22,15 +22,17 @@
           (lambda ()
             (add-hook 'completion-at-point-functions #'fastctags-completion-at-point nil t)))
 
+(with-eval-after-load 'fastctags
+  (require 'semantic/fw)
+  (require 'counsel))
+
 (defun ran-fastctags-imenu()
   "List all imenu tag with counsel-semantic-or-imenu or imenu."
   (interactive)
-  (require 'semantic/fw)
   (if (and (not (semantic-active-p))
            (seq-empty-p (counsel--imenu-candidates)))
       (call-interactively 'imenu)
     (call-interactively 'counsel-semantic-or-imenu)))
-
 
 (defun fastctags-nav-find-tag-at-point-in-specific-directory ()
   "Find tag using tagname at point, selecting from specific tags files.

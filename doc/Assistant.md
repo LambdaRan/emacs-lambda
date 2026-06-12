@@ -12,6 +12,26 @@ python assistant.py sync company-mode yasnippet       # 更新多个包
 
 同步时下载的临时文件存放在项目同级目录 `{project}_temp/`，默认保留不删除。加 `--clean` 参数在同步完成后自动删除。
 
+## check — 检查包状态
+
+```bash
+python assistant.py check                             # 检查全部包
+python assistant.py check company-mode                # 只检查指定包
+python assistant.py check company-mode yasnippet      # 检查多个包
+```
+
+全量检查（不指定包名）会比较 `packages.json` 与 `site-lisp/extensions/` 目录，报告：
+- 缺失的包（区分可同步包和需手动安装的包）
+- 多余的本地目录（不在 `packages.json` 中的）
+
+指定包检查时，逐个报告该包是否存在及类型（synced / manual）：
+
+```
+✅ company-mode         present (synced)
+❌ ghostel              missing (manual setup needed)
+⚠️  nonexistent-pkg      not found in packages.json
+```
+
 ## add — 添加新依赖包
 
 ```bash

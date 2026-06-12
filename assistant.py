@@ -5,6 +5,7 @@ assistant.py - Emacs 依赖包管理助手
 子命令:
     sync    同步依赖包（从 GitHub Archive 下载）
     add     添加新的依赖包到 packages.json
+    check   检测本地包是否缺失或多余
 
 用法:
     python assistant.py sync --all
@@ -12,6 +13,7 @@ assistant.py - Emacs 依赖包管理助手
     python assistant.py sync company-mode yasnippet
     python assistant.py add company-mode/company-mode
     python assistant.py add company-mode/company-mode --ref main --sync
+    python assistant.py check
 """
 
 import argparse
@@ -274,6 +276,67 @@ def cmd_add(args):
 
 
 # ---------------------------------------------------------------------------
+# check 子命令
+# ---------------------------------------------------------------------------
+
+def cmd_check(args):
+    """check 子命令入口：检测本地包是否缺失或多余"""
+    config = load_packages()
+    packages = config["packages"]
+
+    by_name = {p["name"]: p for p in packages}
+
+    if args.packages:
+        # 指定包检查
+        for name in args.packages:
+            if name not in by_name:
+                print(f"⚠️  {name:<20} not found in packages.json")
+                continue
+            pkg_dir = os.path.join(EXTENSIONS_DIR, name)
+            if os.path.isdir(pkg_dir):
+                kind = "manual" if by_name[name].get("manual") else "synced"
+                print(f"✅ {name:<20} present ({kind})")
+            else:
+                kind = "manual setup needed" if by_name[name].get("manual") else "need sync"
+                print(f"❌ {name:<20} missing ({kind})")
+        return
+
+    # 全量检查
+    pkg_names = set(by_name.keys())
+    local_dirs = set()
+    if os.path.isdir(EXTENSIONS_DIR):
+        for entry in os.listdir(EXTENSIONS_DIR):
+            if os.path.isdir(os.path.join(EXTENSIONS_DIR, entry)):
+                local_dirs.add(entry)
+
+    missing = pkg_names - local_dirs
+    extra = local_dirs - pkg_names
+
+    manual_pkgs = {p["name"] for p in packages if p.get("manual")}
+    missing_manual = missing & manual_pkgs
+    missing_sync = missing - manual_pkgs
+
+    if not missing and not extra:
+        print("✅ All packages are in sync.")
+        return
+
+    if missing_sync:
+        print("❌ Missing (need sync):")
+        for name in sorted(missing_sync):
+            print(f"   - {name}")
+
+    if missing_manual:
+        print("⚠️  Missing (manual, need manual setup):")
+        for name in sorted(missing_manual):
+            print(f"   - {name}")
+
+    if extra:
+        print("📦 Extra directories (not in packages.json):")
+        for name in sorted(extra):
+            print(f"   - {name}")
+
+
+# ---------------------------------------------------------------------------
 # 主入口
 # ---------------------------------------------------------------------------
 
@@ -288,6 +351,10 @@ def main():
     sync_parser.add_argument("packages", nargs="*", help="Package names to sync")
     sync_parser.add_argument("--all", action="store_true", help="Sync all packages")
     sync_parser.add_argument("--clean", action="store_true", help="Clean temp directory after sync")
+
+    # check
+    check_parser = subparsers.add_parser("check", help="Check for missing or extra packages")
+    check_parser.add_argument("packages", nargs="*", help="Package names to check (default: all)")
 
     # add
     add_parser = subparsers.add_parser("add", help="Add a new package")
@@ -308,6 +375,8 @@ def main():
 
     if args.command == "sync":
         cmd_sync(args)
+    elif args.command == "check":
+        cmd_check(args)
     elif args.command == "add":
         cmd_add(args)
 

@@ -13,17 +13,6 @@
 (require 'company)
 (global-company-mode 1)
 
-(defun company-tabnine-sort-by-detail (candidates)
-  "Sort tabnine response by detail value"
-  (sort candidates
-        (lambda (c1 c2)
-          (let ((d1 (get-text-property 0 'detail c1))
-                (d2 (get-text-property 0 'detail c2)))
-            ;; 默认忽略type
-            (or d1 (setq d1 "1%"))
-            (or d2 (setq d2 "1%"))
-            (>= (string-to-number d1) (string-to-number d2))))))
-
 
 (with-eval-after-load 'company
   (require 'lazy-load)

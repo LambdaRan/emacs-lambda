@@ -47,17 +47,12 @@
 
 (when (display-graphic-p)
   (change-font)
-  (catch 'end
-    (dolist (font '("Segoe UI Symbol" "Apple Color Emoji" "Symbola" "Symbol"))
-            (when (font-installed-p font)
-              (set-fontset-font t 'unicode font nil 'prepend)
-              (throw 'end t))))
-  (catch 'end                      ;给相应的字符集设置中文字体
-    (dolist (font '("Microsoft Yahei"))
-      (when (font-installed-p font)
-        (dolist (charset '(kana han cjk-misc bopomofo chinese-gbk))
-          (set-fontset-font t charset (font-spec :name font :size 12)))
-        (throw 'end t))))
+  (when-let ((font (cl-find-if #'font-installed-p
+                                '("Segoe UI Symbol" "Apple Color Emoji" "Symbola" "Symbol"))))
+    (set-fontset-font t 'unicode font nil 'prepend))
+  (when-let ((font (cl-find-if #'font-installed-p '("Microsoft Yahei"))))
+    (dolist (charset '(kana han cjk-misc bopomofo chinese-gbk))
+      (set-fontset-font t charset (font-spec :name font :size 12))))
   )
 
 ;;; ### Font ###

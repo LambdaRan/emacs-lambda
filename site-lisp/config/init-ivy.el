@@ -1,6 +1,7 @@
 ;; init-ivy.el --- configuration -*- lexical-binding: t -*-
 
 (with-eval-after-load 'ivy
+  (require 'counsel)
   (ivy-mode t))
 
 (with-eval-after-load 'ivy
@@ -34,7 +35,7 @@
      (setq counsel-grep-base-command
            (concat (executable-find "rg")
                    " -n -M 512 --no-heading --color never -i \"%s\" %s")))
-    ('t (message "Not find rg")))
+    (t (message "ripgrep (rg) not found, counsel-grep will be slow")))
 )
 
 ;; Integration with `magit'

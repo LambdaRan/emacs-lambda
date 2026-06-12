@@ -1,6 +1,8 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 (require 'init-const)
 
+;;; --- 修饰键设置 ---
+
 ;; Super = windows
 ;; Hyper =
 ;; Meta = Alt
@@ -30,12 +32,13 @@
   (w32-register-hot-key [C-])
   )
 
-;;; ### Unset key ###
-;;; --- 卸载按键
-(lazy-load-unset-keys                   ;全局按键的卸载
+;;; --- 卸载默认按键 ---
+
+(lazy-load-unset-keys
  '("C-x C-f" "C-z" "C-q" "s-W" "M-h" "C-\\" "C-/" "s-x" "C-x d"))
 
-;;; --- 工具函数
+;;; --- 基础工具 ---
+
 (lazy-load-set-keys
  '(
    ("<f5>" . emacs-session-save)            ; 退出emacs
@@ -48,7 +51,8 @@
    ("C-c C-k". kill-whole-line)                   ; 在当前行任何位置删除整行
    ))
 
-;; 搜索
+;;; --- 搜索与跳转 ---
+
 (lazy-load-global-keys
  '(
    ("s-R" . re-builder)                 ;可视化构建正则表达式
@@ -71,12 +75,14 @@
    ("." . color-rg-search-input-in-current-file)
    ("[" . color-rg-search-symbol-with-type)
    ("]" . color-rg-search-project-with-type)
-   ("U" . color-rg-search-symbol-gbk)   
+   ("U" . color-rg-search-symbol-gbk)
    ("I" . color-rg-search-input-gbk)
-   ("J" . color-rg-search-symbol-in-project-gbk)   
+   ("J" . color-rg-search-symbol-in-project-gbk)
    )
  "init-color-rg"
  "C-c")
+
+;;; --- 光标移动与导航 ---
 
 (lazy-load-set-keys
  '(
@@ -89,6 +95,8 @@
 (lazy-load-global-keys
  '(("M-g" . goto-line-preview))
  "goto-line-preview")
+
+;;; --- 编辑操作 ---
 
 (lazy-load-global-keys
  '(
@@ -143,6 +151,8 @@
  '(("s-Q" . multi-scratch-new))
  "multi-scratch")
 
+;;; --- 窗口操作 ---
+
 ;;; ### Window Operation ###
 (lazy-load-global-keys
  '(("C-j" . ace-window))
@@ -184,6 +194,8 @@
    )
  "init-xwidget")
 
+;;; --- 标签页 ---
+
 ;;; ### Awesome-Tab ###
 ;;; --- 多标签浏览
 (lazy-load-set-keys
@@ -208,6 +220,8 @@
    )
  "awesome-tab")
 
+;;; --- 帮助与文档 ---
+
 ;;; ### Help ###
 ;;; --- 帮助模式
 (lazy-load-global-keys
@@ -221,6 +235,8 @@
  '(("C-c x" . one-key-menu-thing-edit)  ;thing-edit 菜单
    )
  "init-thing-edit")
+
+;;; --- 文件与项目 ---
 
 ;; ### Dired;;  ###
 (lazy-load-global-keys
@@ -301,6 +317,8 @@
    ("C-c m" . magit-status+))
  "init-git")
 
+;;; --- Shell 与终端 ---
+
 ;;; ### Aweshell ###
 ;;; --- 多标签式的shell
 (lazy-load-global-keys
@@ -324,6 +342,8 @@
 ;;    ("C-c M-i" . ran-counsel-imenu))
 ;;  "init-etags")
 
+;;; --- 代码导航 ---
+
 (lazy-load-global-keys
  '(
    ("C-}" . fastctags-nav-find-tag)
@@ -346,6 +366,8 @@
    )
  "init-ffip"
  "C-c")
+
+;;; --- Counsel/Ivy 补全 ---
 
 ;;; ### Unset key ###
 (lazy-load-unset-keys                   ; 全局按键卸载

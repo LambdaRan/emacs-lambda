@@ -2,11 +2,8 @@
 (require 'init-const)
 (require 'init-accelerate)
 
-(let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
-      (gc-cons-threshold most-positive-fixnum)
-      (gc-cons-percentage 0.6)
-      ;; 清空避免加载远程文件的时候分析文件。
-      (file-name-handler-alist nil))
+;; 清空避免加载远程文件的时候分析文件。
+(let ((file-name-handler-alist nil))
 
   (setq-default inhibit-redisplay t
                 inhibit-message t)
@@ -14,16 +11,11 @@
             (lambda ()
               (setq-default inhibit-redisplay nil
                             inhibit-message nil)
-              (redisplay)))  
+              (redisplay)))
 
-  ;; 统计启动时间
-  (with-temp-message ""                 ;抹掉插件启动的输出
-    ;; (require 'benchmark-init-modes)
-    ;; (require 'benchmark-init)
-    ;; (benchmark-init/activate)
-
+  (with-temp-message ""
     ;; 按需加载插件
-    (require 'lazy-load)    
+    (require 'lazy-load)
     (require 'init-font)
     (require 'init-generic)
     (require 'init-theme)
@@ -32,39 +24,40 @@
       (require 'exec-path-from-shell)
       (exec-path-from-shell-initialize))
 
-    (require 'one-key)
-    (require 'init-fingertip)    
     (require 'init-awesome-tab)
     (require 'init-awesome-tray)
     (require 'init-auto-save)
     (require 'init-mode)
     (require 'init-treesit)
-    (require 'init-dired)
-    (require 'init-one-key)
     (require 'init-key)
-    ;; 只读模式下使用vi样式的单按键操作
-    (require 'init-vi-navigate)
     (require 'init-ivy)
     (require 'init-startup)
-    ;; 可以延后加载的
+
+    ;; 第一批延迟：视觉和轻量模块 (0.5s)
     (run-with-idle-timer
-     1 nil
+     0.5 nil
+     #'(lambda ()
+         (require 'one-key)
+         (require 'init-fingertip)
+         (require 'init-dired)
+         (require 'init-one-key)
+         (require 'init-vi-navigate)
+         (require 'init-line-number)
+         (require 'init-highlight-parentheses)
+         (require 'init-treesit-fold)))
+
+    ;; 第二批延迟：重型模块 (1.5s)
+    (run-with-idle-timer
+     1.5 nil
      #'(lambda ()
          (require 'init-agent-shell)
          (require 'init-ghostel)
-         ;; 显示行号
-         (require 'init-line-number)
-         (require 'init-highlight-parentheses)
-         (require 'init-treesit-fold)
          (require 'init-idle)
          (require 'init-ffip)
          (require 'init-color-rg)
-         ;; (require 'init-etags)
          (require 'init-fastctags)
-         ;; 后台自动删除不用的buffer
          (require 'init-tempbuf)
          (require 'init-indent)
-         ;; 自动补全
          (require 'init-company-mode)
          (require 'init-info)
          (require 'init-c)
@@ -72,10 +65,14 @@
 
          ;; Restore session at last.
          (require 'init-session)
-         (emacs-session-restore)
-
-         ;; (server-start)            ;为emacsclient准备使用场景，比如git
-         )))
+         (emacs-session-restore)))
+    ) ;; end with-temp-message
   ) ;; end let
+
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (message "Emacs ready in %.2f seconds with %d garbage collections."
+                     (float-time (time-subtract after-init-time before-init-time))
+                     gcs-done)))
 
 (provide 'init)

@@ -24,10 +24,13 @@
 ;; (setq counsel-etags-debug nil)
 ;; (setq counsel-etags-grep-program (counsel-etags-guess-program "rg"))
 
+(with-eval-after-load 'counsel-etags
+  (require 'semantic/fw)
+  (require 'counsel))
+
 (defun ran-counsel-imenu()
   "List all imenu tag with counsel-semantic-or-imenu or imenu."
   (interactive)
-  (require 'semantic/fw)
   (if (and (not (semantic-active-p))
            (seq-empty-p (counsel--imenu-candidates)))
       (call-interactively 'imenu)
