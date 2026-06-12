@@ -4,7 +4,17 @@
 (require 'lazy-load)
 
 (setq color-rg-show-function-name-p nil)
+(setq color-rg-search-no-ignore-file nil)  ; 尊重 .rgignore 文件
 (setq color-rg-search-ignore-rules "-g \"!node_modules\" -g \"!dist\" -g \"!TAGS\" -g \"!tags\" -g \"!*~\"")
+
+;; 跳过 VCS ignore 文件（.gitignore 等），但保留 .rgignore 和 .ignore
+;; 适用于 SVN 管理的项目中 .gitignore 忽略了所有文件的情况
+(defun color-rg-build-command@inject-no-ignore-vcs (orig-fn &rest args)
+  "Inject --no-ignore-vcs into rg command to skip .gitignore but keep .rgignore."
+  (let ((cmd (apply orig-fn args)))
+    (replace-regexp-in-string "\\`rg " "rg --no-ignore-vcs " cmd)))
+
+(advice-add #'color-rg-build-command :around #'color-rg-build-command@inject-no-ignore-vcs)
 ;; (when (eq system-type 'windows-nt)
 ;;   (setq color-rg-command-prefix "powershell"))
 

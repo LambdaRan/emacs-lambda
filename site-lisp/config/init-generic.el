@@ -87,7 +87,8 @@
 (setq frame-title-format "Emacs")
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
-(setq jit-lock-defer-time 0.25)
+(setq jit-lock-defer-time 0)
+(setq inhibit-compacting-font-caches t) ;使用字体缓存，避免卡顿
 ;; Restore emacs session.
 (setq initial-buffer-choice t)
 (run-with-timer 1 nil #'(lambda () (bury-buffer)))
