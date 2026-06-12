@@ -133,8 +133,6 @@
         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
 
 ;; 自带功能
-(run-with-idle-timer 1 nil
-          #'(lambda ()
 (tooltip-mode -1)                   ; 不要显示任何 tooltips
 (show-paren-mode t)                 ; 显示括号匹配
 (global-hl-line-mode 1)             ; 高亮当前行
@@ -144,7 +142,6 @@
 (electric-pair-mode t)              ; 括号自动匹配插入
 (global-auto-revert-mode t)         ; 文件被外部程序修改后自动重新加载
 (global-subword-mode t)             ; Word移动支持 FooBar 的格式
-))
 
 (provide 'init-idle)
 

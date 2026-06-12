@@ -4,11 +4,6 @@
 (require 'find-file-in-project)
 (require 'ivy)
 
-(when sys/mac-cocoa-p
-  ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
-  (require 'exec-path-from-shell)
-  (exec-path-from-shell-initialize))
-
 ;; config
 ;; use fd instread find
 (setq ffip-use-rust-fd t)

@@ -5,8 +5,7 @@
 (require 'init-const)
 
 ;;; Code:
-(setq frame-inhibit-implied-resize t    ;;; 不要缩放frame.
-      initial-major-mode 'fundamental-mode ; ;; 默认用最简单的模式
+(setq initial-major-mode 'fundamental-mode ; ;; 默认用最简单的模式
       package-enable-at-startup nil        ; ;; 不要自动启用package
       package--init-file-ensured t)
 

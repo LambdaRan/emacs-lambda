@@ -170,7 +170,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
                     ("\\.proto$" . protobuf-mode)
                     ("\\.yaml\\'" . yaml-mode)
                     ("\\.yml\\'" . yaml-mode)
-                    ("\\.cs\\'". csharp-mode)
+                    ("\\.cs\\'" . csharp-mode)
                     ))
   (add-to-alist 'auto-mode-alist elt-cons))
 

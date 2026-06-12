@@ -101,7 +101,6 @@
 (setq initial-scratch-message "")       ;关闭启动空白buffer, 这个buffer会干扰session恢复
 (setq-default comment-style 'indent)    ;设定自动缩进的注释风格
 (setq ring-bell-function 'ignore)       ;关闭烦人的出错时的提示声
-(setq initial-major-mode 'text-mode)    ;设置默认地主模式为TEXT模式
 (setq mouse-yank-at-point t)            ;粘贴于光标处,而不是鼠标指针处
 (setq select-enable-clipboard t)        ;支持emacs和外部程序的粘贴
 (setq split-width-threshold nil)        ;分屏的时候使用上下分屏

@@ -8,8 +8,6 @@
       ;; 清空避免加载远程文件的时候分析文件。
       (file-name-handler-alist nil))
 
-  ;; 让窗口启动更平滑
-  (setq frame-inhibit-implied-resize t)
   (setq-default inhibit-redisplay t
                 inhibit-message t)
   (add-hook 'window-setup-hook
@@ -30,7 +28,9 @@
     (require 'init-generic)
     (require 'init-theme)
     (when (featurep 'cocoa)
-      (require 'cache-path-from-shell))
+      (require 'cache-path-from-shell)
+      (require 'exec-path-from-shell)
+      (exec-path-from-shell-initialize))
 
     (require 'one-key)
     (require 'init-fingertip)    

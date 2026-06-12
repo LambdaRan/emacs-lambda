@@ -1,15 +1,7 @@
 ;; init-ivy.el --- configuration -*- lexical-binding: t -*-
 
-(add-hook 'after-init-hook
-          #'(lambda ()
-              (require 'ivy)
-              (require 'counsel)
-              (ivy-mode t)))
-
-(when sys/mac-cocoa-p
-  ;; Initialize environment from user's shell to make eshell know every PATH by other shell.
-  (require 'exec-path-from-shell)
-  (exec-path-from-shell-initialize))
+(with-eval-after-load 'ivy
+  (ivy-mode t))
 
 (with-eval-after-load 'ivy
   (setq ivy-use-virtual-buffers t)
@@ -22,14 +14,14 @@
   ;; https://github.com/redguardtoo/emacs.d/commit/41b8d9feefda14776b24e53bc0454faf7a1794e1
   (setq ivy-dynamic-exhibit-delay-ms 250)
   (defvar my-ivy--queue-last-input nil)
-  (defun my-ivy-queue-exhibit-a(f &rest args)
+  (defun my-ivy-queue-exhibit@around(f &rest args)
     (cond
      ((equal my-ivy--queue-last-input (ivy--input))
       (ivy--exhibit))
      (t
       (apply f args)))
     (setq my-ivy--queue-last-input (ivy--input)))
-  (advice-add 'ivy--queue-exhibit :around #'my-ivy-queue-exhibit-a)  
+  (advice-add 'ivy--queue-exhibit :around #'my-ivy-queue-exhibit@around)  
 )
 
 (with-eval-after-load 'counsel

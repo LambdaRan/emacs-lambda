@@ -1,4 +1,4 @@
-;;; init-agent-shell.el --- Configuration for agent-shell
+;;; init-agent-shell.el --- Configuration for agent-shell -*- lexical-binding: t; -*-
 
 ;;; agent-shell/acp/shell-maker
 

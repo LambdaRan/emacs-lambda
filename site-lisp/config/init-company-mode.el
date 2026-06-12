@@ -10,10 +10,8 @@
 ;;               (require company)
 ;;               (global-company-mode)))
 
-(add-hook 'prog-mode-hook
-          #'(lambda ()
-              (require 'company)
-              (global-company-mode)))
+(require 'company)
+(global-company-mode 1)
 
 (defun company-tabnine-sort-by-detail (candidates)
   "Sort tabnine response by detail value"

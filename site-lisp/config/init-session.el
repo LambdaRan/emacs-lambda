@@ -115,7 +115,7 @@
     ;; Kill unused buffers.
     (es-kill-unused-buffers)
     ;; Restore session.
-    (desktop-read "~/.emacs.d/")
+    (desktop-read (expand-file-name user-emacs-directory))
     ))
 
 (defun emacs-session-save (&optional arg)
@@ -130,8 +130,8 @@
       ;; Save all buffers before exit.
       (auto-save-buffers))
     ;; Save session.
-    (make-directory "~/.emacs.d/" t)
-    (desktop-save "~/.emacs.d/")
+    (make-directory (expand-file-name user-emacs-directory) t)
+    (desktop-save (expand-file-name user-emacs-directory))
     (kill-emacs)))
 
 (provide 'init-session)
