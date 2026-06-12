@@ -38,7 +38,6 @@
 ;;; --- 工具函数
 (lazy-load-set-keys
  '(
-   ("<f2>" . make_fullscreen)               ; 全屏模式
    ("<f5>" . emacs-session-save)            ; 退出emacs
    ("<M-s-return>" . toggle-debug-on-error) ; 切换调试模式
    ("s-[" . eval-expression)                ; 执行表达式
@@ -189,7 +188,6 @@
 ;;; --- 多标签浏览
 (lazy-load-set-keys
  '(
-   ("M-i" . awesome-tab-ace-mp)                  ;Ace jump
    ("M-7" . awesome-tab-backward-tab)              ;移动到后一个标签
    ("M-8" . awesome-tab-forward-tab)               ;移动到前一个标签
    ("M-9" . awesome-tab-backward-group)            ;移动到后一个标签组
@@ -241,8 +239,16 @@
    )
  "avy")
 
-(autoload 'ielm-map "ielm")
-;全局按键的卸载
+(with-eval-after-load 'ielm
+  (lazy-load-unset-keys
+   '("M-p" "M-n")
+   ielm-map)                        ;卸载按键
+  (lazy-load-set-keys
+   '(
+     ("C-s-p" . comint-previous-input) ;上一个输入
+     ("C-s-n" . comint-next-input)     ;下一个输入
+     )
+   ielm-map));全局按键的卸载
 (lazy-load-unset-keys
  '("C-x e"))
 (lazy-load-global-keys
@@ -261,20 +267,6 @@
    ("C-'" . delete-current-buffer-window)      ;删除当前buffer的窗口
    )
  "ran-toolkit")
-
-(eval-after-load 'ielm-mode
-  '(lambda ()
-    (progn
-      (lazy-load-unset-keys
-       '("M-p" "M-n")
-       ielm-map)                        ;卸载按键
-      (lazy-load-set-keys
-       '(
-         ("C-s-p" . comint-previous-input) ;上一个输入
-         ("C-s-n" . comint-next-input)     ;下一个输入
-         )
-       ielm-map)
-      )))
 
 ;;; Elisp
 (lazy-load-set-keys

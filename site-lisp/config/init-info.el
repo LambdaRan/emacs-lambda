@@ -99,8 +99,6 @@
                 ("P" . Info-prev)                   ;上一个同级节点
                 ("J" . scroll-up-one-line)          ;向下滚动一行
                 ("K" . scroll-down-one-line)        ;向上滚动一行
-                ("." . go-to-char-forward)  ;向后查找某一个字符
-                ("," . go-to-char-backward) ;向前查找某一个字符
                 ("<" . Info-forward-node)   ;下一个节点
                 (">" . Info-backward-node)  ;上一个节点
                 ("C-<" . Info-final-node)   ;最后一个节点

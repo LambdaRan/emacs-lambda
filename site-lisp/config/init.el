@@ -50,7 +50,6 @@
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-         (require 'init-vterm)
          (require 'init-agent-shell)
          (require 'init-ghostel)
          ;; 显示行号
@@ -67,7 +66,6 @@
          (require 'init-indent)
          ;; 自动补全
          (require 'init-company-mode)
-         ;; (require 'init-lsp-bridge)
          (require 'init-info)
          (require 'init-c)
          (require 'ran-toolkit)

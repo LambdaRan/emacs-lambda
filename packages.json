@@ -220,11 +220,6 @@
       "note": "手动维护，含 native dll"
     },
     {
-      "name": "vterm",
-      "manual": true,
-      "note": "手动维护，含 native dll"
-    },
-    {
       "name": "lazycat",
       "manual": true,
       "note": "个人工具集合"

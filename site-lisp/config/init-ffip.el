@@ -117,24 +117,6 @@
         (ffip-completing-read (ffip-hint) cands action)
       (message "Nothing found!"))))
 
-(defun ffip-ivy-read (find-directory-p action caller)
-  "Find file with ffip then use 'ivy-read' dispatch to CALLER do ACTION."
-  (let ((keyword (ffip-read-keyword))
-        cands lnum)
-    (when (and keyword (stringp keyword) (string-match "^\\(.*\\):\\([0-9]+\\):?$" keyword))
-      (setq lnum (string-to-number (match-string 2 keyword)))
-      (setq keyword (match-string 1 keyword)))
-    (setq cands (ffip-project-search keyword find-directory-p))
-    (if (> (length cands) 0)
-          (progn
-            (ivy-read (ffip-hint)
-                      cands
-                      :matcher #'counsel--find-file-matcher
-                      :action action
-                      :history 'file-name-history
-                      :keymap counsel-find-file-map
-                      :caller caller))
-      (message "Nothing found!"))))
 
 ;;;;;;;;;;;;; Cmd 
 (defun ran-vscode ()

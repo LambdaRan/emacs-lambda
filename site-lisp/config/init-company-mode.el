@@ -26,37 +26,6 @@
             (or d2 (setq d2 "1%"))
             (>= (string-to-number d1) (string-to-number d2))))))
 
-(defun company-sort-by-tabnine-and-ctags (candidates)
-  "sort company backends response"
-  (when (or (functionp company-backend)
-            (not (and (listp company-backend)
-                      (memq 'company-tabnine company-backend))))
-    candidates)
-  (let (candidates-tabnine candidates-ctags candidates-yas)
-    (setq candidates-max-length (min (length candidates) 20))
-    (dolist (candidate candidates)
-      (setq backend-property (get-text-property 0 'company-backend candidate))
-      (cond
-        ((eq backend-property 'company-ctags)
-         (push candidate candidates-ctags))
-        ((eq backend-property 'company-yasnippet)
-         (push candidate candidates-yas))
-        (t (push candidate candidates-tabnine))))
-    ;; (setq candidates-tabnine (nreverse candidates-tabnine))
-    (setq candidates-tabnine (company-tabnine-sort-by-detail candidates-tabnine))
-    (setq candidates-ctags (nreverse candidates-ctags))
-    (setq candidates-yas (nreverse candidates-yas))
-    (setq candidates (nconc (seq-take candidates-tabnine 5)
-                            (seq-take candidates-ctags 3)
-                            (seq-take candidates-yas 2)))
-    (setq candidates-other (nconc (seq-drop candidates-tabnine 5)
-                                  (seq-drop candidates-ctags 3)
-                                  (seq-drop candidates-yas 2)))
-    (let ((len (length candidates)))
-      (when (< len candidates-max-length)
-        (setq candidates (nconc candidates (seq-take candidates-other (- candidates-max-length len))))))
-
-    candidates))
 
 (with-eval-after-load 'company
   (require 'lazy-load)
@@ -85,8 +54,6 @@
         ;; @see https://github.com/company-mode/company-mode/issues/146
         company-tooltip-align-annotations t)
 
-  ;; (add-to-list 'company-transformers 'company-sort-by-backend-importance)
-  ;; (add-to-list 'company-transformers 'company-sort-by-tabnine-and-ctags t)
   ;; Remove duplicate candidate.
   (add-to-list 'company-transformers #'delete-dups)
   ;; NOT to load company-mode for certain major modes.

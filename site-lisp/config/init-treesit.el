@@ -75,13 +75,12 @@
 
 (add-hook 'web-mode-hook #'(lambda ()
                              (let ((file-name (buffer-file-name)))
-                               (when file-name
-                                 (treesit-parser-create
-                                  (pcase (file-name-extension file-name)
-                                    ("vue" 'vue)
-                                    ("html" 'html)
-                                    ("php" 'php))))
-                               )))
+                               (when-let* ((file-name file-name)
+                                           (lang (pcase (file-name-extension file-name)
+                                                   ("vue" 'vue)
+                                                   ("html" 'html)
+                                                   ("php" 'php))))
+                                 (treesit-parser-create lang)))))
 
 (add-hook 'zig-mode-hook #'(lambda () (treesit-parser-create 'zig)))
 (add-hook 'mojo-mode-hook #'(lambda () (treesit-parser-create 'mojo)))

@@ -46,17 +46,15 @@
 (when sys/windows-p
   (defun color-rg-get-match-buffer@override (filepath)
     (catch 'find-match
-      (setq project-root (color-rg-project-root-dir))
-      (setq filepath (file-relative-name filepath project-root))
-      (dolist (buffer (buffer-list))
-        (setq bufferfile (buffer-file-name buffer))
-        (when bufferfile
-          (setq bufferfile (file-relative-name bufferfile project-root))
-          (when (string-equal bufferfile filepath)
-            (throw 'find-match buffer))
-          )
-        )
-      nil))
+      (let ((project-root (color-rg-project-root-dir)))
+        (setq filepath (file-relative-name filepath project-root))
+        (dolist (buffer (buffer-list))
+          (let ((bufferfile (buffer-file-name buffer)))
+            (when bufferfile
+              (setq bufferfile (file-relative-name bufferfile project-root))
+              (when (string-equal bufferfile filepath)
+                (throw 'find-match buffer)))))
+        nil)))
   (advice-add #'color-rg-get-match-buffer :override #'color-rg-get-match-buffer@override)
   ;; (advice-remove #'color-rg-get-match-buffer #'color-rg-get-match-buffer@override)
 )
