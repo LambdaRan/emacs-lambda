@@ -40,6 +40,3 @@
   "Are we running on a Cygwin system?")
 
 (provide 'init-const)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init-const.el ends here

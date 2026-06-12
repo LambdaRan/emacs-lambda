@@ -1,8 +1,6 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
-;;; Require
-(require 'aweshell)
 
-;;; Code:
+(require 'aweshell)
 
 (setq aweshell-auto-suggestion-p nil)
 

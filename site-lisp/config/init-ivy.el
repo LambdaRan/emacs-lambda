@@ -1,4 +1,4 @@
-;; init-ivy.el --- configuration -*- lexical-binding: t -*-
+;; -*- coding: utf-8; lexical-binding: t; -*-
 
 (with-eval-after-load 'ivy
   (require 'counsel)

@@ -1,10 +1,8 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 ;; init-accelerate.el --- Accelerate the start Emacs
 
-;;; Require
 (require 'init-const)
 
-;;; Code:
 (setq initial-major-mode 'fundamental-mode ; ;; 默认用最简单的模式
       package-enable-at-startup nil        ; ;; 不要自动启用package
       package--init-file-ensured t)
@@ -76,5 +74,3 @@
               (gcmh-mode 1)))
 
 (provide 'init-accelerate)
-
-;;; init-accelerate.el ends here

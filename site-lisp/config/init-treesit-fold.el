@@ -1,4 +1,4 @@
-;;; init-treesit-fold.el --- Config for treesit   -*- lexical-binding: t; -*-
+;; -*- coding: utf-8; lexical-binding: t; -*-
 
 (require 'treesit-fold)
 

@@ -1,5 +1,4 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
-;; https://github.com/dgutov/diff-hl
 
 ;; (require 'diff-hl)
 ;; (require 'diff-hl-margin)

@@ -1,9 +1,6 @@
-;;; init-treesit.el --- Config for treesit   -*- lexical-binding: t; -*-
+;; -*- coding: utf-8; lexical-binding: t; -*-
 
-;;; Require
 (require 'treesit)
-
-;;; Code:
 
 ;; 执行以下函数确定ABI版本，当前是14
 ;; (treesit-library-abi-version)
@@ -101,5 +98,3 @@
 (add-hook 'ruby-mode-hook #'(lambda () (treesit-parser-create 'ruby)))
 
 (provide 'init-treesit)
-
-;;; init-treesit.el ends here

@@ -1,11 +1,7 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
-;;; init-font.el --- Font configuration
 
-;;; Require
 (require 'init-const)
 (require 'lazy-load)
-
-;;; Code:
 
 ;; (setq-default line-spacing 0.2)
 
@@ -64,5 +60,3 @@
    ))
 
 (provide 'init-font)
-
-;;; init-font.el ends here
