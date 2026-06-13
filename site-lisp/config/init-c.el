@@ -23,7 +23,7 @@
                                   "/usr/local/opt/llvm/include/c++/v1"
                                   ))
     ;; make a #define be left-aligned
-    (setq c-electric-pound-behavior (quote (alignleft)))
+    (setq c-electric-pound-behavior '(alignleft))
 
     ;; cpp font lock.
     (modern-c++-font-lock-global-mode t)

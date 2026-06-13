@@ -22,7 +22,7 @@
      (t
       (apply f args)))
     (setq my-ivy--queue-last-input (ivy--input)))
-  (advice-add 'ivy--queue-exhibit :around #'my-ivy-queue-exhibit@around)  
+  (advice-add #'ivy--queue-exhibit :around #'my-ivy-queue-exhibit@around)
 )
 
 (with-eval-after-load 'counsel
@@ -40,6 +40,6 @@
 
 ;; Integration with `magit'
 (with-eval-after-load 'magit
-  (setq magit-completing-read-function 'ivy-completing-read))
+  (setq magit-completing-read-function #'ivy-completing-read))
 
 (provide 'init-ivy)

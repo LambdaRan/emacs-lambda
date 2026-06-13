@@ -9,6 +9,8 @@
 
 ;; Improve the performance of rendering long lines.
 (setq-default bidi-display-reordering nil)
+(setq bidi-inhibit-bpa t)
+(setq-default bidi-paragraph-direction 'left-to-right)
 
 ;; Font compacting can be terribly expensive, especially for rendering icon
 ;; fonts on Windows. Whether disabling it has a notable affect on Linux and Mac

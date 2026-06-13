@@ -1,107 +1,23 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-generic.el --- Generic config
 
-;; Filename: init-generic.el
-;; Description: Generic config
-;; Author: Andy Stewart <lazycat.manatee@gmail.com>
-;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2014, Andy Stewart, all rights reserved.
-;; Created: 2014-01-20 23:57:56
-;; Version: 0.1
-;; Last-Updated: 2014-01-20 23:57:56
-;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-generic.el
-;; Keywords:
-;; Compatibility: GNU Emacs 24.3.50.1
-;;
-;; Features that might be required by this library:
-;;
-;;
-;;
-
-;;; This file is NOT part of GNU Emacs
-
-;;; License
-;;
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-
-;;; Commentary:
-;;
-;; Generic config
-;;
-
-;;; Installation:
-;;
-;; Put init-generic.el to your load-path.
-;; The load-path is usually ~/elisp/.
-;; It's set in your ~/.emacs like this:
-;; (add-to-list 'load-path (expand-file-name "~/elisp"))
-;;
-;; And the following to your ~/.emacs startup file.
-;;
-;; (require 'init-generic)
-;;
-;; No need more.
-
-;;; Customize:
-;;
-;;
-;;
-;; All of the above can customize by:
-;;      M-x customize-group RET init-generic RET
-;;
-
-;;; Change log:
-;;
-;; 2014/01/20
-;;      * First released.
-;;
-
-;;; Acknowledgements:
-;;
-;;
-;;
-
-;;; TODO
-;;
-;;
-;;
-
-;;; Require
-
 (require 'init-const)
+
 ;;; Code:
 (setq frame-title-format "Emacs")
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
 (setq jit-lock-defer-time 0)
-(setq inhibit-compacting-font-caches t) ;使用字体缓存，避免卡顿
 ;; Restore emacs session.
 (setq initial-buffer-choice t)
 (run-with-timer 1 nil #'(lambda () (bury-buffer)))
-;; 增加长行处理性能
-(setq bidi-inhibit-bpa t)
-(setq-default bidi-paragraph-direction 'left-to-right)
 
-(fset 'yes-or-no-p 'y-or-n-p)           ;以 y/n代表 yes/no
+(fset 'yes-or-no-p #'y-or-n-p)           ;以 y/n代表 yes/no
 (setq use-dialog-box nil)               ;never pop dialog
 (setq inhibit-startup-screen t)         ;inhibit start screen
 (setq initial-scratch-message "")       ;关闭启动空白buffer, 这个buffer会干扰session恢复
 (setq-default comment-style 'indent)    ;设定自动缩进的注释风格
-(setq ring-bell-function 'ignore)       ;关闭烦人的出错时的提示声
+(setq ring-bell-function #'ignore)       ;关闭烦人的出错时的提示声
 (setq mouse-yank-at-point t)            ;粘贴于光标处,而不是鼠标指针处
 (setq select-enable-clipboard t)        ;支持emacs和外部程序的粘贴
 (setq split-width-threshold nil)        ;分屏的时候使用上下分屏
@@ -124,7 +40,6 @@
 (setq delete-by-moving-to-trash t)      ; 删除的文件移动到垃圾篓
 (setq switch-to-buffer-preserve-window-point t)
 (setq-default cursor-type 'bar)         ;更改光标类型
-;; (set-cursor-color "Red")                ;更改光标颜色
 (add-to-list 'default-frame-alist '(cursor-color . "Red"))
 
 ;; 平滑地进行半屏滚动，避免滚动后recenter操作
@@ -155,6 +70,17 @@
   (prefer-coding-system 'gb18030)
   (prefer-coding-system 'utf-8)
   (set-default-coding-systems 'utf-8))
+
+;; 基础编辑模式（从 init-idle.el 移入，确保启动即可用）
+(tooltip-mode -1)                   ; 不要显示任何 tooltips
+(show-paren-mode t)                 ; 显示括号匹配
+(global-hl-line-mode 1)             ; 高亮当前行
+(delete-selection-mode t)           ; 选中文本可以编辑
+(blink-cursor-mode -1)              ; 指针不闪动
+(transient-mark-mode 1)             ; 标记高亮
+(electric-pair-mode t)              ; 括号自动匹配插入
+(global-auto-revert-mode t)         ; 文件被外部程序修改后自动重新加载
+(global-subword-mode t)             ; Word移动支持 FooBar 的格式
 
 (provide 'init-generic)
 

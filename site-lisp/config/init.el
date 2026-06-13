@@ -8,7 +8,7 @@
   (setq-default inhibit-redisplay t
                 inhibit-message t)
   (add-hook 'window-setup-hook
-            (lambda ()
+            #'(lambda ()
               (setq-default inhibit-redisplay nil
                             inhibit-message nil)
               (redisplay)))
@@ -70,7 +70,7 @@
   ) ;; end let
 
 (add-hook 'emacs-startup-hook
-          (lambda ()
+          #'(lambda ()
             (message "Emacs ready in %.2f seconds with %d garbage collections."
                      (float-time (time-subtract after-init-time before-init-time))
                      gcs-done)))

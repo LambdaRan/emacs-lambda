@@ -16,7 +16,7 @@
 
 (with-eval-after-load "esh-opt"
   (setq eshell-highlight-prompt nil
-        eshell-prompt-function 'epe-theme-ran))
+        eshell-prompt-function #'epe-theme-ran))
 
 ;; epe-theme-ran
 ;; epe-theme-lambda

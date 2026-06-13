@@ -1,87 +1,5 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
-;;; init-idle.el --- Configure file that can load when emacs idle.
-
-;; Filename: init-idle.el
-;; Description: Configure file that can load when emacs idle.
-;; Author: Andy Stewart <lazycat.manatee@gmail.com>
-;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2014, Andy Stewart, all rights reserved.
-;; Created: 2014-03-17 03:06:11
-;; Version: 0.1
-;; Last-Updated: 2014-03-17 03:06:11
-;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/init-idle.el
-;; Keywords:
-;; Compatibility: GNU Emacs 24.3.50.1
-;;
-;; Features that might be required by this library:
-;;
-;;
-;;
-
-;;; This file is NOT part of GNU Emacs
-
-;;; License
-;;
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-
-;;; Commentary:
-;;
-;; Configure file that can load when emacs idle.
-;;
-
-;;; Installation:
-;;
-;; Put init-idle.el to your load-path.
-;; The load-path is usually ~/elisp/.
-;; It's set in your ~/.emacs like this:
-;; (add-to-list 'load-path (expand-file-name "~/elisp"))
-;;
-;; And the following to your ~/.emacs startup file.
-;;
-;; (require 'init-idle)
-;;
-;; No need more.
-
-;;; Customize:
-;;
-;;
-;;
-;; All of the above can customize by:
-;;      M-x customize-group RET init-idle RET
-;;
-
-;;; Change log:
-;;
-;; 2014/03/17
-;;      * First released.
-;;
-
-;;; Acknowledgements:
-;;
-;;
-;;
-
-;;; TODO
-;;
-;;
-;;
-
-;;; Require
-
+;;; init-idle.el --- Settings loaded during idle time
 
 ;;; Code:
 
@@ -105,43 +23,31 @@
 (setq blink-matching-paren nil)      ;当插入右括号时不显示匹配的左括号
 (setq message-log-max t)         ;设置message记录全部消息, 而不用截去
 (setq require-final-newline nil) ;不自动添加换行符到末尾, 有些情况会出现错误
-(setq ediff-window-setup-function (quote ediff-setup-windows-plain)) ;比较窗口设置在同一个frame里
+(setq ediff-window-setup-function #'ediff-setup-windows-plain) ;比较窗口设置在同一个frame里
 (setq x-stretch-cursor t)         ;光标在 TAB 字符上会显示为一个大方块
 (setq print-escape-newlines t)          ;显示字符窗中的换行符为 \n
 (setq tramp-default-method "ssh")       ;设置传送文件默认的方法
 (setq void-text-area-pointer nil)       ;禁止显示鼠标指针
 (setq byte-compile-warnings
-      (quote (
-              ;; 显示的警告
-              free-vars                 ;不在当前范围的引用变量
-              unresolved                ;不知道的函数
-              callargs                  ;函数调用的参数和定义的不匹配
-              obsolete                  ;荒废的变量和函数
-              noruntime                 ;函数没有定义在运行时期
-              interactive-only          ;正常不被调用的命令
-              make-local ;调用 `make-variable-buffer-local' 可能会不正确的
-              mapcar     ;`mapcar' 调用
-              ;;
-              ;; 抑制的警告
-              (not redefine)        ;重新定义的函数 (比如参数数量改变)
-              (not cl-functions)    ;`CL' 包中的运行时调用的函数
-              )))
-;; (elf-setup-default)                     ;二进制文件默认用elf模式打开
+      '(
+        ;; 显示的警告
+        free-vars                 ;不在当前范围的引用变量
+        unresolved                ;不知道的函数
+        callargs                  ;函数调用的参数和定义的不匹配
+        obsolete                  ;荒废的变量和函数
+        noruntime                 ;函数没有定义在运行时期
+        interactive-only          ;正常不被调用的命令
+        make-local ;调用 `make-variable-buffer-local' 可能会不正确的
+        mapcar     ;`mapcar' 调用
+        ;;
+        ;; 抑制的警告
+        (not redefine)        ;重新定义的函数 (比如参数数量改变)
+        (not cl-functions)    ;`CL' 包中的运行时调用的函数
+        ))
 (setq echo-keystrokes 0.1)              ;加快快捷键提示的速度
 (setq package-archives ;设置中国的镜像源，国外的太慢了，偶尔去偷点 *.el 文件
       '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
-
-;; 自带功能
-(tooltip-mode -1)                   ; 不要显示任何 tooltips
-(show-paren-mode t)                 ; 显示括号匹配
-(global-hl-line-mode 1)             ; 高亮当前行
-(delete-selection-mode t)           ; 选中文本可以编辑
-(blink-cursor-mode -1)              ; 指针不闪动
-(transient-mark-mode 1)             ; 标记高亮
-(electric-pair-mode t)              ; 括号自动匹配插入
-(global-auto-revert-mode t)         ; 文件被外部程序修改后自动重新加载
-(global-subword-mode t)             ; Word移动支持 FooBar 的格式
 
 (provide 'init-idle)
 

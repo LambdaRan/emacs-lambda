@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;; URL: https://github.com/seagle0128/.emacs.d
 ;; 需要拷贝到.emacs.d目录中
  

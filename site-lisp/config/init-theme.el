@@ -29,6 +29,6 @@
       (custom-set-faces
        '(hl-line ((t (:background "gray84")))))))
   (set-cursor-color "Red"))
-(advice-add 'lazycat-theme-toggle :after 'ran-custom-theme)
+(advice-add #'lazycat-theme-toggle :after #'ran-custom-theme)
 
 (provide 'init-theme)
