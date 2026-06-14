@@ -2,9 +2,7 @@
 
 (with-eval-after-load 'ivy
   (require 'counsel)
-  (ivy-mode t))
-
-(with-eval-after-load 'ivy
+  (ivy-mode t)
   (setq ivy-use-virtual-buffers t)
   (setq ivy-wrap t)
   ;; Show #/total when scrolling buffers
@@ -22,8 +20,7 @@
      (t
       (apply f args)))
     (setq my-ivy--queue-last-input (ivy--input)))
-  (advice-add #'ivy--queue-exhibit :around #'my-ivy-queue-exhibit@around)
-)
+  (advice-add #'ivy--queue-exhibit :around #'my-ivy-queue-exhibit@around))
 
 (with-eval-after-load 'counsel
   ;; (setq counsel-find-file-at-point t)

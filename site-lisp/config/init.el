@@ -49,27 +49,31 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
 ;;; 启动优化
 ;; Ref: Doom Emacs early-init.el:131-171, 222-237, 347
 
+;;; 命名函数：替代 emacs-startup-hook 中逻辑较复杂的匿名 lambda
+
+(defvar my--saved-fnha nil "启动前保存的 file-name-handler-alist。")
+
+(defun my-restore-fnha ()
+  "启动后恢复 file-name-handler-alist（合并而非覆盖）。"
+  (set-default-toplevel-value
+   'file-name-handler-alist
+   (delete-dups
+    (append (default-toplevel-value 'file-name-handler-alist)
+            my--saved-fnha))))
+
 ;; PERF: 启动期间保存并简化 `file-name-handler-alist'。
 ;; 每次 `require'、`load'、`expand-file-name' 等都会查询它。
 ;; Ref: Doom Emacs early-init.el:131-148
-(let ((old-fnha (default-toplevel-value 'file-name-handler-alist)))
-  (set-default-toplevel-value
-   'file-name-handler-alist
-   ;; 如果内置 .el 文件未压缩，可移除所有 handler 以获得最大启动速度；
-   ;; 如果压缩了，保留 gzip handler。
-   (if (locate-file-internal "calc-loaddefs.el" load-path)
-       nil
-     (list (rassq 'jka-compr-handler old-fnha))))
-  ;; 启动结束后恢复（合并而非覆盖，保留启动期间包所做的修改）。
-  ;; Ref: Doom Emacs early-init.el:161-171
-  (add-hook 'emacs-startup-hook
-            #'(lambda ()
-                (set-default-toplevel-value
-                 'file-name-handler-alist
-                 (delete-dups
-                  (append (default-toplevel-value 'file-name-handler-alist)
-                          old-fnha))))
-            101))
+;; 使用 setq 而非 let，避免 lexical-binding 下词法作用域遮蔽 defvar。
+(setq my--saved-fnha (default-toplevel-value 'file-name-handler-alist))
+(set-default-toplevel-value
+ 'file-name-handler-alist
+ ;; 如果内置 .el 文件未压缩，可移除所有 handler 以获得最大启动速度；
+ ;; 如果压缩了，保留 gzip handler。
+ (if (locate-file-internal "calc-loaddefs.el" load-path)
+     nil
+   (list (rassq 'jka-compr-handler my--saved-fnha))))
+(add-hook 'emacs-startup-hook #'my-restore-fnha 101)
 
 ;; PERF: 启动期间精简 `load-suffixes'，跳过 .so/.dll 检查。
 ;; DLL 包（vterm、ghostel）在启动后的空闲时加载，不受影响。
@@ -84,8 +88,6 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
                               inhibit-message nil)
                 (redisplay)))
 
-  ;; 恢复 early-init.el 中拦截的 `tool-bar-setup'。
-  ;; Ref: Doom Emacs early-init.el:246-258
   (add-hook 'emacs-startup-hook
             #'(lambda ()
                 (advice-remove #'tool-bar-setup #'ignore)))
@@ -119,6 +121,7 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
                    '(;; 第一批：视觉反馈（轻量，用户立即感知）
                      init-highlight-parentheses
                      init-line-number
+                     init-company-mode
                      init-fingertip
                      ;; 第二批：导航与编辑（用户高频操作）
                      init-dired
@@ -126,7 +129,6 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
                      init-vi-navigate
                      init-treesit-fold
                      init-indent
-                     init-company-mode
                      ;; 第三批：工具（按需使用）
                      init-ffip
                      init-color-rg
@@ -152,8 +154,8 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
 
 (add-hook 'emacs-startup-hook
           #'(lambda ()
-            (message "Emacs ready in %.2f seconds with %d garbage collections."
-                     (float-time (time-subtract after-init-time before-init-time))
-                     gcs-done)))
+              (message "Emacs ready in %.2f seconds with %d garbage collections."
+                       (float-time (time-subtract after-init-time before-init-time))
+                       gcs-done)))
 
 (provide 'init)

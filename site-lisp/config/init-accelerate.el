@@ -78,20 +78,20 @@
 
 ;; Ref: Doom Emacs doom.el:555-558
 ;; GC 安全网：如果 gcmh 加载失败或 GC 值在启动后仍极高，强制恢复到合理值以防止内存膨胀。
-(add-hook 'emacs-startup-hook
-          #'(lambda ()
-              "启动后恢复 GC 值，含安全网。"
-              (cond
-               ;; gcmh 已生效，不干预，由 gcmh 自行管理 GC 阈值
-               ((bound-and-true-p gcmh-mode))
-               ;; gcmh 未加载且 GC 阈值仍极高，降回 16MB 安全值
-               ((>= gc-cons-threshold most-positive-fixnum)
-                (setq gc-cons-threshold (* 16 1024 1024)
-                      gc-cons-percentage 0.1))
-               ;; gcmh 未加载，GC 阈值已恢复，设置合理默认值
-               (t
-                (setq gc-cons-threshold 800000
-                      gc-cons-percentage 0.1))))
-          100) ; 低优先级，最后执行
+(defun my-gcmh-fallback ()
+  "启动后恢复 GC 值，含安全网。"
+  (cond
+   ;; gcmh 已生效，不干预，由 gcmh 自行管理 GC 阈值
+   ((bound-and-true-p gcmh-mode))
+   ;; gcmh 未加载且 GC 阈值仍极高，降回 16MB 安全值
+   ((>= gc-cons-threshold most-positive-fixnum)
+    (setq gc-cons-threshold (* 16 1024 1024)
+          gc-cons-percentage 0.1))
+   ;; gcmh 未加载，GC 阈值已恢复，设置合理默认值
+   (t
+    (setq gc-cons-threshold 800000
+          gc-cons-percentage 0.1))))
+
+(add-hook 'emacs-startup-hook #'my-gcmh-fallback 100) ; 低优先级，最后执行
 
 (provide 'init-accelerate)

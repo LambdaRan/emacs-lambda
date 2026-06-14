@@ -10,7 +10,7 @@
 (setq jit-lock-defer-time 0.05)
 ;; Restore emacs session.
 (setq initial-buffer-choice t)
-(run-with-timer 1 nil #'(lambda () (bury-buffer)))
+(run-with-timer 1 nil #'(lambda () (when (equal (buffer-name) "*scratch*") (bury-buffer))))
 
 (fset 'yes-or-no-p #'y-or-n-p)           ;以 y/n代表 yes/no
 (setq use-dialog-box nil)               ;never pop dialog
@@ -138,8 +138,8 @@
 
 ;; 包管理镜像
 (setq package-archives
-      '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
-        ("melpa" . "http://elpa.emacs-china.org/melpa/")))
+      '(("gnu"   . "https://elpa.emacs-china.org/gnu/")
+        ("melpa" . "https://elpa.emacs-china.org/melpa/")))
 
 ;; Ediff 窗口设置
 (setq ediff-window-setup-function #'ediff-setup-windows-plain)

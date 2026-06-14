@@ -1,4 +1,5 @@
-;;; init-agent-shell.el --- Configuration for agent-shell -*- lexical-binding: t; -*-
+;; -*- coding: utf-8; lexical-binding: t; -*-
+;;; init-agent-shell.el --- Configuration for agent-shell
 
 ;;; agent-shell/acp/shell-maker
 ;;; 延迟加载：acp 和 agent-shell 仅在用户实际调用时才加载。
