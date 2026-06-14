@@ -30,6 +30,12 @@
 (setq history-delete-duplicates t)
 (setq savehist-save-minibuffer-history t)
 
+;;; Recentf — 记录最近打开的文件（consult-buffer 依赖）
+(require 'recentf)
+(recentf-mode 1)
+(setq recentf-max-menu-items 50)
+(setq recentf-max-saved-items 200)
+
 ;;; Marginalia — 候选注解
 (require 'marginalia)
 (marginalia-mode 1)
