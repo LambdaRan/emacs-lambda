@@ -49,8 +49,8 @@
 
 ;;; 外观调整
 (custom-set-faces
- ;; 选择高亮不延伸到窗口右边缘
- '(vertico-current ((t (:inherit highlight :extend nil))))
+ ;; 选择高亮：深蓝背景（与 ivy 一致），不延伸到窗口右边缘
+ '(vertico-current ((t (:background "#2257A0" :foreground "#FAFAFA" :extend nil))))
  ;; 未打开的文件（recentf 历史）显示为灰色
  '(consult-file ((t (:inherit shadow)))))
 
