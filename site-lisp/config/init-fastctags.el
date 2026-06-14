@@ -24,15 +24,15 @@
 
 (with-eval-after-load 'fastctags
   (require 'semantic/fw)
-  (require 'counsel))
+  (require 'consult))
 
 (defun ran-fastctags-imenu()
-  "List all imenu tag with counsel-semantic-or-imenu or imenu."
+  "List all imenu tag with consult-imenu or imenu."
   (interactive)
   (if (and (not (semantic-active-p))
-           (seq-empty-p (counsel--imenu-candidates)))
+           (null (ignore-errors (imenu--make-index-alist))))
       (call-interactively 'imenu)
-    (call-interactively 'counsel-semantic-or-imenu)))
+    (call-interactively 'consult-imenu)))
 
 (defun fastctags-nav-find-tag-at-point-in-specific-directory ()
   "Find tag using tagname at point, selecting from specific tags files.

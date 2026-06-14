@@ -1,13 +1,5 @@
 
 ;; https://github.com/skywind3000/z.lua
-;; https://github.com/abo-abo/swiper
-
-(require 'ivy)
-
-;; (split-string "0.25 /Users/randegang/plugins\n0.25 /Users/randegang/leetcode/Contents\n" "\n" t "[0-9. ]+")
-;; (shell-command-to-string "lua ~/lambda/software/z.lua \\-l")
-;; https://emacs-china.org/t/shell-command-to-string-bash-builtin-builtin/7421
-;; (shell-command-to-string "bash -ic z lambda")
 
 (defgroup zlua nil
   "Use z.lua script jump to some directory"
@@ -36,7 +28,7 @@
 
 (defun zlua-read-input ()
   "Read directly from minibuffer."
-  (let* ((current-symbol (ivy-thing-at-point))
+  (let* ((current-symbol (or (thing-at-point 'symbol t) ""))
          (input-string
           (string-trim
            (read-string
@@ -82,20 +74,13 @@ INITIAL-DIRECTORY can be given as the initial minibuffer input."
         (progn
           (when zlua-sort-directory-candidates
             (setq directory-candidates (reverse directory-candidates)))
-          (ivy-read "Zlua jump directory: "
-                    directory-candidates
-                    :matcher #'counsel--find-file-matcher
-                    :initial-input initial-directory
-                    :action (lambda (d) (dired-jump nil (expand-file-name d)))
-                    :history 'file-name-history
-                    :keymap counsel-find-file-map
-                    :caller 'zlua-jump-to-directory))
+          (let ((selected (completing-read "Zlua jump directory: "
+                                           directory-candidates
+                                           nil nil initial-directory
+                                           'file-name-history)))
+            (when selected
+              (dired-jump nil (expand-file-name selected)))))
       (message "zlua directory candidates empty"))))
-
-(ivy-set-actions
- 'zlua-jump-to-directory
- '(("e" counsel-find-file-extern "open externally")
-   ))
 
 (provide 'zlua)
 

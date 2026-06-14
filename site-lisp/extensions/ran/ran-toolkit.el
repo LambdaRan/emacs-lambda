@@ -30,28 +30,23 @@
       (message "%s copied" new-kill-string)
       (kill-new new-kill-string))))
 
-;; https://emacs.stackexchange.com/questions/39105/insert-file-path-via-counsel
+;; Insert file path via read-file-name
 (defun ran-counsel-insert-file-path ()
-  "Insert file path."
+  "Insert file path via completing-read."
   (interactive)
-  (unless (featurep 'counsel) (require 'counsel))
-  (ivy-read "Find file: " 'read-file-name-internal
-            :matcher #'counsel--find-file-matcher
-            :action
-            (lambda (x)
-              (insert x))))
+  (let ((file (read-file-name "Find file: ")))
+    (when file
+      (insert (expand-file-name file)))))
 
-;; (magit-toplevel) 函数得到 仓库根目录
-;; https://emacs.stackexchange.com/questions/9323/get-git-repo-root-directory-preferably-with-magit
+;; git push origin HEAD:refs/for/[branch]
 (defun ran-git-refs-for ()
-  "git push origin HEAD:refs/for/[branch] "
+  "git push origin HEAD:refs/for/[branch]"
   (interactive)
-  (require 'magit)
-  (let ((git-refs-command (format "%s push origin HEAD:refs/for/" magit-git-executable))
-        (branch (magit-read-other-branch-or-commit "Checkout" "origin/master")))
-    (setq git-refs-command (concat git-refs-command branch))
-    (when (y-or-n-p (concat "Next run : " git-refs-command))
-      (magit-git-command git-refs-command))))
+  (let* ((git-exe (or (executable-find "git") (error "git not found")))
+         (branch (read-string "Branch (default origin/master): " nil nil "origin/master"))
+         (cmd (format "%s push origin HEAD:refs/for/%s" git-exe branch)))
+    (when (y-or-n-p (concat "Next run: " cmd))
+      (shell-command cmd))))
 
 ;; https://github.com/manateelazycat/smart-align
 ;; 增加选择区域

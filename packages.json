@@ -14,7 +14,9 @@
       "name": "awesome-tray",
       "repo": "manateelazycat/awesome-tray",
       "ref": "master",
-	  "ignores":["screenshots/"]
+      "ignores": [
+        "screenshots/"
+      ]
     },
     {
       "name": "company-mode",
@@ -40,7 +42,11 @@
       "name": "expand-region",
       "repo": "magnars/expand-region.el",
       "ref": "master",
-	  "ignores":["*.sh","watch-tests.watchr","features"]
+      "ignores": [
+        "*.sh",
+        "watch-tests.watchr",
+        "features"
+      ]
     },
     {
       "name": "goto-line-preview",
@@ -56,13 +62,19 @@
       "name": "go-mode",
       "repo": "dominikh/go-mode.el",
       "ref": "master",
-	  "ignores":["*.sh",".mailmap","AUTHORS*"]
+      "ignores": [
+        "*.sh",
+        ".mailmap",
+        "AUTHORS*"
+      ]
     },
     {
       "name": "color-rg",
       "repo": "manateelazycat/color-rg",
       "ref": "master",
-	  "ignores":["screenshot/"]
+      "ignores": [
+        "screenshot/"
+      ]
     },
     {
       "name": "thing-edit",
@@ -93,13 +105,21 @@
       "name": "php-mode",
       "repo": "emacs-php/php-mode",
       "ref": "master",
-	  "ignores":["etc/","script",".mailmap","AUTHORS*"]
+      "ignores": [
+        "etc/",
+        "script",
+        ".mailmap",
+        "AUTHORS*"
+      ]
     },
     {
       "name": "modern-cpp-font-lock",
       "repo": "ludwigpacifici/modern-cpp-font-lock",
       "ref": "master",
-	  "ignores":["cpp","img/"]
+      "ignores": [
+        "cpp",
+        "img/"
+      ]
     },
     {
       "name": "ace-window",
@@ -110,7 +130,9 @@
       "name": "all-the-icons",
       "repo": "domtronn/all-the-icons.el",
       "ref": "master",
-	  "ignores":[".editorconfig"]
+      "ignores": [
+        ".editorconfig"
+      ]
     },
     {
       "name": "avy",
@@ -121,18 +143,9 @@
       "name": "lua-mode",
       "repo": "immerrr/lua-mode",
       "ref": "master",
-	  "ignores":["travis/"]
-    },
-    {
-      "name": "counsel-etags",
-      "repo": "redguardtoo/counsel-etags",
-      "ref": "master"
-    },
-    {
-      "name": "swiper",
-      "repo": "abo-abo/swiper",
-      "ref": "master",
-	  "ignores":[".mailmap"]
+      "ignores": [
+        "travis/"
+      ]
     },
     {
       "name": "markdown-mode",
@@ -148,7 +161,9 @@
       "name": "rust-mode",
       "repo": "rust-lang/rust-mode",
       "ref": "master",
-	  "ignores":["*.sh"]
+      "ignores": [
+        "*.sh"
+      ]
     },
     {
       "name": "aweshell",
@@ -174,13 +189,19 @@
       "name": "treesit-fold",
       "repo": "emacs-tree-sitter/treesit-fold",
       "ref": "master",
-	  "ignores":["_scripts/","etc/"]
+      "ignores": [
+        "_scripts/",
+        "etc/"
+      ]
     },
     {
       "name": "web-mode",
       "repo": "fxbois/web-mode",
       "ref": "master",
-	  "ignores":["issues/","*.sh"]
+      "ignores": [
+        "issues/",
+        "*.sh"
+      ]
     },
     {
       "name": "rainbow-mode",
@@ -191,13 +212,17 @@
       "name": "yasnippet",
       "repo": "joaotavora/yasnippet",
       "ref": "master",
-	  "ignores":[".gitmodules"]
+      "ignores": [
+        ".gitmodules"
+      ]
     },
     {
       "name": "shell-maker",
       "repo": "xenodium/shell-maker",
       "ref": "master",
-	  "ignores":["demos/"]
+      "ignores": [
+        "demos/"
+      ]
     },
     {
       "name": "acp",
@@ -233,6 +258,31 @@
       "name": "ran",
       "manual": true,
       "note": "个人工具集合"
+    },
+    {
+      "name": "vertico",
+      "repo": "minad/vertico",
+      "ref": "main"
+    },
+    {
+      "name": "consult",
+      "repo": "minad/consult",
+      "ref": "main"
+    },
+    {
+      "name": "orderless",
+      "repo": "oantolin/orderless",
+      "ref": "master"
+    },
+    {
+      "name": "marginalia",
+      "repo": "minad/marginalia",
+      "ref": "main"
+    },
+    {
+      "name": "compat",
+      "repo": "emacs-compat/compat",
+      "ref": "main"
     }
   ]
 }

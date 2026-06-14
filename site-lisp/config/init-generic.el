@@ -25,7 +25,7 @@
 (setq select-enable-clipboard t)        ;支持emacs和外部程序的粘贴
 (setq split-width-threshold nil)        ;分屏的时候使用上下分屏
 (setq confirm-kill-processes nil)       ;退出自动杀掉进程
-(setq async-bytecomp-allowed-packages nil) ;避免magit报错
+(setq async-bytecomp-allowed-packages nil) ;避免 async 字节编译冲突
 (setq word-wrap-by-category t)             ;按照中文折行
 (setq profiler-report-cpu-line-format ;让 profiler-report 第一列宽一点
       '((24 right ((19 right)

@@ -1,0 +1,42 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
+
+;;; Compat — 必须先于 vertico/consult/marginalia 加载
+;; 强制使用 extensions/ 下的新版 compat，避免加载 Emacs 内置旧版
+(let ((compat-dir (expand-file-name "extensions/compat" my-emacs-root-dir)))
+  (when (file-directory-p compat-dir)
+    (add-to-list 'load-path compat-dir)
+    ;; 清除内置 compat 的 feature 标记，强制重新加载新版
+    (setq features (delq 'compat features))
+    (require 'compat)))
+
+;;; Vertico — 垂直候选 UI
+(require 'vertico)
+(vertico-mode 1)
+(setq vertico-count 15)
+(setq vertico-resize nil)
+(setq vertico-cycle t)
+
+;;; Orderless — 空格分隔无序匹配
+(require 'orderless)
+(setq completion-styles '(orderless basic))
+(setq completion-category-defaults nil)
+(setq completion-category-overrides '((file (styles partial-completion))
+                                      (buffer (styles partial-completion))))
+
+;;; Savehist — 历史持久化
+(require 'savehist)
+(savehist-mode 1)
+(setq history-length 500)
+(setq history-delete-duplicates t)
+(setq savehist-save-minibuffer-history t)
+
+;;; Marginalia — 候选注解
+(require 'marginalia)
+(marginalia-mode 1)
+
+;;; Consult 配置
+(require 'consult)
+(setq consult-ripgrep-args
+      "rg --null --line-buffered --color=never --max-columns=512 --no-heading --line-number -i")
+
+(provide 'init-vertico)

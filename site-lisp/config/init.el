@@ -111,7 +111,7 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
     (require 'init-awesome-tab)    ; 标签栏
     (require 'init-awesome-tray)   ; 状态栏
     (require 'init-key)            ; 按键绑定
-    (require 'init-ivy)            ; 补全框架
+    (require 'init-vertico)        ; 补全框架
 
     ;; === 增量加载：用户空闲时逐包加载 ===
     ;; Ref: Doom Emacs modules/doom/init.el:652-695

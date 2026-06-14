@@ -312,12 +312,6 @@
    ("C-=" . er/expand-region))
  "expand-region")
 
-;;; ### Magit ###
-(lazy-load-global-keys
- '(
-   ("C-c m" . magit-status+))
- "init-git")
-
 ;;; --- Shell 与终端 ---
 
 ;;; ### Aweshell ###
@@ -335,13 +329,6 @@
    ("DEL" . isearch-del-char)
    ("M-o" . isearch-del-char))
  isearch-mode-map)
-
-;; (lazy-load-global-keys
-;;  '(
-;;    ("C-}" . counsel-etags-find-tag)
-;;    ("C-]" . counsel-etags-find-tag-at-point)
-;;    ("C-c M-i" . ran-counsel-imenu))
-;;  "init-etags")
 
 ;;; --- 代码导航 ---
 
@@ -368,11 +355,11 @@
  "init-ffip"
  "C-c")
 
-;;; --- Counsel/Ivy 补全 ---
+;;; --- Vertico/Consult 补全 ---
 
 ;;; ### Unset key ###
 (lazy-load-unset-keys                   ; 全局按键卸载
- '("C-x C-f" "M-x" "C-x b" "M-y"))
+ '("C-x C-f" "M-x" "C-x b" "M-y" "C-c M-d" "C-c M-f"))
 
 (lazy-load-global-keys
  '(("C-c c z" . zlua-jump-to-directory))
@@ -383,17 +370,14 @@
 
 (lazy-load-global-keys
  '(
-   ("C-x C-f" . counsel-find-file)
-   ("M-x" . counsel-M-x)
-   ("M-y" . counsel-yank-pop)
-   ("C-c M-l" . counsel-locate)
-   ("C-c M-d" . counsel-dired-jump)
-   ("C-c M-e" . counsel-find-file-extern)
-   ("C-c M-f" . counsel-recentf)
-   ;; ("C-c M-i" . counsel-semantic-or-imenu)
-   ("C-x b" . ivy-switch-buffer)
-   ("C-c c s" . swiper-isearch)
+   ("C-x C-f" . find-file)
+   ("M-x" . execute-extended-command)
+   ("M-y" . consult-yank-pop)
+   ("C-c M-d" . dired-jump)
+   ("C-c M-f" . consult-recent-file)
+   ("C-x b" . switch-to-buffer)
+   ("C-c c s" . consult-line)
    )
- "init-ivy")
+ "init-vertico")
 
 (provide 'init-key)

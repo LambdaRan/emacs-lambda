@@ -2,7 +2,6 @@
 
 (require 'init-const)
 (require 'find-file-in-project)
-(require 'ivy)
 
 ;; config
 ;; use fd instread find

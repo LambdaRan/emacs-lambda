@@ -96,9 +96,6 @@
                'calc-mode-hook            ;计算器模式
                'gnus-article-mode-hook    ;Gnus 文章模式
                'gnus-kill-file-mode       ;Gnus 删除文件模糊
-               'magit-process-mode-hook
-               'magit-diff-mode-hook
-               'magit-status-mode-hook
                ))
   (add-hook hook
             #'(lambda ()
