@@ -39,4 +39,19 @@
 (setq consult-ripgrep-args
       "rg --null --line-buffered --color=never --max-columns=512 --no-heading --line-number -i")
 
+;; M-x 自动添加 ^ 前缀，始终从命令名开头匹配
+(defvar my-mx-anchored t "M-x 是否默认从命令名开头匹配。")
+(define-advice read-extended-command (:around (orig-fn &rest args) my-anchor-prefix)
+  (if my-mx-anchored
+      (minibuffer-with-setup-hook (lambda () (insert "^"))
+        (apply orig-fn args))
+    (apply orig-fn args)))
+
+;;; 外观调整
+(custom-set-faces
+ ;; 选择高亮不延伸到窗口右边缘
+ '(vertico-current ((t (:inherit highlight :extend nil))))
+ ;; 未打开的文件（recentf 历史）显示为灰色
+ '(consult-file ((t (:inherit shadow)))))
+
 (provide 'init-vertico)

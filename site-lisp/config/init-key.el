@@ -375,7 +375,7 @@
    ("M-y" . consult-yank-pop)
    ("C-c M-d" . dired-jump)
    ("C-c M-f" . consult-recent-file)
-   ("C-x b" . switch-to-buffer)
+   ("C-x b" . consult-buffer)
    ("C-c c s" . consult-line)
    )
  "init-vertico")
