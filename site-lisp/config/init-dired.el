@@ -16,15 +16,12 @@
 (setq my-dired-omit-regexp "^\\.?#\\|^\\..*") ;设置忽略文件的匹配正则表达式
 (setq dired-omit-verbose nil)                 ; 不显示message
 (setq my-dired-omit-extensions '(".cache" ".BIN" ".Msi")) ;设置忽略文件的扩展名列表
-(add-hook 'dired-after-readin-hook #'(lambda ()
-                                       (progn
-                                         (require 'dired-extension)
-                                         (dired-sort-method)))) ;先显示目录, 然后显示文件
 (add-hook 'dired-mode-hook
+          #'(lambda () (require 'dired-extension)))
+(add-hook 'dired-after-readin-hook
           #'(lambda ()
-              (require 'dired-extension)
               (dired-omit-method)                 ;隐藏文件的方法
-              ))
+              (dired-sort-method)))               ;先显示目录, 然后显示文件
 
 ;; 隐藏详细信息，按左括号键'('切换状态
 (add-hook 'dired-after-readin-hook #'dired-hide-details-mode)

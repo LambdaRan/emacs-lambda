@@ -51,15 +51,10 @@
     ))
 
 
-(dolist (hook (list
-               'c-mode-hook
-               'c++-mode-hook
-               'c-mode-common-hook
-               ))
-  (add-hook hook
-            #'(lambda ()
+(add-hook 'c-mode-common-hook
+          #'(lambda ()
+              (unless (eq major-mode 'java-mode)
                 (require 'cc-mode)
-                ;; (require 'c-eldoc)
                 (require 'modern-cpp-font-lock)
                 (require 'google-c-style)
                 (c-mode-style-setup))))

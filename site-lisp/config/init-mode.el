@@ -58,7 +58,7 @@
 
 ;;; ### Auto-fill ###
 ;;; --- 自动换行
-(setq default-fill-column 120)          ;默认显示 100列就换行
+(setq default-fill-column 120)          ;默认 120 列就换行
 (dolist (hook (list
                'after-text-mode-hook
                'message-mode-hook
@@ -66,15 +66,10 @@
                ))
   (add-hook hook #'(lambda () (auto-fill-mode 1))))
 
-(dolist (hook (list
-               'emacs-lisp-mode-hook
-               ))
-  (add-hook hook
-            #'(lambda ()
-                ;; Elisp 缩进
-                (require 'sly-el-indent)
-                (sly-el-indent-setup)
-                )))
+(add-hook 'emacs-lisp-mode-hook
+          (lambda ()
+            (require 'sly-el-indent)
+            (sly-el-indent-setup)))
 
 (with-eval-after-load  'ielm
   (require 'elispfl)

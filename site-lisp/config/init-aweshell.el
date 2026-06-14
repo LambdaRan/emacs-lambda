@@ -14,7 +14,7 @@
     (epe-colorize-with-face (if (= (user-uid) 0) "#" "") 'epe-sudo-symbol-face)
     " "))
 
-(with-eval-after-load "esh-opt"
+(with-eval-after-load 'esh-opt
   (setq eshell-highlight-prompt nil
         eshell-prompt-function #'epe-theme-ran))
 

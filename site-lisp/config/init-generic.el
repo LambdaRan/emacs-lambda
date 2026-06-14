@@ -10,7 +10,10 @@
 (setq jit-lock-defer-time 0.05)
 ;; Restore emacs session.
 (setq initial-buffer-choice t)
-(run-with-timer 1 nil #'(lambda () (when (equal (buffer-name) "*scratch*") (bury-buffer))))
+(run-with-timer 1 nil (lambda ()
+  (let ((buf (get-buffer "*scratch*")))
+    (when (eq (current-buffer) buf)
+      (bury-buffer)))))
 
 (fset 'yes-or-no-p #'y-or-n-p)           ;以 y/n代表 yes/no
 (setq use-dialog-box nil)               ;never pop dialog
