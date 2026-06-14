@@ -64,15 +64,30 @@
 ;; Speed up startup
 (setq auto-mode-case-fold nil)
 
+;; Ref: Doom Emacs modules/doom/init.el:303-307
+;; 将 gcmh 激活延迟到首次打开文件时，减少启动开销。
+(setq gcmh-idle-delay 5
+      gcmh-high-cons-threshold #x1000000) ; 16MB
+
+(defun my-enable-gcmh-once ()
+  "首次打开文件时启用 gcmh，然后移除此 hook。"
+  (require 'gcmh)
+  (gcmh-mode 1)
+  (remove-hook 'find-file-hook #'my-enable-gcmh-once))
+(add-hook 'find-file-hook #'my-enable-gcmh-once)
+
+;; Ref: Doom Emacs doom.el:555-558
+;; GC 安全网：如果 gcmh 加载失败或 GC 值在启动后仍极高，强制恢复到合理值以防止内存膨胀。
 (add-hook 'emacs-startup-hook
           #'(lambda ()
-              "Recover GC values after startup."
+              "启动后恢复 GC 值，含安全网。"
               (setq gc-cons-threshold 800000
                     gc-cons-percentage 0.1)
-              (require 'gcmh)
-              ;; Garbage Collector Magic Hack
-              (setq gcmh-idle-delay 5
-                    gcmh-high-cons-threshold #x1000000) ; 16MB              
-              (gcmh-mode 1)))
+              ;; 安全网：如果 GC 阈值仍然极高（如 gcmh 未加载成功），强制降回 16MB。
+              (when (= gc-cons-threshold most-positive-fixnum)
+                (setq gc-cons-threshold (* 16 1024 1024))) ; 16MB
+              (when (= gc-cons-percentage 0.5)
+                (setq gc-cons-percentage 0.1)))
+          100) ; 低优先级，最后执行
 
 (provide 'init-accelerate)
