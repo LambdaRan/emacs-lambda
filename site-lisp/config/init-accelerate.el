@@ -81,13 +81,17 @@
 (add-hook 'emacs-startup-hook
           #'(lambda ()
               "启动后恢复 GC 值，含安全网。"
-              (setq gc-cons-threshold 800000
-                    gc-cons-percentage 0.1)
-              ;; 安全网：如果 GC 阈值仍然极高（如 gcmh 未加载成功），强制降回 16MB。
-              (when (= gc-cons-threshold most-positive-fixnum)
-                (setq gc-cons-threshold (* 16 1024 1024))) ; 16MB
-              (when (= gc-cons-percentage 0.5)
-                (setq gc-cons-percentage 0.1)))
+              (cond
+               ;; gcmh 已生效，不干预，由 gcmh 自行管理 GC 阈值
+               ((bound-and-true-p gcmh-mode))
+               ;; gcmh 未加载且 GC 阈值仍极高，降回 16MB 安全值
+               ((>= gc-cons-threshold most-positive-fixnum)
+                (setq gc-cons-threshold (* 16 1024 1024)
+                      gc-cons-percentage 0.1))
+               ;; gcmh 未加载，GC 阈值已恢复，设置合理默认值
+               (t
+                (setq gc-cons-threshold 800000
+                      gc-cons-percentage 0.1))))
           100) ; 低优先级，最后执行
 
 (provide 'init-accelerate)

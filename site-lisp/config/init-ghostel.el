@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; coding: utf-8; -*-
 ;;; init-ghostel.el --- Configuration for ghostel
 
 ;;; Require

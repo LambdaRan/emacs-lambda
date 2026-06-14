@@ -49,7 +49,8 @@ assistant.py         → 包管理器（从 GitHub Archive 同步）
 2. `site-lisp/start.el` — require `init`
 3. `site-lisp/config/init.el` — 主配置协调器：
    - **同步加载**核心模块（字体、主题、按键、tab、tray、ivy 等）
-   - 通过 `run-with-idle-timer`（1秒）**延迟加载**：company-mode、vterm、agent-shell、ghostel、语言配置（C、ran-toolkit）、session 恢复
+   - 通过自定义 `my-load-packages-incrementally`（0.2s 间隔）在空闲间隙**增量加载**：高亮、行号、导航、编辑工具、搜索、session 恢复等
+   - **lazy-load 延迟加载**：agent-shell 配置随增量加载器加载（轻量），但 acp/agent-shell 重型包通过 `with-eval-after-load` + stub 延迟到首次调用时才加载
 4. `init-const.el` — 平台检测常量（`sys/windows-p`、`sys/linux-p`、`sys/mac-p`）和目录路径
 5. `init-accelerate.el` — 启动性能调优（GC 延迟、字体缓存、bidi、Windows IO 优化、gcmh）
 
@@ -57,7 +58,7 @@ assistant.py         → 包管理器（从 GitHub Archive 同步）
 
 - 配置模块命名：`site-lisp/config/init-<feature>.el`
 - 每个配置模块自包含：require 依赖、配置包、provide 自身
-- 延迟加载使用 `lazy-load` 宏（不用 `use-package`）
+- 延迟加载使用 `lazy-load` 宏（不用 `use-package`）；重型模块（如 agent-shell）使用 `with-eval-after-load` + autoload stub 实现按需加载
 - 平台判断使用 `init-const.el` 中的 `sys/windows-p`、`sys/mac-p`、`sys/linux-p`
 - 根目录变量：`my-emacs-root-dir`（site-lisp/），配置目录：`my-emacs-config-dir`
 - 所有 `.el` 文件使用 `lexical-binding: t` 和 `utf-8` 编码

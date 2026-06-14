@@ -1,4 +1,5 @@
-;;; init-fingertip.el --- Fingertip configuration
+;;; -*- lexical-binding: t; coding: utf-8; -*-
+;;; init-fingertip.el --- Fingertip configuration 
 
 ;; Filename: init-fingertip.el
 ;; Description: Fingertip configuration

@@ -35,8 +35,7 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
                                 (require req nil t)
                                 t)))
                      (push req packages))  ; 用户正在操作，重新入队
-              (error (message "增量加载 %S 失败: %s" req e)
-                     (setq packages nil)))
+              (error (message "增量加载 %S 失败: %s" req e)))
             (if (null packages)
                 nil  ; 全部加载完成
               (run-at-time (if idle-time
@@ -136,10 +135,9 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
                      init-info
                      init-c
                      ran-toolkit
-                     ;; 第四批：重型模块（终端、AI）
+                     ;; 第四批：重型模块（终端、AI 配置）
                      init-agent-shell
                      init-ghostel
-                     init-idle
                      ;; 最后恢复会话
                      init-session)
                    t)))

@@ -10,14 +10,27 @@
 
 ;; 跳过 VCS ignore 文件（.gitignore 等），但保留 .rgignore 和 .ignore
 ;; 适用于 SVN 管理的项目中 .gitignore 忽略了所有文件的情况
-(defun color-rg-build-command@inject-no-ignore-vcs (orig-fn &rest args)
-  "Inject --no-ignore-vcs into rg command to skip .gitignore but keep .rgignore."
-  (let ((cmd (apply orig-fn args)))
-    (replace-regexp-in-string "\\`rg " "rg --no-ignore-vcs " cmd)))
+;; PCRE2 正则搜索支持（支持 lookahead/lookbehind）
+;; GBK 编码搜索支持
+(defvar color-rg--search-pcre nil
+  "When non-nil, inject '-P' (PCRE2) into rg command.")
 
-(advice-add #'color-rg-build-command :around #'color-rg-build-command@inject-no-ignore-vcs)
-;; (when (eq system-type 'windows-nt)
-;;   (setq color-rg-command-prefix "powershell"))
+(defvar color-rg--search-encoding nil
+  "When non-nil, inject '-E ENCODING' into rg command.")
+
+(defun color-rg-build-command@inject-flags (orig-fn &rest args)
+  "一次性注入 --no-ignore-vcs、PCRE2、encoding 参数。
+合并原有的三层 advice 链，避免顺序依赖和正则匹配脆弱问题。"
+  (let ((cmd (apply orig-fn args))
+        (extra " --no-ignore-vcs"))
+    (when color-rg--search-pcre
+      (setq extra (concat extra " -P")))
+    (when color-rg--search-encoding
+      (setq extra (concat extra (format " -E %s" color-rg--search-encoding))))
+    ;; 在 rg 命令后一次性注入所有额外参数
+    (replace-regexp-in-string "\\`rg\\b" (concat "rg" extra) cmd)))
+
+(advice-add #'color-rg-build-command :around #'color-rg-build-command@inject-flags)
 
 (defcustom color-rg-project-root nil
   "If non-nil, overrides the project root directory location."
@@ -70,19 +83,6 @@
   ;; (advice-remove #'color-rg-get-match-buffer #'color-rg-get-match-buffer@override)
 )
 
-;; PCRE2 正则搜索支持（支持 lookahead/lookbehind）
-(defvar color-rg--search-pcre nil
-  "When non-nil, inject '-P' (PCRE2) into rg command.")
-
-(defun color-rg-build-command@inject-pcre (orig-fn &rest args)
-  "Inject PCRE2 flag when `color-rg--search-pcre' is set."
-  (let ((cmd (apply orig-fn args)))
-    (if color-rg--search-pcre
-        (replace-regexp-in-string "\\`rg " "rg -P " cmd)
-      cmd)))
-
-(advice-add #'color-rg-build-command :around #'color-rg-build-command@inject-pcre)
-
 ;;;###autoload
 (defun color-rg-search-input-pcre (&optional keyword directory)
   "Search with PCRE2 regexp (supports lookahead/lookbehind)."
@@ -96,20 +96,6 @@
   (interactive)
   (let ((color-rg--search-pcre t))
     (color-rg-search-project)))
-
-;; GBK 编码搜索支持
-(defvar color-rg--search-encoding nil
-  "When non-nil, inject '-E ENCODING' into rg command.")
-
-(defun color-rg-build-command@inject-encoding (orig-fn &rest args)
-  "Inject encoding flag into rg command when `color-rg--search-encoding' is set."
-  (let ((cmd (apply orig-fn args)))
-    (if color-rg--search-encoding
-        (replace-regexp-in-string
-         "\\`rg " (format "rg -E %s " color-rg--search-encoding) cmd)
-      cmd)))
-
-(advice-add #'color-rg-build-command :around #'color-rg-build-command@inject-encoding)
 
 ;;;###autoload
 (defun color-rg-search-input-gbk (&optional keyword directory)
