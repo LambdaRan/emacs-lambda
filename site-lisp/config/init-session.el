@@ -3,8 +3,6 @@
 
 (require 'auto-save)
 
-;;; Code:
-
 (setq desktop-load-locked-desktop t) ; don't popup dialog ask user, load anyway
 (setq desktop-restore-frames nil)    ; don't restore any frame
 
@@ -34,7 +32,16 @@
     (es-kill-unused-buffers)
     ;; Restore session.
     (desktop-read (expand-file-name user-emacs-directory))
-    ))
+    ;; 清理 Minibuf-0：awesome-tray 向其中写入了 tray 文本，
+    ;; desktop-read 可能将该非空 buffer 恢复到窗口中，导致 tray 显示在顶部。
+    (when (get-buffer " *Minibuf-0*")
+      (with-current-buffer " *Minibuf-0*"
+        (delete-region (point-min) (point-max))))
+    ;; 如果 *Minibuf-0* 被显示在某个窗口中，替换为 *scratch*
+    (dolist (win (window-list))
+      (when (equal (buffer-name (window-buffer win)) " *Minibuf-0*")
+        (with-selected-window win
+          (switch-to-buffer "*scratch*"))))))
 
 (defun emacs-session-save (&optional no-quit)
   "Save emacs session and quit.
@@ -51,5 +58,3 @@ With prefix argument (C-u), save without quitting."
     (kill-emacs)))
 
 (provide 'init-session)
-
-;;; init-session.el ends here
