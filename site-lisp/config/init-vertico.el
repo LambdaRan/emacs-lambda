@@ -53,6 +53,9 @@
         (apply orig-fn args))
     (apply orig-fn args)))
 
+;; consult-buffer 禁用实时预览，确认选中后才切换
+(consult-customize consult-buffer :preview-key nil)
+
 ;;; 外观调整
 (custom-set-faces
  ;; 选择高亮：深蓝背景（与 ivy 一致），不延伸到窗口右边缘
