@@ -15,6 +15,9 @@
 (defvar my-incremental-idle-timer 0.2
   "每两个包之间的空闲秒数。加载完一个包后，等多久加载下一个。")
 
+(defvar my-init-start-time (current-time)
+  "Emacs 初始化开始时间，用于计算从启动到所有包加载完成的总耗时。")
+
 (defun my-load-packages-incrementally (packages &optional now)
   "在空闲间隙逐个加载 PACKAGES。
 NOW 非 nil 时立即开始加载，否则注册待后续加载。"
@@ -37,7 +40,12 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
                      (push req packages))  ; 用户正在操作，重新入队
               (error (message "增量加载 %S 失败: %s" req e)))
             (if (null packages)
-                nil  ; 全部加载完成
+                ;; 全部加载完成，打印总耗时
+                (message "All packages loaded in %.2f seconds (init %.2fs + lazy %.2fs), %d GCs."
+                         (float-time (time-subtract (current-time) my-init-start-time))
+                         (float-time (time-subtract after-init-time before-init-time))
+                         (float-time (time-subtract (current-time) after-init-time))
+                         gcs-done)
               (run-at-time (if idle-time
                                my-incremental-idle-timer
                              my-incremental-first-idle-timer)
