@@ -58,9 +58,9 @@
 
 ;;; 外观调整
 (custom-set-faces
- ;; 选择高亮：浅蓝背景，不延伸到窗口右边缘
- '(vertico-current ((t (:background "#C3E8FF" :foreground "#1B2229" :extend nil))))
- ;; 未打开的文件（recentf 历史）显示为灰色
- '(consult-file ((t (:inherit shadow)))))
+ ;; 选择高亮：深蓝背景，不延伸到窗口右边缘
+ '(vertico-current ((t (:background "#2257A0" :foreground "#FAFAFA" :extend nil))))
+ ;; 未打开的文件（recentf 历史）显示为深蓝灰 + 斜体
+ '(consult-file ((t (:foreground "#353a42" :slant italic)))))
 
 (provide 'init-vertico)
