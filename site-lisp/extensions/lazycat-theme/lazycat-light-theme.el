@@ -201,7 +201,7 @@ determine the exact padding."
 
    (font-lock-comment-face
     :foreground comments
-    :background (if lazycat-light-comment-bg (lazycat-lighten bg 0.05)))
+    :background (if lazycat-light-comment-bg (lazycat-lighten bg 0.05) 'unspecified))
    (font-lock-doc-face
     :inherit 'font-lock-comment-face
     :foreground doc-comments)

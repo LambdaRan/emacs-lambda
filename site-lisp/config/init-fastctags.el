@@ -24,7 +24,8 @@
 
 (with-eval-after-load 'fastctags
   (require 'semantic/fw)
-  (require 'consult))
+  (require 'consult)
+  (require 'consult-imenu))
 
 (defun ran-fastctags-imenu()
   "List all imenu tag with consult-imenu or imenu."

@@ -56,10 +56,17 @@
 ;; consult-buffer 禁用实时预览，确认选中后才切换
 (consult-customize consult-buffer :preview-key nil)
 
+;;; Vertico Multiform — 按命令定制排序等属性
+(require 'vertico-multiform)
+;; consult-buffer 关闭重新排序，保留 buffer 自带的最近访问顺序
+(setq vertico-multiform-commands
+      '((consult-buffer (vertico-sort-function . nil))))
+(vertico-multiform-mode 1)
+
 ;;; 外观调整
 (custom-set-faces
- ;; 选择高亮：深蓝背景，不延伸到窗口右边缘
- '(vertico-current ((t (:background "#2257A0" :foreground "#FAFAFA" :extend nil))))
+ ;; 选择高亮：深蓝背景 + distant-foreground 确保所有候选文字在选中时清晰可读
+ '(vertico-current ((t (:background "#2257A0" :foreground "#FAFAFA" :distant-foreground "#FAFAFA" :extend nil))))
  ;; 未打开的文件（recentf 历史）：浅灰蓝 + 斜体，与主文字 #383a42 明显区分
  '(consult-file ((t (:foreground "#73797e" :slant italic)))))
 

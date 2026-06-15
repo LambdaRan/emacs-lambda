@@ -242,7 +242,9 @@ Optional argument REVERSED default is move next line, if reversed is non-nil mov
   (save-excursion
     (indent-region (point-min) (point-max) nil)
     (delete-trailing-whitespace)
-    (untabify (point-min) (point-max))))
+    (if indent-tabs-mode
+        (tabify (point-min) (point-max))
+      (untabify (point-min) (point-max)))))
 
 (defun indent-comment-buffer ()
   "Indent comment of buffer."

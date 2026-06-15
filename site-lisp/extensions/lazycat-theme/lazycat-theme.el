@@ -320,7 +320,7 @@ theme face specs. These is a simplified spec. For example:
     (lazycat-visual-bell :background error)
 
     ;; --- base faces -------------------------
-    (bold        :weight 'bold :foreground (unless bold base8))
+    (bold        :weight 'bold :foreground 'unspecified)
     (italic      :slant  'italic)
     (bold-italic :inherit '(bold italic))
 
@@ -376,11 +376,11 @@ theme face specs. These is a simplified spec. For example:
     ;; 2. All other line number plugin faces should &inherit from these.
     (line-number
      :inherit 'default
-     :foreground base5 :distant-foreground nil
+     :foreground base5 :distant-foreground 'unspecified
      :weight 'normal :italic nil :underline nil :strike-through nil)
     (line-number-current-line
      :inherit '(hl-line default)
-     :foreground fg :distant-foreground nil
+     :foreground fg :distant-foreground 'unspecified
      :weight 'normal :italic nil :underline nil :strike-through nil)
 
 
@@ -715,8 +715,8 @@ theme face specs. These is a simplified spec. For example:
      (&dark  :foreground (lazycat-darken fg 0.12))
      (&light :foreground (lazycat-lighten fg 0.12)))
     (diff-removed :foreground red :background base3)
-    (diff-header  :foreground cyan :background nil)
-    (diff-file-header :foreground blue :background nil)
+    (diff-header  :foreground cyan :background 'unspecified)
+    (diff-file-header :foreground blue :background 'unspecified)
     (diff-hunk-header :foreground violet)
     (diff-refine-added   :inherit 'diff-added :inverse-video t)
     (diff-refine-changed :inherit 'diff-changed :inverse-video t)
