@@ -60,7 +60,7 @@
 (custom-set-faces
  ;; 选择高亮：深蓝背景，不延伸到窗口右边缘
  '(vertico-current ((t (:background "#2257A0" :foreground "#FAFAFA" :extend nil))))
- ;; 未打开的文件（recentf 历史）显示为深蓝灰 + 斜体
- '(consult-file ((t (:foreground "#353a42" :slant italic)))))
+ ;; 未打开的文件（recentf 历史）显示为深灰 + 斜体
+ '(consult-file ((t (:foreground "#595959" :slant italic)))))
 
 (provide 'init-vertico)
