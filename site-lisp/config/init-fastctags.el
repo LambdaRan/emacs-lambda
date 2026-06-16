@@ -27,40 +27,13 @@
   (require 'consult)
   (require 'consult-imenu))
 
-(defun ran-fastctags-imenu ()
-  "List all imenu tags with consult-imenu or imenu.
-The symbol at point is pre-filled as initial input in the minibuffer."
+(defun ran-fastctags-imenu()
+  "List all imenu tag with consult-imenu or imenu."
   (interactive)
   (if (and (not (semantic-active-p))
            (null (ignore-errors (imenu--make-index-alist))))
       (call-interactively 'imenu)
-    (let* ((items (consult-imenu--items-safe))
-           (initial (thing-at-point 'symbol)))
-      (consult-imenu--deduplicate items)
-      (consult-imenu--jump
-       (consult--read
-        (or items (user-error "Imenu is empty"))
-        :state
-        (let ((preview (consult--jump-preview)))
-          (lambda (action cand)
-            (funcall preview action
-                     (and (markerp (cdr cand)) (cdr cand)))))
-        :narrow
-        (when-let* ((narrow (consult-imenu--narrow)))
-          (list :predicate
-                (lambda (cand)
-                  (eq (get-text-property 0 'consult--type (car cand))
-                      consult--narrow))
-                :keys narrow))
-        :group (consult-imenu--group)
-        :prompt "Go to item: "
-        :require-match t
-        :category 'imenu
-        :lookup #'consult--lookup-cons
-        :history 'consult-imenu--history
-        :add-history initial
-        :initial initial
-        :sort nil)))))
+    (call-interactively 'consult-imenu)))
 
 (defun fastctags-nav-find-tag-at-point-in-specific-directory ()
   "Find tag using tagname at point, selecting from specific tags files.
