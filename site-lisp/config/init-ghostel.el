@@ -10,7 +10,8 @@
 (setq ghostel-enable-url-detection t)
 ;; 文件引用检测
 (setq ghostel-enable-file-detection t)
-(setq ghostel-shell "pwsh.exe")
+(when sys/windows-p 
+  (setq ghostel-shell "pwsh.exe")) 
 (setq ghostel-term "xterm-ghostty")
 
 (lazy-load-unset-keys

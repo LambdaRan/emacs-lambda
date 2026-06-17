@@ -3,9 +3,10 @@
 
 (require 'go-mode)
 
-(defun go-run-buffer()
+(defun go-run-buffer ()
+  "Run current Go file using `compile' (non-blocking)."
   (interactive)
-  (shell-command (concat "go run " (buffer-file-name))))
+  (compile (concat "go run " (shell-quote-argument (buffer-file-name)))))
 
 (lazy-load-unset-keys
  '("C-k" "M-o")

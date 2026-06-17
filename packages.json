@@ -19,11 +19,6 @@
       ]
     },
     {
-      "name": "company-mode",
-      "repo": "company-mode/company-mode",
-      "ref": "master"
-    },
-    {
       "name": "dash",
       "repo": "magnars/dash.el",
       "ref": "master"
@@ -94,7 +89,8 @@
     {
       "name": "benchmark-init",
       "repo": "dholm/benchmark-init-el",
-      "ref": "master"
+      "ref": "master",
+      "note": "按需启动分析工具，init.el 中已注释，非自动加载"
     },
     {
       "name": "sly-el-indent",
@@ -282,6 +278,16 @@
     {
       "name": "compat",
       "repo": "emacs-compat/compat",
+      "ref": "main"
+    },
+    {
+      "name": "corfu",
+      "repo": "minad/corfu",
+      "ref": "main"
+    },
+    {
+      "name": "cape",
+      "repo": "minad/cape",
       "ref": "main"
     }
   ]

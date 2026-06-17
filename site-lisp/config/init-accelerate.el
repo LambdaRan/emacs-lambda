@@ -36,8 +36,8 @@
 ;; fonts that are larger than the system default (which would resize the frame).
 
 ;; Increase how much is read from processes in a single chunk (default is 4kb).
-;; This is further increased elsewhere, where needed (like our LSP module).
-(setq read-process-output-max (* 64 1024))  ; 64kb
+;; 1MB：agent-shell 跑 Claude Code 等大输出进程时减少读次数（项目无 LSP，按最大输出场景设）。
+(setq read-process-output-max (* 1 1024 1024))  ; 1MB
 ;; 增加IO性能
 (setq process-adaptive-read-buffering nil)
 
@@ -77,21 +77,23 @@
 (add-hook 'find-file-hook #'my-enable-gcmh-once)
 
 ;; Ref: Doom Emacs doom.el:555-558
-;; GC 安全网：如果 gcmh 加载失败或 GC 值在启动后仍极高，强制恢复到合理值以防止内存膨胀。
-(defun my-gcmh-fallback ()
-  "启动后恢复 GC 值，含安全网。"
+;; 启动时 GC 恢复：early-init 把 gc-cons-threshold 设为 most-positive-fixnum 加速启动，
+;; 而 gcmh 被延迟到首次 find-file 才激活，故此处（emacs-startup-hook）必须先把阈值
+;; 降回 16MB 作为安全默认，gcmh 随后接管并自行管理阈值。这是主路径，非"兜底"。
+(defun my-restore-gc-after-startup ()
+  "启动后恢复 GC 阈值；若 gcmh 已意外激活则不干预。"
   (cond
-   ;; gcmh 已生效，不干预，由 gcmh 自行管理 GC 阈值
+   ;; gcmh 已生效（理论上首次 find-file 前不应发生），交由 gcmh 管理
    ((bound-and-true-p gcmh-mode))
-   ;; gcmh 未加载且 GC 阈值仍极高，降回 16MB 安全值
+   ;; gcmh 尚未激活，启动期阈值仍为 most-positive-fixnum → 降回 16MB
    ((>= gc-cons-threshold most-positive-fixnum)
     (setq gc-cons-threshold (* 16 1024 1024)
           gc-cons-percentage 0.1))
-   ;; gcmh 未加载，GC 阈值已恢复，设置合理默认值
+   ;; 阈值已被别处恢复，设保守默认（防御性，正常不触发）
    (t
     (setq gc-cons-threshold 800000
           gc-cons-percentage 0.1))))
 
-(add-hook 'emacs-startup-hook #'my-gcmh-fallback 100) ; 低优先级，最后执行
+(add-hook 'emacs-startup-hook #'my-restore-gc-after-startup 100) ; 低优先级，靠后执行
 
 (provide 'init-accelerate)

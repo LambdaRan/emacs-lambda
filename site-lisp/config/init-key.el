@@ -243,7 +243,6 @@
 (lazy-load-global-keys
  '(
    ("C-x d" . dired-jump)
-   ("C-x C-f" . find-file)
    )
  "init-dired")
 

@@ -1,3 +1,4 @@
 .vscode
 .agent-shell
 .claude
+__pycache__/

@@ -129,9 +129,9 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
                    '(;; 第一批：视觉反馈（轻量，用户立即感知）
                      init-highlight-parentheses
                      init-line-number
-                     init-company-mode
                      init-fingertip
                      ;; 第二批：导航与编辑（用户高频操作）
+                     init-corfu                       ; 补全（corfu+cape，先于批次3的 fastctags，保证 cape 就绪）
                      init-dired
                      init-one-key
                      init-vi-navigate

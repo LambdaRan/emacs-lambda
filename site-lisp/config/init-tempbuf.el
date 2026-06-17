@@ -95,7 +95,7 @@
                'Info-mode-hook            ;Info 模式
                'calc-mode-hook            ;计算器模式
                'gnus-article-mode-hook    ;Gnus 文章模式
-               'gnus-kill-file-mode       ;Gnus 删除文件模糊
+               'gnus-summary-mode-hook    ;Gnus 摘要模式
                ))
   (add-hook hook
             #'(lambda ()

@@ -7,7 +7,8 @@
 (setq frame-title-format "Emacs")
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
-(setq jit-lock-defer-time 0.05)
+;; 现代 Emacs (29+) jit-lock 已足够快，即时字体化（nil）比 defer 0.05 更跟手、无闪烁。
+(setq jit-lock-defer-time nil)
 ;; Restore emacs session.
 (setq initial-buffer-choice t)
 (run-with-timer 1 nil (lambda ()
@@ -25,7 +26,6 @@
 (setq select-enable-clipboard t)        ;支持emacs和外部程序的粘贴
 (setq split-width-threshold nil)        ;分屏的时候使用上下分屏
 (setq confirm-kill-processes nil)       ;退出自动杀掉进程
-(setq async-bytecomp-allowed-packages nil) ;避免 async 字节编译冲突
 (setq word-wrap-by-category t)             ;按照中文折行
 (setq profiler-report-cpu-line-format ;让 profiler-report 第一列宽一点
       '((24 right ((19 right)
@@ -38,7 +38,10 @@
         (1 left "%s")
         (0 left)))
 (setq completion-auto-select nil)       ;避免默认自动选择
-(setq ad-redefinition-action 'accept)   ; 不要烦人的 redefine warning
+(setq ad-redefinition-action 'accept)   ; 启动期间不显示 redefine warning
+(add-hook 'emacs-startup-hook
+          (lambda () (setq ad-redefinition-action 'warn))
+          90)                            ; 启动后恢复警告，便于排查问题
 (setq frame-resize-pixelwise t) ; 设置缩放的模式,避免Mac平台最大化窗口以后右边和下边有空隙
 (setq delete-by-moving-to-trash t)      ; 删除的文件移动到垃圾篓
 (setq switch-to-buffer-preserve-window-point t)
@@ -99,6 +102,8 @@
 (setq eval-expression-print-length nil) ;执行表达式的长度没有限制
 (setq eval-expression-print-level nil)  ;执行表达式的深度没有限制
 (setq read-quoted-char-radix 16)        ;引用字符的基数
+;; 显式枚举启用的字节编译告警类别（含 (not redefine)/(not cl-functions) 排除项）。
+;; 不改用 '(not obsolete) 之类的全开形式，避免 *Compile-Log* 被噪声淹没。
 (setq byte-compile-warnings
       '(
         free-vars                 ;不在当前范围的引用变量
@@ -139,7 +144,8 @@
 (setq echo-keystrokes 0.1)              ;加快快捷键提示的速度
 (setq one-key-popup-window nil)         ;禁止自动弹出窗口
 
-;; 包管理镜像
+;; 包管理镜像：package.el 已在启动时禁用（依赖由 assistant.py 管理），
+;; 此处仅作 M-x package-install / list-packages 手动后备时使用。
 (setq package-archives
       '(("gnu"   . "https://elpa.emacs-china.org/gnu/")
         ("melpa" . "https://elpa.emacs-china.org/melpa/")))

@@ -14,20 +14,28 @@ assistant.py - Emacs 依赖包管理助手
     python assistant.py add company-mode/company-mode
     python assistant.py add company-mode/company-mode --ref main --sync
     python assistant.py check
+
+同步策略:
+    - 按 branch ref 下载（archive/refs/heads/<ref>.zip），并发下载与解压（默认 6 并发）。
+    - 下载带超时与重试，解压防御 zip-slip。
 """
 
 import argparse
+import concurrent.futures
 import fnmatch
 import glob
 import io
 import json
 import os
-import re
 import shutil
 import sys
+import threading
+import time
 import urllib.request
-import urllib.error
 import zipfile
+
+if sys.version_info < (3, 9):
+    sys.exit("Error: assistant.py requires Python 3.9+ (uses str.removesuffix).")
 
 # Windows GBK 编码兼容
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -44,12 +52,20 @@ GLOBAL_IGNORES = [
     "*.gif", "*.png", "*.svg",
 ]
 
+STATUS_ICONS = {"success": "✅", "skipped": "⏭️", "failed": "❌"}
+
 # 脚本所在目录即为仓库根目录
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGES_JSON = os.path.join(SCRIPT_DIR, "packages.json")
 EXTENSIONS_DIR = os.path.join(SCRIPT_DIR, "site-lisp", "extensions")
 # 临时目录：项目同级目录下
 TEMP_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), os.path.basename(SCRIPT_DIR) + "_temp")
+
+# 同步并发度
+SYNC_MAX_WORKERS = 6
+# 下载超时与重试
+DOWNLOAD_TIMEOUT = 60
+DOWNLOAD_RETRIES = 3
 
 
 # ---------------------------------------------------------------------------
@@ -73,13 +89,43 @@ def save_packages(config):
 
 
 # ---------------------------------------------------------------------------
+# 下载
+# ---------------------------------------------------------------------------
+
+def download_with_retry(url, dest, retries=DOWNLOAD_RETRIES, timeout=DOWNLOAD_TIMEOUT):
+    """带超时与指数退避重试的下载。"""
+    last_err = None
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "assistant.py"})
+            with urllib.request.urlopen(req, timeout=timeout) as resp, open(dest, "wb") as out:
+                shutil.copyfileobj(resp, out)
+            return
+        except Exception as e:
+            last_err = e
+            if attempt < retries - 1:
+                time.sleep(1.5 ** attempt)   # 1s, 1.5s, 2.25s
+    raise last_err
+
+
+def safe_extract(zf, dest):
+    """解压 zip 并防御 zip-slip（路径逃逸）。"""
+    dest_real = os.path.realpath(dest)
+    for member in zf.infolist():
+        target = os.path.realpath(os.path.join(dest, member.filename))
+        if target != dest_real and not target.startswith(dest_real + os.sep):
+            raise ValueError(f"Unsafe path in archive (zip-slip): {member.filename}")
+    zf.extractall(dest)
+
+
+# ---------------------------------------------------------------------------
 # sync 子命令
 # ---------------------------------------------------------------------------
 
 def should_ignore(name, ignores):
-    """检查文件名是否匹配任意排除规则"""
+    """检查文件名是否匹配任意排除规则（大小写敏感，跨平台一致）。"""
     for pattern in ignores:
-        if fnmatch.fnmatch(name, pattern):
+        if fnmatch.fnmatchcase(name, pattern):
             return True
     return False
 
@@ -124,7 +170,7 @@ def copy_all_with_ignores(source_dir, target_dir, ignores):
 
 
 def sync_package(pkg, extensions_dir, temp_dir):
-    """同步单个包，返回 (status, message)"""
+    """同步单个包：按 branch ref 下载 → 解压 → 安装。返回 (status, message)。"""
     name = pkg["name"]
 
     if pkg.get("manual"):
@@ -141,14 +187,23 @@ def sync_package(pkg, extensions_dir, temp_dir):
 
     # 每个包使用独立的临时子目录
     if os.path.exists(pkg_temp):
-        shutil.rmtree(pkg_temp)
+        shutil.rmtree(pkg_temp, ignore_errors=True)
     os.makedirs(pkg_temp, exist_ok=True)
 
-    urllib.request.urlretrieve(url, os.path.join(pkg_temp, "pkg.zip"))
+    zip_path = os.path.join(pkg_temp, "pkg.zip")
+    try:
+        download_with_retry(url, zip_path)
+    except Exception as e:
+        return "failed", f"download: {e}"
 
-    with zipfile.ZipFile(os.path.join(pkg_temp, "pkg.zip"), "r") as zf:
-        zf.extractall(pkg_temp)
-    os.remove(os.path.join(pkg_temp, "pkg.zip"))
+    try:
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            safe_extract(zf, pkg_temp)
+    except Exception as e:
+        return "failed", f"extract: {e}"
+    finally:
+        if os.path.exists(zip_path):
+            os.remove(zip_path)
 
     extracted = None
     for entry in os.listdir(pkg_temp):
@@ -160,7 +215,7 @@ def sync_package(pkg, extensions_dir, temp_dir):
         return "failed", "no directory in archive"
 
     if os.path.exists(target_dir):
-        shutil.rmtree(target_dir)
+        shutil.rmtree(target_dir, ignore_errors=True)
     os.makedirs(target_dir, exist_ok=True)
 
     files = pkg.get("files")
@@ -197,17 +252,28 @@ def cmd_sync(args):
     os.makedirs(TEMP_DIR, exist_ok=True)
 
     results = {"success": 0, "skipped": 0, "failed": 0}
+    lock = threading.Lock()
 
-    for pkg in targets:
-        name = pkg["name"]
-        try:
-            status, msg = sync_package(pkg, EXTENSIONS_DIR, TEMP_DIR)
-        except Exception as e:
-            status, msg = "failed", str(e)
+    def emit(name, status, msg):
+        with lock:
+            results[status] += 1
+            print(f"{STATUS_ICONS[status]} {name:<20} {msg}")
 
-        results[status] += 1
-        icon = {"success": "✅", "skipped": "⏭️", "failed": "❌"}[status]
-        print(f"{icon} {name:<20} {msg}")
+    # 并发同步：每个包独立（独立临时目录、目标目录），无共享可变状态。
+    if targets:
+        workers = min(SYNC_MAX_WORKERS, len(targets))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+            future_map = {
+                ex.submit(sync_package, p, EXTENSIONS_DIR, TEMP_DIR): p
+                for p in targets
+            }
+            for fut in concurrent.futures.as_completed(future_map):
+                pkg = future_map[fut]
+                try:
+                    status, msg = fut.result()
+                except Exception as e:
+                    status, msg = "failed", str(e)
+                emit(pkg["name"], status, msg)
 
     print("---")
     print(
@@ -269,8 +335,7 @@ def cmd_add(args):
         os.makedirs(TEMP_DIR, exist_ok=True)
         try:
             status, msg = sync_package(entry, EXTENSIONS_DIR, TEMP_DIR)
-            icon = {"success": "✅", "skipped": "⏭️", "failed": "❌"}[status]
-            print(f"{icon} {name:<20} {msg}")
+            print(f"{STATUS_ICONS.get(status, '?')} {name:<20} {msg}")
         except Exception as e:
             print(f"❌ {name:<20} {e}")
 

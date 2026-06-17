@@ -8,14 +8,6 @@
 (setq color-rg-search-no-ignore-file nil)  ; 尊重 .rgignore 文件
 (setq color-rg-search-ignore-rules "-g \"!node_modules\" -g \"!dist\" -g \"!TAGS\" -g \"!tags\" -g \"!*~\"")
 
-;; 修复 color-rg 结果语法高亮延迟：compilation-filter 期间 inhibit-modification-hooks 为 t，
-;; 导致 jit-lock 未标记新插入文本，font-lock-face 属性不会被渲染。
-;; 在 filter 结束后手动触发 font-lock 着色。
-(define-advice color-rg-filter (:after () my-force-fontify)
-  (let ((beg (point-min))
-        (end (point-max)))
-    (font-lock-fontify-region beg end)))
-
 ;; 跳过 VCS ignore 文件（.gitignore 等），但保留 .rgignore 和 .ignore
 ;; 适用于 SVN 管理的项目中 .gitignore 忽略了所有文件的情况
 ;; PCRE2 正则搜索支持（支持 lookahead/lookbehind）
@@ -46,13 +38,11 @@
   :type 'string
   :safe #'stringp)
 
-;; (progn (put 'color-rg-project-root 'safe-local-variable 'stringp))
-
 (defun color-rg-project-root-dir@around(func &rest args)
-    "Return special project root or `color-rg-project-root-dir'."
-    (if (and color-rg-project-root (not (string-empty-p color-rg-project-root)))
-        (file-name-as-directory color-rg-project-root)
-      (apply func args)))
+  "Return special project root or `color-rg-project-root-dir'."
+  (if (and color-rg-project-root (not (string-empty-p color-rg-project-root)))
+      (file-name-as-directory color-rg-project-root)
+    (apply func args)))
 
 (advice-add #'color-rg-project-root-dir :around #'color-rg-project-root-dir@around)
 

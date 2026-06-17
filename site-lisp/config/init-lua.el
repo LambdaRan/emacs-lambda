@@ -4,6 +4,8 @@
 (require 'lua-mode)
 
 (setq lua-indent-level 4)
-(add-hook 'lua-mode-hook (lambda () (setq indent-tabs-mode t)))
+(add-hook 'lua-mode-hook (lambda ()
+                           (setq indent-tabs-mode t)
+                           (setq tab-width 4)))
 
 (provide 'init-lua)

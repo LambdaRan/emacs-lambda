@@ -6,7 +6,7 @@
 
 ;;; Code:
 
-(setq dired-recursive-deletes 'always)  ;删除东西时不提示
+(setq dired-recursive-deletes 'top)   ;删除目录时顶层确认
 (setq dired-recursive-copies 'always)   ;拷贝东西时不提示
 (setq dired-listing-switches "-aluh")   ;传给 ls 的参数
 (setq directory-free-space-args "-Pkh") ;目录空间选项

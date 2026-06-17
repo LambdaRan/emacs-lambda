@@ -1,10 +1,5 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 
-;; (require 'diff-hl)
-;; (require 'diff-hl-margin)
-;; (global-diff-hl-mode)
-;; (diff-hl-flydiff-mode)
-
 ;; `diff-hl-diff-goto-hunk'  C-x v =
 ;; `diff-hl-revert-hunk'     C-x v n
 ;; `diff-hl-previous-hunk'   C-x v [
@@ -28,7 +23,6 @@
   (setq diff-hl-side 'right)
 
   (add-hook 'dired-mode-hook #'diff-hl-dired-mode-unless-remote)
-  ;; (add-hook 'dired-mode-hook 'diff-hl-dired-
   )
 
 (provide 'init-diff-hl)

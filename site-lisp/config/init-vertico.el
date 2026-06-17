@@ -1,13 +1,17 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 
 ;;; Compat — 必须先于 vertico/consult/marginalia 加载
-;; 强制使用 extensions/ 下的新版 compat，避免加载 Emacs 内置旧版
-(let ((compat-dir (expand-file-name "extensions/compat" my-emacs-root-dir)))
-  (when (file-directory-p compat-dir)
-    (add-to-list 'load-path compat-dir)
-    ;; 清除内置 compat 的 feature 标记，强制重新加载新版
-    (setq features (delq 'compat features))
-    (require 'compat)))
+;; site-start 已把 extensions/compat 加入 load-path（末尾）。这里把它前置到
+;; load-path 最前，确保 vertico/consult/corfu 等优先 require 到 extensions 版本，
+;; 而非任何先于本文件加载的其它 compat。若已有 compat 被加载（feature 标记存在），
+;; 先清除标记再强制重载 extensions 版本，保证版本一致。
+;; 注：Emacs 并不内置 compat；本块是优先级前置 + 一致性保障，不做版本号比较。
+(let ((ext-compat (expand-file-name "extensions/compat" my-emacs-root-dir)))
+  (when (file-directory-p ext-compat)
+    (add-to-list 'load-path ext-compat)        ; 前置：优先于 load-path 中的其它 compat
+    (when (featurep 'compat)                   ; 已加载过 compat：清标记后重载 extensions 版本
+      (setq features (delq 'compat features)))
+    (load "compat" nil t)))
 
 ;;; Vertico — 垂直候选 UI
 (require 'vertico)
@@ -42,8 +46,11 @@
 
 ;;; Consult 配置
 (require 'consult)
+;; --with-filename / --path-separator / / --search-zip 须与 consult 默认保持一致：
+;; consult 的候选解析正则要求每行以 "文件名\0行号" 开头，缺 --with-filename 时单文件/stdin
+;; 搜索结果会被静默丢弃；--path-separator / 用于 Windows 路径分隔。-i 始终忽略大小写。
 (setq consult-ripgrep-args
-      "rg --null --line-buffered --color=never --max-columns=512 --no-heading --line-number -i")
+      "rg --null --line-buffered --color=never --max-columns=512 --path-separator / --no-heading --with-filename --line-number --search-zip -i")
 
 ;; M-x 自动添加 ^ 前缀，始终从命令名开头匹配
 (defvar my-mx-anchored t "M-x 是否默认从命令名开头匹配。")
