@@ -36,11 +36,29 @@
 (require 'consult-imenu)
 
 (defun ran-fastctags-imenu ()
-  "List all imenu tag with consult-imenu or imenu."
+  "List all imenu tag with consult-imenu or imenu.
+consult-imenu 不传 :default，无法自动预选当前符号；
+这里从 consult-imenu 缓存中找到包含当前符号的完整候选字符串，
+注入 completing-read 的 DEF 参数，vertico 精确匹配后预选。"
   (interactive)
   (if (null (ignore-errors (imenu--make-index-alist)))
       (call-interactively 'imenu)
-    (call-interactively 'consult-imenu)))
+    (let ((sym (thing-at-point 'symbol))
+          (orig-cr (symbol-function #'completing-read)))
+      (cl-letf (((symbol-function #'completing-read)
+                 (lambda (prompt collection &optional predicate require-match
+                                 initial-input hist _def inherit-input-method)
+                   ;; 从 consult-imenu 缓存中找包含当前符号的完整候选字符串
+                   (let ((def (when sym
+                                (seq-find (lambda (item)
+                                            (string-match-p
+                                             (concat "\\b" (regexp-quote sym) "\\'")
+                                             (car item)))
+                                          (consult-imenu--items)))))
+                     (funcall orig-cr prompt collection predicate require-match
+                              initial-input hist (and def (car def))
+                              inherit-input-method)))))
+        (call-interactively #'consult-imenu)))))
 
 (defun fastctags-nav-find-tag-at-point-in-specific-directory ()
   "Find tag using tagname at point, selecting from specific tags files.
