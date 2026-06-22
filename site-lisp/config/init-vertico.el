@@ -52,19 +52,12 @@
 (setq consult-ripgrep-args
       "rg --null --line-buffered --color=never --max-columns=512 --path-separator / --no-heading --with-filename --line-number --search-zip -i")
 
-;; M-x 自动添加 ^ 前缀，始终从命令名开头匹配
-(defvar my-mx-anchored t "M-x 是否默认从命令名开头匹配。")
-(define-advice read-extended-command (:around (orig-fn &rest args) my-anchor-prefix)
-  (if my-mx-anchored
-      (minibuffer-with-setup-hook (lambda () (insert "^"))
-        (apply orig-fn args))
-    (apply orig-fn args)))
-
 ;; consult-buffer 禁用实时预览，确认选中后才切换
 (consult-customize consult-buffer :preview-key nil)
 
 ;;; Vertico Multiform — 按命令定制排序等属性
 (require 'vertico-multiform)
+(require 'vertico-sort)
 ;; consult-buffer 关闭重新排序，保留 buffer 自带的最近访问顺序
 (setq vertico-multiform-commands
       '((consult-buffer (vertico-sort-function . nil))))
