@@ -9,7 +9,7 @@
 (dolist (hook '(makefile-mode-hook
                 makefile-bsdmake-mode-hook
                 makefile-gmake-mode-hook
-                go-mode-hook             ; Go 语言约定使用 tab
+                ;; go-mode-hook 已由 go-ts-mode 内置 indent-tabs-mode t 覆盖
                 lua-ts-mode-hook))        ; Lua 使用 tab
   (add-hook hook (lambda () (setq indent-tabs-mode t))))
 
@@ -35,7 +35,7 @@
                'coffee-mode-hook
                'js-mode-hook
                'protobuf-mode-hook
-               'php-mode-hook
+
                'csharp-mode-hook
                ))
   (add-hook hook #'(lambda ()

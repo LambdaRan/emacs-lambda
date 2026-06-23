@@ -6,7 +6,6 @@
 ;;; ### auto-mode-alist ###
 ;;; --- 绑定扩展名到特定的模式
 (dolist (elt-cons '(
-                    ("\\.php\\'" . php-mode)
                     ("\\.vue" . web-mode)
                     ("\\.wxml" . web-mode)
                     ("\\.blade\\.php\\'" . web-mode)
@@ -21,8 +20,11 @@
                     ("\\.jsx$" . web-mode)
                     ("\\.css\\'" . css-mode)
                     ("\\.wxss\\'" . css-mode)
-                    ("\\.go$" . go-mode)
-                    ("\\.rs$" . rust-mode)
+                    ("\\.go\\'" . go-ts-mode)
+                    ("\\.rs\\'" . rust-ts-mode)
+                    ("\\.php\\'" . php-ts-mode)
+
+
                     ("\\.js$" . js-mode)
                     ("\\.wxs$" . js-mode)
                     ("\\.lua$" . lua-ts-mode)
@@ -47,9 +49,9 @@
 
 ;;; Mode load.
 (autoload 'web-mode "init-web-mode")
-(autoload 'php-mode "php-mode")
-(autoload 'go-mode "init-golang")
-(autoload 'rust-mode "rust-mode")
+
+(autoload 'go-ts-mode "init-golang")
+
 (autoload 'csharp-mode "csharp-mode")
 (autoload 'python-mode "init-python")
 (autoload 'lua-ts-mode "init-lua")
@@ -75,16 +77,8 @@
   (require 'elispfl)
   (elispfl-ielm-mode))
 
-(add-hook 'php-mode-hook
-          #'(lambda ()
-              ;; 关闭对HTML的支持
-              (setq php-template-compatibility nil)
-
-              (setq tab-width 4
-                    c-basic-offset 4
-                    c-hanging-comment-ender-p nil)
-              (php-enable-pear-coding-style)
-              ))
+;; php-ts-mode 使用 PEAR 编码风格（默认 indent-offset=4, tab-width=4）
+(setq php-ts-mode-indent-style 'pear)
 
 
 (provide 'init-mode)

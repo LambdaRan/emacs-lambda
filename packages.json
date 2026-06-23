@@ -54,16 +54,6 @@
       "ref": "master"
     },
     {
-      "name": "go-mode",
-      "repo": "dominikh/go-mode.el",
-      "ref": "master",
-      "ignores": [
-        "*.sh",
-        ".mailmap",
-        "AUTHORS*"
-      ]
-    },
-    {
       "name": "color-rg",
       "repo": "manateelazycat/color-rg",
       "ref": "master",
@@ -96,17 +86,6 @@
       "name": "sly-el-indent",
       "repo": "cireu/sly-el-indent",
       "ref": "master"
-    },
-    {
-      "name": "php-mode",
-      "repo": "emacs-php/php-mode",
-      "ref": "master",
-      "ignores": [
-        "etc/",
-        "script",
-        ".mailmap",
-        "AUTHORS*"
-      ]
     },
     {
       "name": "modern-cpp-font-lock",
@@ -144,14 +123,6 @@
       "name": "find-file-in-project",
       "repo": "technomancy/find-file-in-project",
       "ref": "master"
-    },
-    {
-      "name": "rust-mode",
-      "repo": "rust-lang/rust-mode",
-      "ref": "master",
-      "ignores": [
-        "*.sh"
-      ]
     },
     {
       "name": "aweshell",

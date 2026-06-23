@@ -55,27 +55,25 @@
         (mojo . ("https://github.com/HerringtonDarkholme/tree-sitter-mojo"))))
 
 ;; ── major-mode-remap-alist ──────────────────────────────────────
-;; 仅映射 Emacs 30.2 内置的 *-ts-mode（自动回退：grammar 不可用时保持原 mode）
-;; 不含 bash/js/css/python/clojure/csharp — Emacs 30.2 未内置对应 ts-mode
+;; 所有内置 ts-mode 的 auto-mode-alist 注册都是条件的（treesit-ready-p），
+;; 因此必须通过 remap 确保：grammar 可用时用 ts-mode，不可用时回退到原 mode
 (setq major-mode-remap-alist
-      '(;; --- progmodes/ 内置 ---
+      '(;; --- progmodes/ ---
         (c-mode          . c-ts-mode)
         (c++-mode        . c++-ts-mode)
         (cmake-mode      . cmake-ts-mode)
         (dockerfile-mode . dockerfile-ts-mode)
         (elixir-mode     . elixir-ts-mode)
-        (go-mode         . go-ts-mode)
+        (heex-mode       . heex-ts-mode)
         (java-mode       . java-ts-mode)
         (js-json-mode    . json-ts-mode)
-        (php-mode        . php-ts-mode)
+        (lua-mode        . lua-ts-mode)
         (ruby-mode       . ruby-ts-mode)
-        (rust-mode       . rust-ts-mode)
         (typescript-mode . typescript-ts-mode)
-        ;; --- textmodes/ 内置 ---
+        ;; --- textmodes/ ---
         (conf-toml-mode  . toml-ts-mode)
         (html-mode       . html-ts-mode)
-        (yaml-mode       . yaml-ts-mode)
-        ))
+        (yaml-mode       . yaml-ts-mode)))
 
 ;; ── 高亮级别（1=注释+定义 2=+关键字+字符串 3=+赋值+内置+数字 4=全部）──
 (setq treesit-font-lock-level 3)
