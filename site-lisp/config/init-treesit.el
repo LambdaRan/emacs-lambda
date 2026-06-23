@@ -4,6 +4,7 @@
 
 ;; 执行以下函数确定ABI版本，当前是14
 ;; (treesit-library-abi-version)
+;; Grammar 的 `parser.c` 中 `LANGUAGE_VERSION` 必须与此匹配，否则报 `version-mismatch`。
 
 ;; Customize treesit grammer load path.
 ;; (setq treesit-extra-load-path (list (concat lazycat-emacs-root-dir "/treesit-grammer")))
@@ -26,11 +27,12 @@
         (go . ("https://github.com/tree-sitter/tree-sitter-go" "v0.23.3"))
         (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
         (haskell "https://github.com/tree-sitter/tree-sitter-haskell" "master" "src" nil nil)
+        (heex . ("https://github.com/phoenixframework/tree-sitter-heex" "main" "src" nil nil))
         (html . ("https://github.com/tree-sitter/tree-sitter-html"))
         (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
         (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
         (json . ("https://github.com/tree-sitter/tree-sitter-json"))
-        (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+        (lua . ("https://github.com/tree-sitter-grammars/tree-sitter-lua" "a24dab1"))
         (make . ("https://github.com/alemuller/tree-sitter-make"))
         (markdown . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "v0.4.1" "tree-sitter-markdown/src"))
         (markdown-inline . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "v0.4.0" "tree-sitter-markdown-inline/src"))
@@ -50,26 +52,44 @@
         (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
         (zig . ("https://github.com/GrayJack/tree-sitter-zig"))
         (clojure . ("https://github.com/sogaiu/tree-sitter-clojure"))
-        (nix . ("https://github.com/nix-community/nix-ts-mode"))
         (mojo . ("https://github.com/HerringtonDarkholme/tree-sitter-mojo"))))
 
+;; ── major-mode-remap-alist ──────────────────────────────────────
+;; 仅映射 Emacs 30.2 内置的 *-ts-mode（自动回退：grammar 不可用时保持原 mode）
+;; 不含 bash/js/css/python/clojure/csharp — Emacs 30.2 未内置对应 ts-mode
 (setq major-mode-remap-alist
-      '((c-mode          . c-ts-mode)
+      '(;; --- progmodes/ 内置 ---
+        (c-mode          . c-ts-mode)
         (c++-mode        . c++-ts-mode)
         (cmake-mode      . cmake-ts-mode)
-        (conf-toml-mode  . toml-ts-mode)
-        (css-mode        . css-ts-mode)
-        (js-mode         . js-ts-mode)
-        (js-json-mode    . json-ts-mode)
-        (python-mode     . python-ts-mode)
-        (sh-mode         . bash-ts-mode)
-        (typescript-mode . typescript-ts-mode)
-        (rust-mode       . rust-ts-mode)
+        (dockerfile-mode . dockerfile-ts-mode)
+        (elixir-mode     . elixir-ts-mode)
+        (go-mode         . go-ts-mode)
         (java-mode       . java-ts-mode)
-        (clojure-mode    . clojure-ts-mode)
-        (csharp-mode     . csharp-ts-mode)
+        (js-json-mode    . json-ts-mode)
+        (php-mode        . php-ts-mode)
+        (ruby-mode       . ruby-ts-mode)
+        (rust-mode       . rust-ts-mode)
+        (typescript-mode . typescript-ts-mode)
+        ;; --- textmodes/ 内置 ---
+        (conf-toml-mode  . toml-ts-mode)
+        (html-mode       . html-ts-mode)
+        (yaml-mode       . yaml-ts-mode)
         ))
 
+;; ── 高亮级别（1=注释+定义 2=+关键字+字符串 3=+赋值+内置+数字 4=全部）──
+(setq treesit-font-lock-level 3)
+
+;; ── 手动创建 treesit parser（无内置 ts-mode 的语言）──────────────
+;; 这些语言没有 Emacs 内置的 *-ts-mode，通过 hook 在原 mode 中启用 treesit 语法高亮
+(add-hook 'zig-mode-hook #'(lambda () (treesit-parser-create 'zig)))
+(add-hook 'mojo-mode-hook #'(lambda () (treesit-parser-create 'mojo)))
+(add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
+(add-hook 'ielm-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
+(add-hook 'haskell-mode-hook #'(lambda () (treesit-parser-create 'haskell)))
+(add-hook 'kotlin-mode-hook #'(lambda () (treesit-parser-create 'kotlin)))
+
+;; web-mode 中为 vue/html/php 启用 treesit parser（web-mode 本身无 ts 替代）
 (add-hook 'web-mode-hook #'(lambda ()
                              (let ((file-name (buffer-file-name)))
                                (when-let* ((file-name file-name)
@@ -78,15 +98,5 @@
                                                    ("html" 'html)
                                                    ("php" 'php))))
                                  (treesit-parser-create lang)))))
-
-(add-hook 'zig-mode-hook #'(lambda () (treesit-parser-create 'zig)))
-(add-hook 'mojo-mode-hook #'(lambda () (treesit-parser-create 'mojo)))
-(add-hook 'emacs-lisp-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
-(add-hook 'ielm-mode-hook #'(lambda () (treesit-parser-create 'elisp)))
-(add-hook 'go-mode-hook #'(lambda () (treesit-parser-create 'go)))
-(add-hook 'lua-mode-hook #'(lambda () (treesit-parser-create 'lua)))
-(add-hook 'haskell-mode-hook #'(lambda () (treesit-parser-create 'haskell)))
-(add-hook 'kotlin-mode-hook #'(lambda () (treesit-parser-create 'kotlin)))
-(add-hook 'ruby-mode-hook #'(lambda () (treesit-parser-create 'ruby)))
 
 (provide 'init-treesit)

@@ -10,7 +10,7 @@
                 makefile-bsdmake-mode-hook
                 makefile-gmake-mode-hook
                 go-mode-hook             ; Go 语言约定使用 tab
-                lua-mode-hook))          ; Lua 使用 tab
+                lua-ts-mode-hook))        ; Lua 使用 tab
   (add-hook hook (lambda () (setq indent-tabs-mode t))))
 
 ;; (setq-default c-electric-flag nil)

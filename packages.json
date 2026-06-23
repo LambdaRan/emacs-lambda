@@ -136,14 +136,6 @@
       "ref": "master"
     },
     {
-      "name": "lua-mode",
-      "repo": "immerrr/lua-mode",
-      "ref": "master",
-      "ignores": [
-        "travis/"
-      ]
-    },
-    {
       "name": "markdown-mode",
       "repo": "jrblevin/markdown-mode",
       "ref": "master"

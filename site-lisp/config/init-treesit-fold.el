@@ -18,8 +18,6 @@
           (for_generic_statement         . treesit-fold-range-lua-do-loop)
           (repeat_statement              . treesit-fold-range-lua-repeat)
           (comment                       . treesit-fold-range-lua-comment)))
-  (setf (alist-get 'lua-mode treesit-fold-range-alist)
-        (alist-get 'lua-ts-mode treesit-fold-range-alist))
 
   ;; 修复 treesit-fold-range-lua-function: 新版 grammar 的
   ;; function_definition_statement 可能没有 "parameters" 字段

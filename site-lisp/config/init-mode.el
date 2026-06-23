@@ -25,7 +25,7 @@
                     ("\\.rs$" . rust-mode)
                     ("\\.js$" . js-mode)
                     ("\\.wxs$" . js-mode)
-                    ("\\.lua$" . lua-mode)
+                    ("\\.lua$" . lua-ts-mode)
                     ("\\.cpp$" . c++-mode)
                     ("\\.h$" . c++-mode)
                     ("\\.yaml\\'" . yaml-mode)
@@ -52,7 +52,7 @@
 (autoload 'rust-mode "rust-mode")
 (autoload 'csharp-mode "csharp-mode")
 (autoload 'python-mode "init-python")
-(autoload 'lua-mode "init-lua")
+(autoload 'lua-ts-mode "init-lua")
 (autoload 'yaml-mode "yaml-mode")
 (autoload 'protobuf-mode "protobuf-mode")
 
