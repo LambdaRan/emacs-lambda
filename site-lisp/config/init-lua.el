@@ -80,7 +80,7 @@
        name: (dot_index_expression
               table: (identifier) @font-lock-type-face)))
 
-    ;; 示例4: 高亮 goto label（::name::）
+    ;; 高亮 goto label（::name::）
     :feature 'label
     :override t
     '((label_statement) @font-lock-constant-face)
@@ -91,8 +91,8 @@
   (setq-local treesit-font-lock-feature-list
               '((comment definition)
                 (keyword string require)
-                (assignment builtin constant number self label)
-                (bracket delimiter escape function operator property punctuation variable)))
+                (builtin constant function number self label)
+                (assignment bracket delimiter escape operator property punctuation variable)))
   ;; 重新计算生效的 feature
   (treesit-font-lock-recompute-features))
 

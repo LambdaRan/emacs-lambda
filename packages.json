@@ -88,15 +88,6 @@
       "ref": "master"
     },
     {
-      "name": "modern-cpp-font-lock",
-      "repo": "ludwigpacifici/modern-cpp-font-lock",
-      "ref": "master",
-      "ignores": [
-        "cpp",
-        "img/"
-      ]
-    },
-    {
       "name": "ace-window",
       "repo": "abo-abo/ace-window",
       "ref": "master"

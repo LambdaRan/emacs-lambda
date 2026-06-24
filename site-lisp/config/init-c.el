@@ -25,12 +25,6 @@
     ;; make a #define be left-aligned
     (setq c-electric-pound-behavior '(alignleft))
 
-    ;; cpp font lock.
-    (modern-c++-font-lock-global-mode t)
-    ;; modern-c++-generate-font-lock-keywords
-    ;; modern-c++-generate-font-lock-stl-cstdint
-    ;; 这两个函数耗时
-
     ;; google-c-style
     (google-set-c-style)
     (google-make-newline-indent)
@@ -55,7 +49,6 @@
           #'(lambda ()
               (unless (eq major-mode 'java-mode)
                 (require 'cc-mode)
-                (require 'modern-cpp-font-lock)
                 (require 'google-c-style)
                 (c-mode-style-setup))))
 
