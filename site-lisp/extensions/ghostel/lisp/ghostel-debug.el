@@ -325,24 +325,28 @@ computed viewport-start, and per-window ws/we/wp/body-height."
                        (plist-get w :wp) (plist-get w :body)))
    wins " | "))
 
-(defun ghostel-debug--log-redraw (orig-fn buffer)
+(defun ghostel-debug--log-redraw (orig-fn buffer &optional force)
   "Log redraw decisions: skip vs execute, DEC 2026 state, timing.
-ORIG-FN is `ghostel--redraw-now', BUFFER is the target buffer."
+ORIG-FN is `ghostel--redraw-now', BUFFER is the target buffer, FORCE is
+its optional force-past-synchronized-output argument (forwarded)."
   (when ghostel-debug--log-buffer
-    (let ((before (ghostel-debug--snapshot buffer))
-          (t0 (current-time)))
-      (funcall orig-fn buffer)
+    (let* ((before (ghostel-debug--snapshot buffer))
+           ;; `force' set via the snapshotted buffer-local flag OR passed as
+           ;; an argument both bypass the DEC 2026 skip in `ghostel--redraw-now'.
+           (force-in (or (plist-get before :force) force))
+           (t0 (current-time)))
+      (funcall orig-fn buffer force)
       (let* ((elapsed (* 1000 (float-time (time-subtract (current-time) t0))))
              (after (ghostel-debug--snapshot buffer)))
         (with-current-buffer ghostel-debug--log-buffer
           (goto-char (point-max))
-          (if (and (plist-get before :sync) (not (plist-get before :force)))
+          (if (and (plist-get before :sync) (not force-in))
               (insert (format "[%s] REDRAW: SKIPPED (DEC2026 active, force=nil)\n"
                               (format-time-string "%T.%3N")))
             (insert (format "[%s] REDRAW: %.1fms force=%s→%s dec2026=%s buf=%d→%d trailNL=%s→%s pt=%d→%d cursor=%S→%S cursor-char=%S→%S rows=%s vs=%s→%s\n"
                             (format-time-string "%T.%3N")
                             elapsed
-                            (plist-get before :force) (plist-get after :force)
+                            force-in (plist-get after :force)
                             (plist-get before :sync)
                             (plist-get before :buf-size) (plist-get after :buf-size)
                             (plist-get before :trailing-nl) (plist-get after :trailing-nl)
@@ -356,16 +360,17 @@ ORIG-FN is `ghostel--redraw-now', BUFFER is the target buffer."
             (insert (format "           wins-after:  %s\n"
                             (ghostel-debug--fmt-wins (plist-get after :wins))))))))))
 
-(defun ghostel-debug--log-resize (orig-fn window)
+(defun ghostel-debug--log-resize (orig-fn window &optional force)
   "Log resize events with old/new dimensions and timing.
-ORIG-FN is `ghostel--adjust-size'.  WINDOW is passed through."
+ORIG-FN is `ghostel--adjust-size'.  WINDOW and its optional FORCE
+argument are passed through."
   (let* ((buffer (and (window-live-p window) (window-buffer window)))
          (old-rows (and (buffer-live-p buffer)
                         (buffer-local-value 'ghostel--term-rows buffer)))
          (old-cols (and (buffer-live-p buffer)
                         (buffer-local-value 'ghostel--term-cols buffer)))
          (t0 (current-time))
-         (result (funcall orig-fn window))
+         (result (funcall orig-fn window force))
          (elapsed (* 1000 (float-time (time-subtract (current-time) t0))))
          (new-rows (and (buffer-live-p buffer)
                         (buffer-local-value 'ghostel--term-rows buffer)))
@@ -439,8 +444,9 @@ The latency breakdown shows:
             ghostel-debug--latency-log)
       (setq ghostel-debug--latency-send-time nil))))
 
-(defun ghostel-debug--latency-on-render (_buffer)
-  "Record render-completion time and finalize latency entry."
+(defun ghostel-debug--latency-on-render (_buffer &rest _)
+  "Record render-completion time and finalize latency entry.
+Ignores `ghostel--redraw-now's optional force argument."
   (when ghostel-debug--latency-active
     (let ((render-time (current-time)))
       ;; Complete the most recent entry that has no render time
@@ -505,6 +511,218 @@ The latency breakdown shows:
         (special-mode)))
     (message "ghostel-debug: latency report ready in *ghostel-debug*")))
 
+
+;;; Glyph diagnostics
+
+(defconst ghostel-debug--font-info-fields
+  '((0 . "Name")
+    (1 . "Filename")
+    (2 . "Pixel size")
+    (3 . "Size")
+    (4 . "Ascent")
+    (5 . "Descent")
+    (6 . "Space width")
+    (7 . "Average width")
+    (8 . "Capability"))
+  "Labels for the vector returned by `query-font'.")
+
+(defconst ghostel-debug--glyph-fields
+  '((0 . "From index")
+    (1 . "To index")
+    (2 . "Character")
+    (3 . "Code")
+    (4 . "Width")
+    (5 . "Left bearing")
+    (6 . "Right bearing")
+    (7 . "Ascent")
+    (8 . "Descent")
+    (9 . "Adjustment"))
+  "Labels for glyph vectors in a shaped glyph string.")
+
+(defun ghostel-debug--vref (vector index)
+  "Return VECTOR's element at INDEX, or nil when absent."
+  (and (vectorp vector)
+       (< index (length vector))
+       (aref vector index)))
+
+(defun ghostel-debug--prin1 (value)
+  "Return VALUE formatted for diagnostic output."
+  (let ((print-length nil)
+        (print-level nil)
+        (print-circle t))
+    (prin1-to-string value)))
+
+(defun ghostel-debug--insert-field (label value)
+  "Insert diagnostic field LABEL with VALUE."
+  (insert (format "%-20s %s\n" (concat label ":")
+                  (ghostel-debug--prin1 value))))
+
+(defun ghostel-debug--char-summary (char)
+  "Return a compact description of CHAR."
+  (if char
+      (format "%S  U+%04X  width=%d column%s"
+              (char-to-string char)
+              char
+              (char-width char)
+              (if (= (char-width char) 1) "" "s"))
+    "nil"))
+
+(defun ghostel-debug--find-gstring (pos end window)
+  "Return glyph-string information for text from POS to END in WINDOW.
+The return value is a plist with :source, :gstring, :font, and
+:composition keys, or :error when shaping failed before a glyph string
+could be produced.  This mirrors the renderer's lookup order:
+composition glyph string first, otherwise `font-at' +
+`composition-get-gstring' + `font-shape-gstring'."
+  (condition-case err
+      (let* ((composition (find-composition pos end nil t))
+             (composition-gstring (and composition (nth 2 composition))))
+        (if (and composition-gstring (not (eq composition-gstring nil)))
+            (let* ((header (ghostel-debug--vref composition-gstring 0))
+                   (font (ghostel-debug--vref header 0)))
+              (list :source 'composition
+                    :gstring composition-gstring
+                    :font font
+                    :composition composition))
+          (let ((font (font-at pos window)))
+            (cond
+             ((null font)
+              (list :composition composition
+                    :error "font-at returned nil"))
+             (t
+              (let* ((raw (composition-get-gstring pos end font nil))
+                     (shaped (and raw (font-shape-gstring raw nil))))
+                (if shaped
+                    (list :source 'font-shape-gstring
+                          :gstring shaped
+                          :font font
+                          :composition composition
+                          :raw-gstring raw)
+                  (list :font font
+                        :composition composition
+                        :raw-gstring raw
+                        :error "font-shape-gstring returned nil"))))))))
+    (error (list :error (error-message-string err)))))
+
+(defun ghostel-debug--insert-font-info (font font-info)
+  "Insert diagnostic output for FONT and FONT-INFO."
+  (insert "--- Font ---\n")
+  (ghostel-debug--insert-field "Font object" font)
+  (cond
+   ((not (vectorp font-info))
+    (ghostel-debug--insert-field "query-font" font-info))
+   (t
+    (dolist (field ghostel-debug--font-info-fields)
+      (ghostel-debug--insert-field (cdr field)
+                                   (ghostel-debug--vref font-info
+                                                        (car field))))
+    (let ((ascent (ghostel-debug--vref font-info 4))
+          (descent (ghostel-debug--vref font-info 5)))
+      (when (and (numberp ascent) (numberp descent))
+        (ghostel-debug--insert-field "Total height" (+ ascent descent))))
+    (ghostel-debug--insert-field "Raw query-font" font-info))))
+
+(defun ghostel-debug--insert-renderer-metrics (font-info gstring)
+  "Insert the native renderer metric subset from FONT-INFO and GSTRING."
+  (let* ((first-glyph (and (vectorp gstring)
+                           (> (length gstring) 2)
+                           (aref gstring 2)))
+         (pixel-size (ghostel-debug--vref font-info 2))
+         (ascent (ghostel-debug--vref font-info 4))
+         (descent (ghostel-debug--vref font-info 5))
+         (width (ghostel-debug--vref first-glyph 4)))
+    (insert "--- Renderer metrics ---\n")
+    (ghostel-debug--insert-field "Pixel size" pixel-size)
+    (ghostel-debug--insert-field "Ascent" ascent)
+    (ghostel-debug--insert-field "Descent" descent)
+    (when (and (numberp ascent) (numberp descent))
+      (ghostel-debug--insert-field "Total height" (+ ascent descent)))
+    (ghostel-debug--insert-field "Width" width)
+    (ghostel-debug--insert-field "Sources"
+                                 "query-font[2,4,5] + first glyph[4]")
+    (insert "\n")))
+
+(defun ghostel-debug--insert-glyph (index glyph)
+  "Insert diagnostic output for glyph vector GLYPH at INDEX."
+  (insert (format "Glyph %d%s\n" index (if (= index 0) " (gstring element 2)" "")))
+  (cond
+   ((not (vectorp glyph))
+    (ghostel-debug--insert-field "Value" glyph))
+   (t
+    (dolist (field ghostel-debug--glyph-fields)
+      (let ((value (ghostel-debug--vref glyph (car field))))
+        (ghostel-debug--insert-field
+         (cdr field)
+         (if (and (= (car field) 2) (characterp value))
+             (ghostel-debug--char-summary value)
+           value))))
+    (let ((ascent (ghostel-debug--vref glyph 7))
+          (descent (ghostel-debug--vref glyph 8)))
+      (when (and (numberp ascent) (numberp descent))
+        (ghostel-debug--insert-field "Total height" (+ ascent descent))))
+    (ghostel-debug--insert-field "Raw glyph" glyph)))
+  (insert "\n"))
+
+;;;###autoload
+(defun ghostel-debug-glyph-at-point ()
+  "Display text, font, and shaped glyph diagnostics for the char at point.
+The report mirrors the glyph lookup used by the native renderer: it
+shows text properties at point, `query-font' metrics for the selected
+font, and the shaped glyph vector metrics for the glyph string Emacs
+will render."
+  (interactive)
+  (let* ((pos (point))
+         (char (char-after pos))
+         (end (and char (1+ pos)))
+         (window (selected-window)))
+    (unless char
+      (user-error "No character at point"))
+    (let* ((source-buffer (buffer-name))
+           (text-properties (text-properties-at pos))
+           (ginfo (ghostel-debug--find-gstring pos end window))
+           (font (plist-get ginfo :font))
+           (font-info (condition-case err
+                          (and font (query-font font))
+                        (error (list :error (error-message-string err)))))
+           (gstring (plist-get ginfo :gstring))
+           (out (get-buffer-create "*ghostel-debug-glyph*")))
+      (with-current-buffer out
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (insert "=== ghostel-debug-glyph-at-point ===\n\n")
+          (insert "--- Character ---\n")
+          (ghostel-debug--insert-field "Buffer" source-buffer)
+          (ghostel-debug--insert-field "Position" pos)
+          (ghostel-debug--insert-field "Character" (ghostel-debug--char-summary char))
+          (ghostel-debug--insert-field "Text properties" text-properties)
+          (insert "\n")
+          (ghostel-debug--insert-font-info font font-info)
+          (insert "\n")
+          (ghostel-debug--insert-renderer-metrics font-info gstring)
+          (insert "--- Glyph string ---\n")
+          (ghostel-debug--insert-field "Source" (plist-get ginfo :source))
+          (ghostel-debug--insert-field "Range" (cons pos end))
+          (ghostel-debug--insert-field "Composition"
+                                       (plist-get ginfo :composition))
+          (when (plist-get ginfo :error)
+            (ghostel-debug--insert-field "Error" (plist-get ginfo :error)))
+          (ghostel-debug--insert-field "Header"
+                                       (and (vectorp gstring)
+                                            (ghostel-debug--vref gstring 0)))
+          (ghostel-debug--insert-field "ID"
+                                       (and (vectorp gstring)
+                                            (ghostel-debug--vref gstring 1)))
+          (ghostel-debug--insert-field "Raw gstring" gstring)
+          (insert "\n--- Glyphs ---\n")
+          (if (not (vectorp gstring))
+              (insert "(no glyph string)\n")
+            (cl-loop for i from 2 below (length gstring)
+                     for glyph = (aref gstring i)
+                     do (ghostel-debug--insert-glyph (- i 2) glyph)))
+          (goto-char (point-min)))
+        (special-mode))
+      (display-buffer out)
+      (message "Wrote *ghostel-debug-glyph* — paste into the issue"))))
 
 ;;; Environment diagnostics
 

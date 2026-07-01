@@ -16,7 +16,7 @@
       corfu-auto-delay 0.2             ; 对标 company-idle-delay 0.2
       corfu-auto-prefix 2              ; 对标 company-minimum-prefix-length 2
       corfu-cycle t                    ; 对标 company-selection-wrap-around
-      corfu-preselect 'first           ; 预选第一项，对标 company-tng 行为
+      corfu-preselect 'first          ; 不预选任何候选项
       corfu-count 14)                  ; 弹窗显示的候选数量
 
 ;; 弹窗宽高
@@ -34,13 +34,13 @@
 ;; corfu-map 默认含：M-n/M-p=next/prev, RET=insert, TAB=complete, M-TAB=expand,
 ;; M-g=info-location, M-h=info-documentation, M-SPC=insert-separator。
 ;; （corfu-indexed-mode 的 M-1~M-9 在上方已启用，不在此清除。）
-(dolist (key '("M-n" "M-p" "RET" "TAB" "M-TAB" "M-g" "M-h" "M-SPC"))
+(dolist (key '("M-n" "M-p" "RET" "TAB" "M-TAB" "M-g" "M-h" "M-SPC" "C-m"))
   (define-key corfu-map (kbd key) nil))
 
 (define-key corfu-map (kbd "TAB")   #'corfu-insert)        ; 对标 company-complete-selection
 (define-key corfu-map (kbd "<tab>") #'corfu-insert)
 (define-key corfu-map (kbd "C-h")   #'corfu-complete)       ; 对标 company-complete-common（补全公共前缀）
-(define-key corfu-map (kbd "RET")   #'corfu-insert)        ; RET 同样插入
+;; (define-key corfu-map (kbd "RET")   #'corfu-insert)        ; RET 同样插入
 (define-key corfu-map (kbd "C-n")   #'corfu-next)           ; 对标原 company C-n
 (define-key corfu-map (kbd "C-p")   #'corfu-previous)       ; 对标原 company C-p
 (define-key corfu-map (kbd "M-w")   #'corfu-info-location)  ; 对标 company-show-location

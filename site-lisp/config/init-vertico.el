@@ -58,6 +58,9 @@
 ;;; Vertico Multiform — 按命令定制排序等属性
 (require 'vertico-multiform)
 (require 'vertico-sort)
+;; vertico-sort.el 在 vertico.el 之后加载，defcustom 的 fboundp 检查已返回 nil，
+;; 必须显式设置排序函数，否则 vertico 不排序（候选按 completion table 原始顺序）。
+(setq vertico-sort-function #'vertico-sort-history-length-alpha)
 ;; consult-buffer 关闭重新排序，保留 buffer 自带的最近访问顺序
 (setq vertico-multiform-commands
       '((consult-buffer (vertico-sort-function . nil))))
