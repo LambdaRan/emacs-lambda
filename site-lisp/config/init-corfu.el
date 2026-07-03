@@ -40,11 +40,20 @@
 (define-key corfu-map (kbd "TAB")   #'corfu-insert)        ; 对标 company-complete-selection
 (define-key corfu-map (kbd "<tab>") #'corfu-insert)
 (define-key corfu-map (kbd "C-h")   #'corfu-complete)       ; 对标 company-complete-common（补全公共前缀）
-;; (define-key corfu-map (kbd "RET")   #'corfu-insert)        ; RET 同样插入
+(define-key corfu-map (kbd "<return>") #'corfu-insert)      ; GUI 物理回车：接受补全
 (define-key corfu-map (kbd "C-n")   #'corfu-next)           ; 对标原 company C-n
 (define-key corfu-map (kbd "C-p")   #'corfu-previous)       ; 对标原 company C-p
 (define-key corfu-map (kbd "M-w")   #'corfu-info-location)  ; 对标 company-show-location
 (define-key corfu-map (kbd "M-SPC") #'corfu-insert-separator) ; Orderless 多词匹配
+
+;; C-m / RET：关闭补全弹窗并插入换行
+(defun my-corfu-quit-and-newline ()
+  "Quit corfu popup and insert a newline."
+  (interactive)
+  (when completion-in-region-mode
+    (corfu-quit))
+  (newline-and-indent))
+(define-key corfu-map (kbd "C-m") #'my-corfu-quit-and-newline)
 
 ;;; 排除模式（对标 company-global-modes）
 ;; global-corfu-mode 没有排除列表，需在特定 mode-hook 中手动禁用
@@ -77,6 +86,10 @@
 
 ;; Dabbrev 设置（对标原 company-dabbrev 配置）
 (setq dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'"))
+;; 关闭 case-replace：cape--case-replace 对大写输入的处理有缺陷，
+;; 当候选第二个字符也是大写时（如 cFatigue），拼出的 "CF" 仍全大写，
+;; 导致 replace-match 将整个候选转为大写（CFATIGUELUCKYMGR）。
+(setq dabbrev-case-replace nil)
 
 ;; 编程模式的 Capf 合并（fastctags + cape-dabbrev）在 init-fastctags.el 中配置，
 ;; 以确保 fastctags-completion-at-point 一定可用（避免增量加载顺序问题）。

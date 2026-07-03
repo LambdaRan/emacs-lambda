@@ -122,7 +122,59 @@
         ;; 向父节点跳动
         ;; ("C-j" . fingertip-jump-up)
         ))
-(lazy-load-set-keys fingertip-key-alist fingertip-mode-map)  
+(lazy-load-set-keys fingertip-key-alist fingertip-mode-map)
+
+;;; Fix: tree-sitter 模式下 forward-sexp 不推进导致 while t 死循环
+(advice-add 'fingertip-end-of-list-p :override
+            (lambda (beginning eol)
+              (let ((end-of-list-p nil)
+                    (firstp t)
+                    (prev-point (point)))
+                (catch 'return
+                  (while t
+                    (save-excursion
+                      (unless (fingertip-ignore-errors (forward-sexp))
+                        (when (fingertip-ignore-errors (up-list))
+                          (setq end-of-list-p (eq (line-end-position) eol))
+                          (throw 'return nil)))
+                      (if (or (and (not firstp) (eobp))
+                              (not (fingertip-ignore-errors (backward-sexp)))
+                              (not (eq (line-end-position) eol)))
+                          (throw 'return nil)))
+                    (forward-sexp)
+                    (if (and firstp (eobp))
+                        (throw 'return nil))
+                    (when (= (point) prev-point)
+                      (throw 'return nil))
+                    (setq prev-point (point))
+                    (setq firstp nil)))
+                end-of-list-p)))
+
+(advice-add 'fingertip-backward-sexps-to-kill :override
+            (lambda (beginning bol)
+              (let ((beg-of-list-p nil)
+                    (lastp t)
+                    (prev-point (point)))
+                (catch 'return
+                  (while t
+                    (save-excursion
+                      (unless (fingertip-ignore-errors (backward-sexp))
+                        (when (fingertip-ignore-errors (up-list -1))
+                          (setq beg-of-list-p (eq (line-beginning-position) bol))
+                          (throw 'return nil)))
+                      (if (or (and (not lastp) (bobp))
+                              (not (fingertip-ignore-errors (forward-sexp)))
+                              (not (eq (line-beginning-position) bol)))
+                          (throw 'return nil)))
+                    (backward-sexp)
+                    (if (and lastp (bobp))
+                        (throw 'return nil))
+                    (when (= (point) prev-point)
+                      (throw 'return nil))
+                    (setq prev-point (point))
+                    (setq lastp nil)))
+                beg-of-list-p)))
+
 )
 
 (provide 'init-fingertip)
