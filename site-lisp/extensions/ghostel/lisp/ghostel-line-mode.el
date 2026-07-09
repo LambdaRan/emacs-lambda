@@ -19,6 +19,7 @@
 (require 'compat)
 
 (declare-function ghostel--cursor-blink-stop "ghostel")
+(declare-function ghostel--ensure-ghostel-buffer "ghostel")
 (declare-function ghostel--invalidate "ghostel")
 (declare-function ghostel--leave-readonly-state "ghostel")
 (declare-function ghostel--mode-enabled "ghostel-module")
@@ -40,7 +41,6 @@
 (defvar ghostel--input-mode)
 (defvar ghostel--mode-line-tag)
 (defvar ghostel--term)
-(defvar ghostel-full-redraw)
 (defvar ghostel-semi-char-mode-map)
 
 
@@ -133,12 +133,6 @@ Most recent first.")
 (defvar-local ghostel--line-mode-history-index nil
   "Current index into `ghostel--line-mode-history' while browsing history.
 Nil when not browsing.")
-
-(defvar-local ghostel--line-mode-saved-full-redraw nil
-  "Saved `ghostel-full-redraw' state from before line mode entry.
-Cons (BUFFER-LOCAL-P . VALUE).  Restored by
-`ghostel--line-mode-teardown' so toggling the mode does not
-permanently override the user's setting.")
 
 (defvar-local ghostel--line-mode-saved-cursor-type nil
   "Saved `cursor-type' from before line mode entry, as a singleton list.
@@ -411,15 +405,6 @@ in line mode (the interactive entry validates these)."
       (ghostel--cursor-blink-stop)
       (setq ghostel--line-mode-saved-cursor-type (list cursor-type))
       (setq cursor-type (default-value 'cursor-type))
-      ;; Force full redraws while line mode is active so the
-      ;; snapshot/restore path always rebuilds the prompt row
-      ;; (otherwise dirty-row diff could skip it and the input would
-      ;; be re-inserted at a stale marker position).  Restore the
-      ;; previous setting on teardown.
-      (setq ghostel--line-mode-saved-full-redraw
-            (cons (local-variable-p 'ghostel-full-redraw)
-                  ghostel-full-redraw))
-      (setq-local ghostel-full-redraw t)
       ;; If the user already typed something at this prompt via the
       ;; PTY (e.g. before switching from semi-char to line mode), the
       ;; renderer painted those cells with `ghostel-input'.  Adopt
@@ -490,6 +475,7 @@ On the alt screen, line mode enters at a shell prompt whose OSC 133
 markers reach Ghostel; over a raw TUI (vim, less) it arms and resumes
 when the TUI exits.  A prefix arg FORCE forces immediate entry."
   (interactive "P")
+  (ghostel--ensure-ghostel-buffer)
   (unless ghostel--term
     (user-error "No terminal in this buffer"))
   (cond
@@ -564,8 +550,7 @@ have already handled the input themselves (like
 `ghostel-line-mode-send' and `ghostel-line-mode-interrupt') delete
 it from the buffer before calling this, so no double-send happens.
 
-Restores `ghostel-full-redraw' to the value captured on entry, and
-forces a final redraw so the buffer truncation done at entry is
+Forces a final redraw so the buffer truncation done at entry is
 re-materialized from libghostty.
 
 When PAUSE is non-nil, skip forwarding pending input to the PTY,
@@ -600,12 +585,6 @@ which discards any type-ahead and runs inside `ghostel--redraw-now'."
   (setq ghostel--line-mode-history-index nil)
   (setq ghostel--line-mode-adopted-count nil)
   (setq ghostel--line-mode-on-alt-screen nil)
-  (when ghostel--line-mode-saved-full-redraw
-    (if (car ghostel--line-mode-saved-full-redraw)
-        (setq-local ghostel-full-redraw
-                    (cdr ghostel--line-mode-saved-full-redraw))
-      (kill-local-variable 'ghostel-full-redraw))
-    (setq ghostel--line-mode-saved-full-redraw nil))
   (when ghostel--line-mode-saved-cursor-type
     (setq cursor-type (car ghostel--line-mode-saved-cursor-type))
     (setq ghostel--line-mode-saved-cursor-type nil))
