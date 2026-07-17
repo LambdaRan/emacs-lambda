@@ -14,6 +14,11 @@
 # Idempotency guard — skip if already loaded (e.g. auto-injected).
 [[ "$(type -t __ghostel_osc7)" = "function" ]] && return
 
+# Old bash (e.g. macOS system bash 3.2) rejects process substitution `<(...)`
+# at parse time under POSIX mode; the `ssh` wrapper below uses it.
+# Exit POSIX mode first so sourcing succeeds regardless of the caller's mode.
+builtin set +o posix
+
 # Enable PTY echo.  Bash's readline buffers its own echo output so it
 # never reaches the Emacs process filter.  PTY-level echo makes the
 # kernel echo input immediately.
@@ -70,10 +75,25 @@ __ghostel_prompt_start() {
 # Emit "command output start" (C) via the DEBUG trap, and restore the
 # unmarked PS1/PS2 so the user's command (and any other DEBUG-trap
 # observers) doesn't see our markers.
-# Guard: skip when running inside PROMPT_COMMAND itself.
+# Guards: skip when running inside PROMPT_COMMAND itself, and skip
+# PROMPT_COMMAND content executing at top level — hooks appended to
+# the bash-5.1+ PROMPT_COMMAND array after this file loaded (e.g.
+# systemd's osc-context profile.d script) run as separate top-level
+# commands and must not unwrap PS1 or emit 133;C.  DEBUG fires once
+# per simple command, so a compound element (`history -a; history -n')
+# is matched fragment-by-fragment, split on `;'/newline like
+# bash-preexec does.  Known limitation (shared with bash-preexec): a
+# user-typed command byte-identical to a fragment is skipped too.
 __ghostel_in_prompt_command=0
 __ghostel_preexec() {
     [[ "$__ghostel_in_prompt_command" = 1 ]] && return
+    local __ghostel_frags __ghostel_f IFS=$';\n'
+    read -rd '' -a __ghostel_frags <<< "${PROMPT_COMMAND[*]:-}"
+    for __ghostel_f in ${__ghostel_frags[@]+"${__ghostel_frags[@]}"}; do
+        __ghostel_f="${__ghostel_f#"${__ghostel_f%%[![:space:]]*}"}"
+        __ghostel_f="${__ghostel_f%"${__ghostel_f##*[![:space:]]}"}"
+        [[ -n "$__ghostel_f" && "$BASH_COMMAND" == "$__ghostel_f" ]] && return
+    done
     if [[ -n "${__ghostel_marked_ps1+x}" && "$PS1" == "$__ghostel_marked_ps1" ]]; then
         PS1=$__ghostel_saved_ps1
         PS2=$__ghostel_saved_ps2
@@ -99,7 +119,14 @@ __ghostel_wrapped_prompt_command() {
 
     __ghostel_prompt_start
 
-    eval "${__ghostel_original_prompt_command:-}"
+    # Run the captured PROMPT_COMMAND hooks, restoring $? before each
+    # so hooks that report the last command's exit status (systemd's
+    # osc-context, vte) see the user command's status, not ours.
+    local __ghostel_cmd
+    for __ghostel_cmd in ${__ghostel_original_prompt_commands[@]+"${__ghostel_original_prompt_commands[@]}"}; do
+        __ghostel_set_status "$__ghostel_last_status"
+        eval "$__ghostel_cmd"
+    done
 
     # OSC 7 must fire AFTER the user/system PROMPT_COMMAND so we win the race
     # against competing OSC 7 emitters.  Fedora's /etc/profile.d/vte.sh
@@ -136,8 +163,18 @@ __ghostel_wrapped_prompt_command() {
     __ghostel_in_prompt_command=0
 }
 
-# Preserve any existing PROMPT_COMMAND.
-__ghostel_original_prompt_command="${PROMPT_COMMAND:+$PROMPT_COMMAND}"
+# Restore $? for a hook about to run: `return N' makes N the visible
+# exit status of the next command.
+__ghostel_set_status() { return "${1:-0}"; }
+
+# Preserve any existing PROMPT_COMMAND — scalar, or bash-5.1+ array as
+# populated by e.g. systemd's osc-context profile.d script.  Capture
+# every element, then unset (dropping array-ness) so the wrapper is
+# the sole element and sees the user command's $?.
+__ghostel_original_prompt_commands=()
+[[ -n "${PROMPT_COMMAND[*]:-}" ]] &&
+    __ghostel_original_prompt_commands=("${PROMPT_COMMAND[@]}")
+builtin unset PROMPT_COMMAND
 PROMPT_COMMAND="__ghostel_wrapped_prompt_command"
 
 trap '__ghostel_preexec' DEBUG

@@ -191,8 +191,9 @@
     },
     {
       "name": "ghostel",
-      "manual": true,
-      "note": "手动维护，含 native dll"
+      "repo": "dakra/ghostel",
+      "ref": "main",
+      "files": ["etc", "lisp", "LICENSE", "README.md", "README.org"]
     },
     {
       "name": "lazycat",

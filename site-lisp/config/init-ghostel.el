@@ -14,6 +14,13 @@
   (setq ghostel-shell "pwsh.exe")) 
 (setq ghostel-term "xterm-ghostty")
 
+;; 滚动缓冲区大小（默认 5MB）
+(setq ghostel-max-scrollback (* 10 1024 1024))  ; 10MB
+;; 退出时是否关闭 buffer
+(setq ghostel-kill-buffer-on-exit t)
+;; 输入时自动滚动到底部
+(setq ghostel-scroll-on-input t)
+
 (lazy-load-unset-keys
  '("C-j")
  ghostel-mode-map)
