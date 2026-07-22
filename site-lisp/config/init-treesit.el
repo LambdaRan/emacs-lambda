@@ -97,4 +97,94 @@
                                                    ("php" 'php))))
                                  (treesit-parser-create lang)))))
 
+;; ── defun 导航性能修复 ──────────────────────────────────────────
+;; Emacs 30 的 treesit--thing-sibling 在深层嵌套/大文件上极慢（Windows 尤甚），
+;; 导致 beginning-of-defun / end-of-defun 卡死。
+;; 影响: fingertip, expand-region (er/mark-defun), mark-defun 等所有调用
+;;       defun 导航的功能。
+;; 修复: 用语法表 + 缩进方式替代 treesit 的 defun 遍历。
+
+(defun my-treesit--defun-start-braces ()
+  "用语法表找 defun 起点（大括号语言）。
+通过 syntax-ppss 的嵌套深度，逐层 up-list 跳出到最外层 {。"
+  (let ((forward-sexp-function nil))  ; 强制用语法表，不走 treesit
+    (let ((depth (car (syntax-ppss)))
+          (moved nil))
+      (while (> depth 0)
+        (if (ignore-errors (up-list -1))
+            (setq moved t depth (car (syntax-ppss)))
+          (setq depth 0)))
+      (when (and moved (eq (char-after) ?\{))
+        (forward-line -1)
+        (skip-chars-forward " \t"))
+      moved)))
+
+(defun my-treesit--defun-start-indent ()
+  "用缩进找 defun 起点（Python / Ruby 等缩进语言）。
+从当前位置向前搜索 def/class 关键字，且缩进比当前行浅。"
+  (let ((orig-indent (save-excursion
+                       (back-to-indentation)
+                       (current-column)))
+        (found nil))
+    (when (> orig-indent 0)
+      (while (and (not found)
+                  (re-search-backward
+                   "^[ \t]*\\(def\\|class\\)\\_>" nil t))
+        (let ((ind (save-excursion
+                     (back-to-indentation)
+                     (current-column))))
+          (when (< ind orig-indent)
+            (setq found t)))))
+    found))
+
+(defun my-treesit-beginning-of-defun (&optional arg)
+  "替代 treesit-beginning-of-defun，避免 treesit--thing-sibling 性能问题。
+大括号语言用语法表；缩进语言用关键字+缩进检测。"
+  (let ((arg (or arg 1)))
+    (cond
+     ((< arg 0) (my-treesit-end-of-defun (- arg)))
+     (t
+      (while (> arg 0)
+        (let ((orig (point)))
+          ;; 先退到行首，避免停留在当前 defun 头部
+          (beginning-of-line)
+          (unless (or (my-treesit--defun-start-braces)
+                      (my-treesit--defun-start-indent))
+            ;; 两种方法都没找到，回到原位
+            (goto-char orig))
+        (setq arg (1- arg))))))))
+
+(defun my-treesit-end-of-defun (&optional arg)
+  "替代 treesit-end-of-defun，避免 treesit--thing-sibling 性能问题。
+大括号语言用 syntax-ppss + forward-sexp 找匹配 }。"
+  (let ((forward-sexp-function nil))  ; 强制用语法表，不走 treesit
+    (let ((arg (or arg 1)))
+      (cond
+       ((< arg 0) (my-treesit-beginning-of-defun (- arg)))
+       (t
+        (while (> arg 0)
+          (let* ((state (syntax-ppss))
+                 (depth (car state))
+                 (orig (point)))
+            (cond
+             ((> depth 0)
+              ;; 在嵌套结构中：先跳到最外层，再 forward-sexp 到匹配的 }
+              (catch 'done
+                (while (> (car (syntax-ppss)) 0)
+                  (unless (ignore-errors (up-list -1))
+                    (throw 'done nil))))
+              (or (ignore-errors (forward-sexp 1))
+                  (goto-char (point-max))))
+             (t
+              ;; 顶层：跳到下一个 defun 之前（缩进语言的 def/class）
+              (or (re-search-forward "^\\(def\\|class\\)\\_>" nil t)
+                  (goto-char (point-max)))
+              (when (< (point) (point-max))
+                (forward-line -1)
+                (end-of-line)))))
+          (setq arg (1- arg))))))))
+
+(advice-add 'treesit-beginning-of-defun :override #'my-treesit-beginning-of-defun)
+(advice-add 'treesit-end-of-defun :override #'my-treesit-end-of-defun)
+
 (provide 'init-treesit)

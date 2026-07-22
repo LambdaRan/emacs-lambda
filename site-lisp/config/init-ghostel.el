@@ -23,11 +23,10 @@
 ;; 输入时自动滚动到底部
 (setq ghostel-scroll-on-input t)
 
-(lazy-load-unset-keys
- '("C-j")
- ghostel-mode-map)
-
 (add-to-list 'ghostel-keymap-exceptions "C-j")
+;; add-to-list 不触发 defcustom 的 :set 回调，需要手动 rebuild
+;; 让 semi-char keymap 重新生成时跳过 C-j
+(ghostel--rebuild-semi-char-keymap)
 
 ;; buffer 名称使用当前目录名而非终端标题
 (defun ghostel--set-title-directory (_title)

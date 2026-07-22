@@ -150,6 +150,26 @@
                     (setq firstp nil)))
                 end-of-list-p)))
 
+;;; Fix: 用 syntax-ppss 替代 beginning-of-defun + parse-partial-sexp
+;;; 避免 treesit-beginning-of-defun 在大文件上触发 treesit--thing-sibling 死循环
+(advice-add 'fingertip-current-parse-state :override
+            (lambda ()
+              (if (fboundp 'syntax-ppss)
+                  (syntax-ppss)
+                (let ((point (point)))
+                  (beginning-of-defun)
+                  (when (equal point (point))
+                    (beginning-of-line))
+                  (parse-partial-sexp (min (point) point)
+                                      (max (point) point))))))
+
+;;; Fix: 先检查 treesit 节点类型（O(1)），不在 comment 中直接短路返回
+(advice-add 'fingertip-in-comment-p :override
+            (lambda ()
+              (save-excursion
+                (and (string= (fingertip-node-type-at-point) "comment")
+                     (nth 4 (fingertip-current-parse-state))))))
+
 (advice-add 'fingertip-backward-sexps-to-kill :override
             (lambda (beginning bol)
               (let ((beg-of-list-p nil)
