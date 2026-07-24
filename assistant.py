@@ -11,6 +11,7 @@ assistant.py - Emacs 依赖包管理助手
     python assistant.py sync --all
     python assistant.py sync --all --clean
     python assistant.py sync company-mode yasnippet
+    python assistant.py sync company-mode --replace
     python assistant.py add company-mode/company-mode
     python assistant.py add company-mode/company-mode --ref main --sync
     python assistant.py check
@@ -18,6 +19,8 @@ assistant.py - Emacs 依赖包管理助手
 同步策略:
     - 按 branch ref 下载（archive/refs/heads/<ref>.zip），并发下载与解压（默认 6 并发）。
     - 下载带超时与重试，解压防御 zip-slip。
+    - 默认覆盖拷贝（不删除目标目录，直接覆盖文件）。
+    - --replace 选项：先删除目标目录再重新拷贝（适用于需要清理残留文件的场景）。
 """
 
 import argparse
@@ -97,7 +100,11 @@ def download_with_retry(url, dest, retries=DOWNLOAD_RETRIES, timeout=DOWNLOAD_TI
     last_err = None
     for attempt in range(retries):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "assistant.py"})
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "assistant.py",
+                "Cache-Control": "no-cache, no-store",
+                "Pragma": "no-cache",
+            })
             with urllib.request.urlopen(req, timeout=timeout) as resp, open(dest, "wb") as out:
                 shutil.copyfileobj(resp, out)
             return
@@ -169,8 +176,11 @@ def copy_all_with_ignores(source_dir, target_dir, ignores):
     _copy_recursive(source_dir, target_dir)
 
 
-def sync_package(pkg, extensions_dir, temp_dir):
-    """同步单个包：按 branch ref 下载 → 解压 → 安装。返回 (status, message)。"""
+def sync_package(pkg, extensions_dir, temp_dir, replace=False):
+    """同步单个包：按 branch ref 下载 → 解压 → 安装。返回 (status, message)。
+
+    replace=True 时先删除目标目录再拷贝；默认覆盖拷贝（不删除）。
+    """
     name = pkg["name"]
 
     if pkg.get("manual"):
@@ -181,7 +191,7 @@ def sync_package(pkg, extensions_dir, temp_dir):
     if not repo:
         return "failed", "missing repo"
 
-    url = f"https://github.com/{repo}/archive/refs/heads/{ref}.zip"
+    url = f"https://github.com/{repo}/archive/refs/heads/{ref}.zip?_={int(time.time())}"
     target_dir = os.path.join(extensions_dir, name)
     pkg_temp = os.path.join(temp_dir, name)
 
@@ -214,7 +224,7 @@ def sync_package(pkg, extensions_dir, temp_dir):
     if not extracted:
         return "failed", "no directory in archive"
 
-    if os.path.exists(target_dir):
+    if replace and os.path.exists(target_dir):
         shutil.rmtree(target_dir, ignore_errors=True)
     os.makedirs(target_dir, exist_ok=True)
 
@@ -264,7 +274,7 @@ def cmd_sync(args):
         workers = min(SYNC_MAX_WORKERS, len(targets))
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
             future_map = {
-                ex.submit(sync_package, p, EXTENSIONS_DIR, TEMP_DIR): p
+                ex.submit(sync_package, p, EXTENSIONS_DIR, TEMP_DIR, args.replace): p
                 for p in targets
             }
             for fut in concurrent.futures.as_completed(future_map):
@@ -416,6 +426,10 @@ def main():
     sync_parser.add_argument("packages", nargs="*", help="Package names to sync")
     sync_parser.add_argument("--all", action="store_true", help="Sync all packages")
     sync_parser.add_argument("--clean", action="store_true", help="Clean temp directory after sync")
+    sync_parser.add_argument(
+        "--replace", action="store_true",
+        help="Delete target directory before copying (default: overwrite in place)",
+    )
 
     # check
     check_parser = subparsers.add_parser("check", help="Check for missing or extra packages")

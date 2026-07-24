@@ -4,7 +4,7 @@
 
 ;; Author: Daniel Kraus <daniel@kraus.my>
 ;; URL: https://github.com/dakra/ghostel
-;; Version: 0.44.0
+;; Version: 0.45.0
 ;; Keywords: terminals
 ;; Package-Requires: ((emacs "28.1") (compat "30.1.0.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -1151,7 +1151,6 @@ is non-nil."
 (unless (memq 'ghostel--emulation-alist emulation-mode-map-alists)
   (push 'ghostel--emulation-alist emulation-mode-map-alists))
 
-
 
 ;;; Input mode predicates
 
@@ -1174,7 +1173,13 @@ across the rewrite."
   "Non-nil when the terminal is frozen (copy mode)."
   (eq ghostel--input-mode 'copy))
 
+(defun ghostel-alt-screen-p ()
+  "Return non-nil when the terminal is on its alternate screen.
+True while a fullscreen TUI (vim, less, htop, …) runs, regardless of
+which DEC mode (47, 1047, or 1049) it used to get there."
+  (and ghostel--term (ghostel--alt-screen-p ghostel--term)))
 
+
 ;;; Keymap
 
 (defun ghostel--define-terminal-keys (map &optional no-exceptions)
@@ -1758,10 +1763,23 @@ overlay clears the way \\`keyboard-quit' would in other buffers."
 (defvar-local ghostel--yank-index 0
   "Current kill ring index for `ghostel-yank-pop'.")
 
+(defun ghostel--decode-paste-bytes (text)
+  "Return TEXT as valid Unicode for `ghostel--encode-paste'.
+Re-decode raw byte runs as UTF-8 and replace anything still outside
+the Unicode range with U+FFFD."
+  (if (string-match-p "[^\x0-\x10ffff]" text)
+      (let ((repaired (decode-coding-string
+                       (if (multibyte-string-p text)
+                           (encode-coding-string text 'utf-8)
+                         text)
+                       'utf-8)))
+        (replace-regexp-in-string "[^\x0-\x10ffff]" (string #xFFFD) repaired))
+    text))
+
 (defun ghostel--paste-text (text)
   "Send TEXT to the terminal using the terminal paste encoder."
   (when text
-    (ghostel--encode-paste ghostel--term text)))
+    (ghostel--encode-paste ghostel--term (ghostel--decode-paste-bytes text))))
 
 (defun ghostel-paste ()
   "Paste text from the Emacs kill ring into the terminal.
@@ -1784,7 +1802,7 @@ Use `ghostel-yank-pop' afterwards to cycle through older kills."
   "Replace the just-yanked text with the next kill ring entry.
 After `ghostel-yank' or `ghostel-yank-pop', cycles through the
 kill ring by erasing the previous paste and inserting the next entry.
-Otherwise, opens a `completing-read' browser over `kill-ring' and
+Otherwise, browses `kill-ring' with `read-from-kill-ring' and
 pastes the selected entry into the terminal."
   (interactive)
   (if (memq last-command '(ghostel-yank ghostel-yank-pop))
@@ -1799,10 +1817,10 @@ pastes the selected entry into the terminal."
         (ghostel--paste-text (current-kill ghostel--yank-index t))
         (setq this-command 'ghostel-yank-pop))
     ;; No preceding yank: browse kill ring and paste selection
-    (when-let* ((text (completing-read "Paste from kill ring: "
-                                       kill-ring nil t)))
-      (ghostel--on-user-input)
-      (ghostel--paste-text text))))
+    (let ((text (read-from-kill-ring "Paste from kill ring: ")))
+      (unless (string-empty-p text)
+        (ghostel--on-user-input)
+        (ghostel--paste-text text)))))
 
 (defun ghostel-xterm-paste (event)
   "Forward an xterm-paste EVENT to the terminal via bracketed paste.
@@ -2378,9 +2396,9 @@ Most keys are sent to the terminal; keys in
       ;; Snap the window to the live viewport so the user lands back at the
       ;; prompt after exiting copy/emacs/line.  FORCE so a deliberate switch
       ;; wins over any `ghostel-inhibit-anchor-functions' roaming veto.
+      (goto-char (point-max))
       (ghostel--anchor-window nil t)
       (setq ghostel--force-next-redraw t)
-      (goto-char (point-max))
       (ghostel--invalidate))))
 
 (defun ghostel-char-mode ()
@@ -2409,9 +2427,9 @@ Even keys listed in `ghostel-keymap-exceptions' (\\`C-c', \\`C-x',
     (ghostel--mode-line-refresh)
     (when ghostel--term
       ;; FORCE: a deliberate switch wins over any roaming veto.
+      (goto-char (point-max))
       (ghostel--anchor-window nil t)
       (setq ghostel--force-next-redraw t)
-      (goto-char (point-max))
       (ghostel--invalidate))
     (message "Char mode (%s to exit)"
              (substitute-command-keys
@@ -4412,10 +4430,8 @@ writes a final exit status before closing it."
 (defun ghostel--kill-native-processes-on-exit ()
   "Force native children to exit before Emacs disables process sentinels."
   (dolist (process (process-list))
-    (let ((pid (and (process-live-p process)
-                    (process-get process 'ghostel--native-pid))))
-      (when pid
-        (ignore-errors (signal-process pid 9))))))
+    (when-let* ((pid (process-get process 'ghostel--native-pid)))
+      (ignore-errors (signal-process pid 9)))))
 
 (add-hook 'kill-emacs-hook #'ghostel--kill-native-processes-on-exit)
 
@@ -4425,7 +4441,8 @@ Run from `kill-buffer-hook' in native PTY buffers."
   ;; Do not let `kill-buffer' delete the pipe early.  Keep the
   ;; pipe alive until the native reaper reports that the child
   ;; exited, matching Emacs process lifetime semantics.
-  (set-process-buffer ghostel--process nil)
+  (when ghostel--process
+    (set-process-buffer ghostel--process nil))
   (ghostel--kill-native-process ghostel--term))
 
 (defun ghostel--start-process ()
@@ -4637,17 +4654,29 @@ WINDOW follows the output when the lines from its `window-start' to
 `point-max' fit within its body, measured from BODY-PIXEL-HEIGHT (default
 `window-body-height' in pixels, excluding the mode-line and header-line to
 match the terminal grid), plus one line of tolerance for the partial top
-line the graphical anchor leaves via `window-vscroll'."
+line the graphical anchor leaves via `window-vscroll'.
+
+A cursor-clamped anchor (see `ghostel--anchor-window') can start above
+that geometric bound; WINDOW also counts as anchored while its
+`window-start' sits exactly on the live cursor's line."
   (with-current-buffer (window-buffer window)
-    (when-let* (((derived-mode-p 'ghostel-mode))
-                ((not (eq ghostel--input-mode 'emacs)))
-                (dlh (with-selected-window window (default-line-height)))
-                (body-pixel-height (or body-pixel-height
-                                       (window-body-height window t)))
-                (screen-lines (/ (float body-pixel-height) (float dlh)))
-                (ws (window-start window))
-                (ws-lines-to-end (count-lines ws (point-max))))
-      (<= ws-lines-to-end (1+ (floor screen-lines))))))
+    (when (and (derived-mode-p 'ghostel-mode)
+               (not (eq ghostel--input-mode 'emacs)))
+      (or (and ghostel--cursor-char-pos
+               (not (eq ghostel--input-mode 'line))
+               (eql (window-start window)
+                    (save-excursion
+                      (goto-char ghostel--cursor-char-pos)
+                      (line-beginning-position))))
+          (when-let* ((dlh (with-selected-window window
+                             (default-line-height)))
+                      (body-pixel-height (or body-pixel-height
+                                             (window-body-height window t)))
+                      (screen-lines (/ (float body-pixel-height)
+                                       (float dlh)))
+                      (ws (window-start window))
+                      (ws-lines-to-end (count-lines ws (point-max))))
+            (<= ws-lines-to-end (1+ (floor screen-lines))))))))
 
 (defun ghostel--anchored-windows (&optional buffer all-frames)
   "Return anchored Ghostel windows.
@@ -4708,6 +4737,12 @@ In text frames, use line-count geometry with no vscroll.
 Do nothing unless WINDOW displays a live Ghostel terminal.
 A `ghostel-inhibit-anchor-functions' hook can veto anchoring a window.
 
+The live cursor is never scrolled out of view: when bottom-aligning
+`point-max' would push the cursor's line above `window-start' (a shrunken
+window over a mostly-empty grid), the anchor starts at the cursor's line
+instead.  `ghostel--window-anchored-p' recognizes such a clamped window
+as still following the output.
+
 Copy mode is never anchored (the viewport is frozen).  Emacs mode is
 anchored only when FORCE is non-nil, reserved for deliberate anchors such
 as paste/yank that should scroll to the live cursor even in Emacs mode;
@@ -4729,24 +4764,38 @@ user's point, since its input region is user-owned."
                             'ghostel-inhibit-anchor-functions window force))))))
     (with-selected-window window
       (with-current-buffer buffer
-        (let ((target (point-max))
-              ;; Line mode's input region is user-owned; keep point instead of
-              ;; snapping it to the terminal cursor.
-              (orig (point)))
-          (if-let* ((anchor (and (display-graphic-p (window-frame window))
-                                 ghostel--pixel-anchor-supported-p
-                                 (ghostel--pixel-anchor window target))))
-              (progn
-                (set-window-start window (car anchor))
-                (ghostel--set-window-vscroll window (cdr anchor) t t))
-            (let ((lines (window-screen-lines)))
-              (goto-char target)
-              (forward-line (- (floor lines)))
-              (set-window-start window (point))
-              (ghostel--set-window-vscroll window 0 t t)))
+        (let* ((target (point-max))
+               ;; Line mode's input region is user-owned; keep point instead
+               ;; of snapping it to the terminal cursor.
+               (orig (point))
+               (cursor (and (not (eq ghostel--input-mode 'line))
+                            ghostel--cursor-char-pos))
+               (cursor-bol (and cursor
+                                (save-excursion
+                                  (goto-char cursor)
+                                  (line-beginning-position))))
+               (anchor (or (and (display-graphic-p (window-frame window))
+                                ghostel--pixel-anchor-supported-p
+                                (ghostel--pixel-anchor window target))
+                           (save-excursion
+                             (goto-char target)
+                             (forward-line
+                              (- (floor (window-screen-lines))))
+                             (cons (point) 0))))
+               (start (if (and cursor-bol (< cursor-bol (car anchor)))
+                          cursor-bol
+                        (car anchor)))
+               ;; A vscroll would partially clip the cursor's row whenever
+               ;; it is the top line; a clamped start sits on a line
+               ;; boundary anyway.
+               (vscroll (if (and cursor-bol (= cursor-bol start))
+                            0
+                          (cdr anchor))))
+          (set-window-start window start)
+          (ghostel--set-window-vscroll window vscroll t t)
           (set-window-point window (if (eq ghostel--input-mode 'line)
                                        orig
-                                     (or ghostel--cursor-char-pos target))))))))
+                                     (or cursor target))))))))
 
 (defun ghostel--maybe-defer-redraw (buffer)
   "Defer BUFFER's redraw if a `ghostel-inhibit-redraw-functions' hook asks.

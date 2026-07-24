@@ -5,6 +5,30 @@
 
 (setq lua-ts-indent-offset 4)
 
+(add-hook 'lua-ts-mode-hook #'my-lua-ts-indent-fix)
+
+(defun my-lua-ts-indent-fix ()
+  "修复函数参数/形参换行后的缩进问题。
+内置规则中 first-real-sibling-anchor 会将换行参数对齐到
+行首 ( 的位置,当 ( 与函数名同行时导致缩进为 0。
+此函数用 standalone-parent 覆盖这些规则,使参数相对于
+父语句缩进一个 tab。"
+  (let* ((lang-entry (car treesit-simple-indent-rules))
+         (lang (car lang-entry))
+         (old-rules (cdr lang-entry)))
+    ;; 在已有规则之前插入新规则（优先匹配）
+    ;; 覆盖所有直接父节点为 arguments/parameters 的情况，
+    ;; 统一用 standalone-parent 缩进，避免 first-real-sibling-anchor
+    ;; 把参数对齐到 ( 的位置（当 ( 与函数名同行时会导致缩进为 0）
+    (setcar treesit-simple-indent-rules
+            (cons lang
+                  (append
+                   `(((parent-is "arguments")
+                      standalone-parent lua-ts-indent-offset)
+                     ((parent-is "parameters")
+                      standalone-parent lua-ts-indent-offset))
+                   old-rules)))))
+
 (add-hook 'lua-ts-mode-hook (lambda ()
                               (setq indent-tabs-mode t)
                               (setq tab-width 4)))

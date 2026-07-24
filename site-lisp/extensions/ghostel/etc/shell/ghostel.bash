@@ -12,7 +12,7 @@
 # See the README "Manual setup" section for the full rationale.
 
 # Idempotency guard — skip if already loaded (e.g. auto-injected).
-[[ "$(type -t __ghostel_osc7)" = "function" ]] && return
+[[ "$(builtin type -t __ghostel_osc7)" = "function" ]] && return
 
 # Old bash (e.g. macOS system bash 3.2) rejects process substitution `<(...)`
 # at parse time under POSIX mode; the `ssh` wrapper below uses it.
@@ -66,7 +66,7 @@ __ghostel_osc7() {
 # Emit "command finished" (D) for the previous command.
 # D is skipped on the very first prompt (no previous command).
 __ghostel_prompt_start() {
-    if [[ -n "$__ghostel_prompt_shown" ]]; then
+    if [[ -n "${__ghostel_prompt_shown:-}" ]]; then
         printf '\e]133;D;%s\a' "$__ghostel_last_status"
     fi
     __ghostel_prompt_shown=1
@@ -75,9 +75,11 @@ __ghostel_prompt_start() {
 # Emit "command output start" (C) via the DEBUG trap, and restore the
 # unmarked PS1/PS2 so the user's command (and any other DEBUG-trap
 # observers) doesn't see our markers.
-# Guards: skip when running inside PROMPT_COMMAND itself, and skip
-# PROMPT_COMMAND content executing at top level — hooks appended to
-# the bash-5.1+ PROMPT_COMMAND array after this file loaded (e.g.
+# Guards: skip until the first prompt — startup commands (this file's
+# tail, the rest of `.bashrc') fire DEBUG too, and their C would have
+# no matching D.  Skip when running inside PROMPT_COMMAND itself, and
+# skip PROMPT_COMMAND content executing at top level — hooks appended
+# to the bash-5.1+ PROMPT_COMMAND array after this file loaded (e.g.
 # systemd's osc-context profile.d script) run as separate top-level
 # commands and must not unwrap PS1 or emit 133;C.  DEBUG fires once
 # per simple command, so a compound element (`history -a; history -n')
@@ -86,6 +88,7 @@ __ghostel_prompt_start() {
 # user-typed command byte-identical to a fragment is skipped too.
 __ghostel_in_prompt_command=0
 __ghostel_preexec() {
+    [[ -z "${__ghostel_prompt_shown:-}" ]] && return
     [[ "$__ghostel_in_prompt_command" = 1 ]] && return
     local __ghostel_frags __ghostel_f IFS=$';\n'
     read -rd '' -a __ghostel_frags <<< "${PROMPT_COMMAND[*]:-}"
@@ -158,7 +161,7 @@ __ghostel_wrapped_prompt_command() {
     # Emit 133;A once per cycle (with cl=line for click-events and
     # redraw=last so libghostty knows the prompt-redraw boundary).
     # `aid=$BASHPID' tags this prompt with the current shell PID.
-    printf '\e]133;A;redraw=last;cl=line;aid=%s\a' "$BASHPID"
+    printf '\e]133;A;redraw=last;cl=line;aid=%s\a' "${BASHPID:-}"
 
     __ghostel_in_prompt_command=0
 }
@@ -193,14 +196,14 @@ trap '__ghostel_preexec' DEBUG
 #
 # Per-call escape hatch: prefix `ssh' with GHOSTEL_SSH_KEEP_TERM=1 to
 # bypass the wrapper entirely.
-if [[ -n "$GHOSTEL_SSH_INSTALL_TERMINFO" ]]; then
+if [[ -n "${GHOSTEL_SSH_INSTALL_TERMINFO:-}" ]]; then
     # `function NAME { … }' rather than `NAME() { … }' so a user alias
     # on `ssh' (aliases expand at parse time in zsh, and bash when the
     # alias is already active while sourcing this file) can't turn the
     # definition into a parse error.
     function ssh {
         # Escape hatch + need infocmp locally to do anything useful.
-        if [[ -n "$GHOSTEL_SSH_KEEP_TERM" ]] || \
+        if [[ -n "${GHOSTEL_SSH_KEEP_TERM:-}" ]] || \
                ! builtin command -v infocmp >/dev/null 2>&1; then
             builtin command ssh "$@"
             return
