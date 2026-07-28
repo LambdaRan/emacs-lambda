@@ -34,8 +34,8 @@
         (json . ("https://github.com/tree-sitter/tree-sitter-json"))
         (lua . ("https://github.com/tree-sitter-grammars/tree-sitter-lua" "a24dab1"))
         (make . ("https://github.com/alemuller/tree-sitter-make"))
-        (markdown . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "v0.4.1" "tree-sitter-markdown/src"))
-        (markdown-inline . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "v0.4.0" "tree-sitter-markdown-inline/src"))
+        (markdown . ("https://github.com/tree-sitter/tree-sitter-markdown" "v0.4.1" "tree-sitter-markdown/src"))
+        (markdown-inline . ("https://github.com/tree-sitter/tree-sitter-markdown" "v0.4.0" "tree-sitter-markdown-inline/src"))
         (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
         (org . ("https://github.com/milisims/tree-sitter-org"))
         (python . ("https://github.com/tree-sitter/tree-sitter-python" "v0.23.5"))
@@ -102,22 +102,64 @@
 ;; 导致 beginning-of-defun / end-of-defun 卡死。
 ;; 影响: fingertip, expand-region (er/mark-defun), mark-defun 等所有调用
 ;;       defun 导航的功能。
-;; 修复: 用语法表 + 缩进方式替代 treesit 的 defun 遍历。
+;;
+;; 策略：设置 beginning-of-defun-function / end-of-defun-function（buffer-local），
+;; 不 advise treesit-beginning/end-of-defun 本身。
+;; 这样 treesit 原始函数保持不变，作为安全 fallback，不会递归。
+;;
+;; 快速路径:
+;;   - 大括号语言 ({})：syntax-ppss + up-list
+;;   - def/class 缩进语言 (Python/Ruby)：关键字 + 缩进
+;; Fallback:
+;;   - 其他语言 (Lua function/end, Haskell, ...)：调用 treesit 原始函数
 
 (defun my-treesit--defun-start-braces ()
   "用语法表找 defun 起点（大括号语言）。
-通过 syntax-ppss 的嵌套深度，逐层 up-list 跳出到最外层 {。"
-  (let ((forward-sexp-function nil))  ; 强制用语法表，不走 treesit
-    (let ((depth (car (syntax-ppss)))
-          (moved nil))
+处理两种情况：
+- 嵌套在 {} 内部：逐层 up-list 到最外层 {
+- 顶层 (depth 0)：从当前行向前扫描 {
+仅在找到 {} 时返回 t，非大括号语言返回 nil。"
+  (let* ((forward-sexp-function nil)     ; 强制用语法表，不走 treesit
+         (orig-depth (car (syntax-ppss)))
+         (moved nil)
+         (depth orig-depth))
+    (cond
+     ;; 嵌套在 {} 内部：逐层跳出到最外层
+     ((> depth 0)
       (while (> depth 0)
         (if (ignore-errors (up-list -1))
             (setq moved t depth (car (syntax-ppss)))
           (setq depth 0)))
       (when (and moved (eq (char-after) ?\{))
-        (forward-line -1)
-        (skip-chars-forward " \t"))
-      moved)))
+        ;; { 可能在声明同行或单独一行，取靠前位置
+        (let ((brace-line (line-number-at-pos))
+              (brace-col (current-column)))
+          (forward-line -1)
+          (skip-chars-forward " \t")
+          ;; 如果上一行是空行或缩进比 { 深，说明声明与 { 同行
+          (when (or (looking-at-p "[ \t]*$")
+                    (> (current-column) brace-col))
+            (goto-char (line-beginning-position (+ brace-line 1)))))))
+     ;; 顶层 (depth 0)：向前扫描找函数声明行附近的 {
+     (t
+      (let ((brace-pos nil))
+        (save-excursion
+          (catch 'done
+            (dotimes (_ 6)              ; 最多向前扫描 5 行
+              (let ((d (car (syntax-ppss))))
+                (cond
+                 ((> d 0)               ; 进入 {} 了
+                  (when (re-search-forward "{" (line-end-position) t)
+                    (setq brace-pos (1- (point))))
+                  (throw 'done t))
+                 ((looking-at-p "[ \t]*$") ; 空行：停止扫描
+                  (throw 'done t))))
+              (forward-line 1))))
+        (when brace-pos
+          (goto-char brace-pos)
+          (beginning-of-line)
+          (skip-chars-forward " \t")
+          t))))))
 
 (defun my-treesit--defun-start-indent ()
   "用缩进找 defun 起点（Python / Ruby 等缩进语言）。
@@ -138,53 +180,78 @@
     found))
 
 (defun my-treesit-beginning-of-defun (&optional arg)
-  "替代 treesit-beginning-of-defun，避免 treesit--thing-sibling 性能问题。
-大括号语言用语法表；缩进语言用关键字+缩进检测。"
+  "快速 defun 起点定位 + treesit fallback。
+大括号 / def·class 缩进语言用快速 heuristic；
+其他语言 (Lua, Haskell, ...) 调用 treesit-beginning-of-defun。"
   (let ((arg (or arg 1)))
     (cond
      ((< arg 0) (my-treesit-end-of-defun (- arg)))
      (t
       (while (> arg 0)
         (let ((orig (point)))
-          ;; 先退到行首，避免停留在当前 defun 头部
           (beginning-of-line)
           (unless (or (my-treesit--defun-start-braces)
                       (my-treesit--defun-start-indent))
-            ;; 两种方法都没找到，回到原位
-            (goto-char orig))
-        (setq arg (1- arg))))))))
+            ;; heuristic 不适用：fallback 到 treesit 原始函数
+            ;; （treesit-beginning-of-defun 未被 advise，安全调用）
+            (goto-char orig)
+            (treesit-beginning-of-defun 1)))
+        (setq arg (1- arg)))))))
 
 (defun my-treesit-end-of-defun (&optional arg)
-  "替代 treesit-end-of-defun，避免 treesit--thing-sibling 性能问题。
-大括号语言用 syntax-ppss + forward-sexp 找匹配 }。"
-  (let ((forward-sexp-function nil))  ; 强制用语法表，不走 treesit
-    (let ((arg (or arg 1)))
-      (cond
-       ((< arg 0) (my-treesit-beginning-of-defun (- arg)))
-       (t
-        (while (> arg 0)
-          (let* ((state (syntax-ppss))
-                 (depth (car state))
-                 (orig (point)))
-            (cond
-             ((> depth 0)
-              ;; 在嵌套结构中：先跳到最外层，再 forward-sexp 到匹配的 }
-              (catch 'done
-                (while (> (car (syntax-ppss)) 0)
-                  (unless (ignore-errors (up-list -1))
-                    (throw 'done nil))))
-              (or (ignore-errors (forward-sexp 1))
-                  (goto-char (point-max))))
-             (t
-              ;; 顶层：跳到下一个 defun 之前（缩进语言的 def/class）
-              (or (re-search-forward "^\\(def\\|class\\)\\_>" nil t)
-                  (goto-char (point-max)))
-              (when (< (point) (point-max))
-                (forward-line -1)
-                (end-of-line)))))
-          (setq arg (1- arg))))))))
+  "快速 defun 终点定位 + treesit fallback。
+大括号语言用 syntax-ppss + forward-sexp；其他语言调用 treesit。"
+  (let* ((forward-sexp-function nil)     ; 强制用语法表，不走 treesit
+         (arg (or arg 1)))
+    (cond
+     ((< arg 0) (my-treesit-beginning-of-defun (- arg)))
+     (t
+      (while (> arg 0)
+        (let* ((state (syntax-ppss))
+               (depth (car state))
+               (orig (point)))
+          (cond
+           ((> depth 0)
+            ;; 在嵌套结构中：先跳到最外层，再 forward-sexp 到匹配的 }
+            (catch 'done
+              (while (> (car (syntax-ppss)) 0)
+                (unless (ignore-errors (up-list -1))
+                  (throw 'done nil))))
+            (or (ignore-errors (forward-sexp 1))
+                (goto-char (point-max))))
+           (t
+            ;; 顶层：先尝试大括号语言（向前找 { 再 forward-sexp 到 }）
+            (let ((brace-pos nil))
+              (save-excursion
+                (catch 'done
+                  (dotimes (_ 6)        ; 最多向前扫描 5 行
+                    (let ((d (car (syntax-ppss))))
+                      (cond
+                       ((> d 0)         ; 进入 {} 了
+                        (when (re-search-forward "{" (line-end-position) t)
+                          (setq brace-pos (1- (point))))
+                        (throw 'done t))
+                       ((looking-at-p "[ \t]*$") ; 空行：停止
+                        (throw 'done t))))
+                    (forward-line 1))))
+              (if brace-pos
+                  ;; 大括号语言：跳到 { 再 forward-sexp 到匹配的 }
+                  (progn (goto-char brace-pos)
+                         (or (ignore-errors (forward-sexp 1))
+                             (goto-char (point-max))))
+                ;; 非大括号语言：fallback 到 treesit 原始函数
+                ;; （treesit-end-of-defun 未被 advise，安全调用）
+                (treesit-end-of-defun 1))))))
+        (setq arg (1- arg)))))))
 
-(advice-add 'treesit-beginning-of-defun :override #'my-treesit-beginning-of-defun)
-(advice-add 'treesit-end-of-defun :override #'my-treesit-end-of-defun)
+;; 在 treesit 模式的 hook 中设置 buffer-local 的 defun 导航函数。
+;; 不 advise treesit-beginning/end-of-defun，避免递归。
+(defun my-treesit--setup-defun-nav ()
+  "为当前 treesit 模式 buffer 设置快速 defun 导航。"
+  (when (and (boundp 'treesit-language) treesit-language)
+    (setq-local beginning-of-defun-function #'my-treesit-beginning-of-defun)
+    (setq-local end-of-defun-function #'my-treesit-end-of-defun)))
+
+(add-hook 'treesit-mode-hook #'my-treesit--setup-defun-nav)
 
 (provide 'init-treesit)
