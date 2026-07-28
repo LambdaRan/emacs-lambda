@@ -4,7 +4,7 @@
 
 ;; Author: Daniel Kraus <daniel@kraus.my>
 ;; URL: https://github.com/dakra/ghostel
-;; Version: 0.45.0
+;; Version: 0.46.0
 ;; Keywords: terminals
 ;; Package-Requires: ((emacs "28.1") (compat "30.1.0.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -74,7 +74,7 @@
 ;; Native module:
 ;;
 ;;   A pre-built binary is downloaded automatically on first use.
-;;   To build from source instead (requires exactly Zig 0.15.2), run
+;;   To build from source instead (requires exactly Zig 0.16.0), run
 ;;   zig build --prefix . from the project root, or M-x ghostel-module-compile.
 ;;   M-x ghostel-download-module re-fetches the pre-built binary.
 ;;
@@ -342,6 +342,14 @@ is deferred and rescheduled.  Errors are demoted and treated as nil.
 Add-on features can use this to keep core ghostel from rewriting the
 buffer during transient states such as Emacs Lisp input-method
 composition."
+  :type 'hook)
+
+(defcustom ghostel-inhibit-input-forwarding-functions nil
+  "Abnormal hook to veto forwarding a foreign buffer edit to the PTY.
+Each function is called with no arguments, the ghostel buffer
+current.  A non-nil return leaves the edit alone.  Add-on features
+use this to protect their own buffer insertions, e.g. `ghostel-ime'
+during an Emacs Lisp input-method composition."
   :type 'hook)
 
 (defcustom ghostel-inhibit-anchor-functions nil
@@ -978,7 +986,8 @@ Matches Ghostty 1.2.0's `bold-color' configuration."
            (with-current-buffer buf
              (when (and (derived-mode-p 'ghostel-mode) ghostel--term)
                (ghostel--apply-bold-config ghostel--term)
-               (let ((inhibit-read-only t))
+               (let ((inhibit-read-only t)
+                     (inhibit-modification-hooks t))
                  (ghostel--redraw ghostel--term t t))
                (ghostel--apply-cursor-style))))))
 
@@ -1035,6 +1044,11 @@ local code should not assume it is signalable unless the process is local.")
 
 (defvar-local ghostel--pending-redraw nil
   "Non-nil when redraw is needed when buffer is displayed again.")
+
+(defvar-local ghostel--link-id-counter 0
+  "Source of `ghostel-link-id' values for detected multi-row links.
+Counts up so an id stays unique after scrollback eviction shifts
+buffer positions.")
 
 (defvar-local ghostel--plain-link-detection-timer nil
   "Timer for delayed redraw-triggered plain-text link detection.")
@@ -1680,6 +1694,54 @@ Detect that case via `this-command-keys-vector' and re-inject meta."
       (ghostel--send-encoded key-name mod-str))))
 
 
+;;; Programmatic insert forwarding
+
+(defvar-local ghostel--inhibit-insert-forwarding nil
+  "Non-nil disables insert forwarding (e.g. compilation-style runs).")
+
+(defsubst ghostel--insert-forwarding-live-p ()
+  "Non-nil in a terminal-input mode with a live process and forwarding on."
+  (and (not ghostel--inhibit-insert-forwarding)
+       (ghostel--terminal-input-mode-p)
+       ghostel--term
+       (process-live-p ghostel--process)))
+
+(defun ghostel--forward-inserts-p ()
+  "Non-nil when foreign buffer edits should be intercepted."
+  (and (ghostel--insert-forwarding-live-p)
+       (not (run-hook-with-args-until-success
+             'ghostel-inhibit-input-forwarding-functions))))
+
+(defun ghostel--forward-inserts-after-change (beg end old-len)
+  "Forward a foreign insertion BEG..END to the PTY and remove it from the buffer.
+Text containing a line break is sent as a bracketed paste.  An edit that removed
+renderer-owned text (OLD-LEN non-zero) is instead repaired by a full redraw
+restoring the terminal contents, with point realigned to the VT cursor."
+  (when (ghostel--forward-inserts-p)
+    (if (> old-len 0)
+        (progn
+          (ghostel--redraw ghostel--term t t)
+          ;; The reverted edit must not move point either; realign it.
+          (when ghostel--cursor-char-pos
+            (goto-char ghostel--cursor-char-pos)))
+      (when (> end beg)
+        (let ((text (buffer-substring-no-properties beg end)))
+          (delete-region beg end)
+          (ghostel--on-user-input)
+          (if (string-match-p "[\n\r]" text)
+              (ghostel--paste-text text)
+            (ghostel--send-string (encode-coding-string text 'utf-8))))))))
+
+(defun ghostel--sync-inhibit-read-only ()
+  "Set buffer-local `inhibit-read-only' from the terminal state.
+Non-nil in terminal-input modes with a live process, so
+`(interactive \"*\")' commands run and the after-change hook
+forwards their insertions while `buffer-read-only' stays non-nil;
+nil restores the plain read-only barrier."
+  (setq-local inhibit-read-only
+              (and (ghostel--insert-forwarding-live-p) t)))
+
+
 ;;; Public input API
 
 (defun ghostel--ensure-ghostel-buffer ()
@@ -1905,7 +1967,11 @@ Return non-nil if the event was encoded and sent."
   "Move to the bottom of the buffer (current viewport) in read-only mode."
   (interactive)
   (goto-char (point-max))
-  (skip-chars-backward " \t\n"))
+  (skip-chars-backward " \t\n")
+  (when (and ghostel--cursor-char-pos
+             (<= ghostel--cursor-char-pos (point-max))
+             (> ghostel--cursor-char-pos (point)))
+    (goto-char ghostel--cursor-char-pos)))
 
 ;; Let isearch treat this as the buffer-end motion command.
 (put 'ghostel-readonly-end-of-buffer 'isearch-motion
@@ -2389,6 +2455,7 @@ Most keys are sent to the terminal; keys in
       ('line  (ghostel--line-mode-teardown)))
     (setq ghostel--char-mode-override-active nil)
     (setq ghostel--input-mode 'semi-char)
+    (ghostel--sync-inhibit-read-only)
     (use-local-map ghostel-semi-char-mode-map)
     (setq ghostel--mode-line-tag nil)
     (ghostel--mode-line-refresh)
@@ -2417,6 +2484,7 @@ Even keys listed in `ghostel-keymap-exceptions' (\\`C-c', \\`C-x',
       ('emacs (ghostel--leave-readonly-state))
       ('line  (ghostel--line-mode-teardown)))
     (setq ghostel--input-mode 'char)
+    (ghostel--sync-inhibit-read-only)
     ;; Route char mode through `emulation-mode-map-alists' so it
     ;; overrides minor-mode keymaps (without this, a minor mode that
     ;; binds a prefix like \\`C-c' would steal those keys before
@@ -2484,6 +2552,7 @@ a non-read-only mode."
       (when ghostel--term
         (ghostel--invalidate)))
     (setq ghostel--input-mode mode)
+    (ghostel--sync-inhibit-read-only)
     (use-local-map (ghostel--readonly-keymap))
     (setq ghostel--mode-line-tag (ghostel--mode-line-tag-make mode label))
     (ghostel--mode-line-refresh)
@@ -2491,14 +2560,13 @@ a non-read-only mode."
 
 (defun ghostel-emacs-mode ()
   "Toggle Emacs mode — read-only buffer with the terminal still running.
-The terminal keeps running and scrollback keeps growing.  The
-buffer is read-only, so standard Emacs commands like `isearch',
-`occur', `M-x', `C-SPC' / `M-w', and regular navigation all work
-unmodified over the entire materialised scrollback.  When already
-in Emacs mode this exits back to the previous mode (mirroring
-`ghostel-copy-mode'); otherwise exit with an explicit mode-switch
-command (`\\[ghostel-semi-char-mode]'), or \\`q'/\\`C-g'/any
-self-insert key when `ghostel-readonly-fast-exit' is non-nil."
+The terminal keeps running and scrollback keeps growing.
+The buffer is read-only, so standard Emacs commands like `isearch', `occur',
+`C-SPC' / `M-w', and regular navigation all work unmodified over the entire
+materialised scrollback.  While point sits on the live terminal cursor the
+window follows new output.
+Moving point off the cursor stops scrolling until point returns to the cursor.
+When already in Emacs mode this exits back to the previous mode."
   (interactive)
   (ghostel--ensure-ghostel-buffer)
   (if (eq ghostel--input-mode 'emacs)
@@ -2950,16 +3018,206 @@ Wraps to `point-max' when no link is found before point."
 
 (eldoc-add-command #'ghostel-next-hyperlink #'ghostel-previous-hyperlink)
 
-(defun ghostel--detect-urls-skip-p (pos active-bounds)
-  "Return non-nil if link detection should leave POS alone.
-Skips spans already linkified (any `help-echo'), the shell's prompt
-decoration (`ghostel-prompt') and the cursor's current line.
+(defconst ghostel--soft-wrap-row-limit 50
+  "How many rows `ghostel--detect-urls' joins into one logical line.
+Output like a minified JSON blob is a single line megabytes long;
+joining all of it would cost more than any link is worth, and would hand the
+patterns a match candidate long enough to overflow the regexp matcher.
+Past the limit a row break is kept and joining starts over,
+so a link straddling that break resolves to one side of it.")
+
+(defun ghostel--soft-wrap-line-beginning (pos limit)
+  "Return the start of POS's logical line, crossing soft-wrap newlines.
+A line the terminal split to fit its width continues on the next
+buffer line; the newline between them carries `ghostel-wrap'.
+LIMIT caps how many rows the search walks back."
+  (save-excursion
+    (goto-char pos)
+    (beginning-of-line)
+    (let ((rows 0))
+      (while (and (< rows limit)
+                  (> (point) (point-min))
+                  (get-text-property (1- (point)) 'ghostel-wrap))
+        (forward-line -1)
+        (setq rows (1+ rows))))
+    (point)))
+
+(defun ghostel--soft-wrap-line-end (pos limit)
+  "Return the end of POS's logical line, crossing soft-wrap newlines.
+LIMIT caps how many rows the search walks forward."
+  (save-excursion
+    (goto-char pos)
+    (end-of-line)
+    (let ((rows 0))
+      (while (and (< rows limit)
+                  (get-text-property (point) 'ghostel-wrap))
+        (forward-line 1)
+        (end-of-line)
+        (setq rows (1+ rows))))
+    (point)))
+
+(defun ghostel--wrap-joined-region (begin end limit)
+  "Return (STRING . CHUNKS) for BEGIN..END with soft-wrap newlines removed.
+STRING is the region's text as the terminal program wrote it, so a
+value split across rows matches as one token.  CHUNKS maps it back:
+a vector of (STRING-OFFSET . BUFFER-POS) pairs, one per row, ascending.
+
+LIMIT bounds how many rows may be joined into one line, which keeps a
+megabyte-long line of output from becoming one unbroken token for the
+regexps to chew through."
+  (let ((chunks nil)
+        (parts nil)
+        (offset 0)
+        (rows 0)
+        (pos begin))
+    (while (< pos end)
+      (let* ((wrap (text-property-not-all pos end 'ghostel-wrap nil))
+             (wrapped (and wrap (eq (char-after wrap) ?\n)))
+             (join (and wrapped (< rows limit)))
+             (piece (buffer-substring-no-properties
+                     pos (cond (join wrap)
+                               (wrapped (1+ wrap))
+                               (t end)))))
+        (push (cons offset pos) chunks)
+        (push piece parts)
+        (setq rows (if join (1+ rows) 0)
+              offset (+ offset (length piece))
+              pos (if wrapped (1+ wrap) end))))
+    (cons (string-join (nreverse parts))
+          (vconcat (nreverse chunks)))))
+
+(defun ghostel--wrap-offset-to-pos (offset chunks)
+  "Return the buffer position for STRING OFFSET given CHUNKS.
+CHUNKS is the map returned by `ghostel--wrap-joined-region'.
+Binary search, so a region with thousands of rows stays cheap to map."
+  (unless (zerop (length chunks))
+    (let ((low 0)
+          (high (1- (length chunks))))
+      (while (< low high)
+        (let ((mid (/ (+ low high 1) 2)))
+          (if (<= (car (aref chunks mid)) offset)
+              (setq low mid)
+            (setq high (1- mid)))))
+      (let ((chunk (aref chunks low)))
+        (+ (cdr chunk) (- offset (car chunk)))))))
+
+(defun ghostel--wrap-fragments (beg end)
+  "Return the buffer ranges covering BEG..END, split at soft-wrap newlines.
+Each element is a (START . STOP) cons; the wrap newlines themselves
+are left out so link properties never cover a row break."
+  (let ((fragments nil)
+        (pos beg))
+    (while (< pos end)
+      (let ((wrap (text-property-not-all pos end 'ghostel-wrap nil)))
+        (if (and wrap (eq (char-after wrap) ?\n))
+            (progn
+              (when (< pos wrap) (push (cons pos wrap) fragments))
+              (setq pos (1+ wrap)))
+          (push (cons pos end) fragments)
+          (setq pos end))))
+    (nreverse fragments)))
+
+(defun ghostel--url-link-p (pos)
+  "Non-nil when POS carries a URL link this scan attached.
+The file pattern also matches the `//host/path' half of a URL, so the file
+pass has to recognise a URL link to leave it alone, including one an earlier
+scan attached, when URL detection has since been switched off."
+  (let ((echo (get-text-property pos 'help-echo)))
+    (and (ghostel--detected-link-p pos)
+         (stringp echo)
+         (not (string-prefix-p "fileref:" echo)))))
+
+(defun ghostel--range-overlaps-p (beg end ranges)
+  "Non-nil when BEG..END overlaps any (START . STOP) cons in RANGES."
+  (and (seq-find (lambda (range)
+                   (and (< beg (cdr range)) (> end (car range))))
+                 ranges)
+       t))
+
+(defun ghostel--linkify (fragments uri raw)
+  "Mark FRAGMENTS as a hyperlink to URI.
+FRAGMENTS is the buffer ranges of one match, as `ghostel--wrap-fragments'
+returns them.  RAW is the text the match was made of, kept so a later
+scan can tell this link from one whose text has since changed.
+A range broken by soft wraps is marked one row at a time, with a
+shared `ghostel-link-id' so link navigation treats the rows as one
+link.  The id is a cons, which never `equal's an OSC 8 id (those
+are strings or integers)."
+  (let ((props (list 'help-echo uri
+                     'mouse-face 'highlight
+                     'keymap ghostel-link-map
+                     'ghostel-link-text raw
+                     'ghostel-link-id (cons 'ghostel-detected
+                                            (cl-incf ghostel--link-id-counter)))))
+    (pcase-dolist (`(,start . ,stop) fragments)
+      (add-text-properties start stop props))))
+
+(defun ghostel--detected-link-p (pos)
+  "Non-nil when the link at POS is one this scan attached earlier."
+  (eq (car-safe (get-text-property pos 'ghostel-link-id)) 'ghostel-detected))
+
+(defun ghostel--foreign-link-p (beg end)
+  "Non-nil when BEG..END overlaps a link this scan did not attach.
+An OSC 8 span keeps its own target even where a path pattern also
+matches, so the whole range is checked, not just its first cell."
+  (let ((pos beg)
+        (foreign nil))
+    (while (and (not foreign) (< pos end))
+      (let ((echo (get-text-property pos 'help-echo)))
+        (when (and echo (not (ghostel--detected-link-p pos)))
+          (setq foreign t))
+        (setq pos (next-single-property-change pos 'help-echo nil end))))
+    foreign))
+
+(defun ghostel--skip-match-p (fragments raw active-bounds)
+  "Return non-nil if the link over FRAGMENTS should not be applied.
+RAW is the text this match is made of.  Leaves alone what another
+source owns (an OSC 8 span), the prompt, the line the cursor is on,
+and a match whose link already covers this same text.  A match whose
+text changed, or that is only partly marked, is re-applied: the
+renderer repaints the rows that changed, so the rows of a wrapped
+link that did not change would otherwise keep pointing at text they
+no longer hold.  The test is on the text rather than on the resolved
+target, so a `cd' — which moves `default-directory' under output that
+never changed — leaves existing links pointing where they did.
 ACTIVE-BOUNDS is a (BOL . EOL) cons covering the cursor's line."
-  (or (get-text-property pos 'help-echo)
-      (get-text-property pos 'ghostel-prompt)
-      (and active-bounds
-           (>= pos (car active-bounds))
-           (<= pos (cdr active-bounds)))))
+  (let ((skip nil)
+        (current t))
+    (pcase-dolist (`(,start . ,stop) fragments)
+      (when (or (get-text-property start 'ghostel-prompt)
+                (and active-bounds
+                     (>= start (car active-bounds))
+                     (<= start (cdr active-bounds)))
+                (ghostel--foreign-link-p start stop))
+        (setq skip t))
+      (unless (and (ghostel--detected-link-p start)
+                   (equal raw (get-text-property start 'ghostel-link-text)))
+        (setq current nil)))
+    (or skip current)))
+
+(defun ghostel--drop-stranded-links (begin end matched urls files)
+  "Remove this scan's links in BEGIN..END that no match covers.
+MATCHED is the list of (START . STOP) ranges the scan matched, whatever
+it then did with them.  A row repainted on its own can leave the other
+rows of a wrapped link behind, pointing at text that is gone.
+URLS and FILES say which patterns ran: a link of a kind that was not
+scanned for is unexamined, not stranded."
+  (let ((pos begin))
+    (while (setq pos (text-property-not-all pos end 'ghostel-link-id nil))
+      (let* ((stop (next-single-property-change pos 'ghostel-link-id nil end))
+             (echo (get-text-property pos 'help-echo))
+             (scanned (if (and (stringp echo)
+                               (string-prefix-p "fileref:" echo))
+                          files
+                        urls)))
+        (when (and scanned
+                   (ghostel--detected-link-p pos)
+                   (not (ghostel--range-overlaps-p pos stop matched)))
+          (remove-text-properties pos stop
+                                  '(help-echo nil mouse-face nil keymap nil
+                                              ghostel-link-id nil
+                                              ghostel-link-text nil)))
+        (setq pos stop)))))
 
 (defun ghostel--detect-urls (&optional begin end)
   "Scan a buffer region for plain-text URLs and file:line references.
@@ -2971,68 +3229,102 @@ materialized scrollback on every redraw.
 Binds `inhibit-read-only' and suppresses modification hooks so the scan
 can attach text properties when called from the deferred-detection timer
 outside the redraw scope."
-  (let* ((begin (or begin (point-min)))
-         (end (or end (point-max)))
+  (let* (;; Whole logical lines: a value the terminal split across rows is
+         ;; only recognisable once the rows are joined, and starting mid-line
+         ;; would let the `^' anchor below match where there is no line start.
+         (begin (ghostel--soft-wrap-line-beginning
+                 (or begin (point-min)) ghostel--soft-wrap-row-limit))
+         (end (ghostel--soft-wrap-line-end
+               (or end (point-max)) ghostel--soft-wrap-row-limit))
          (inhibit-read-only t)
          (inhibit-modification-hooks t)
          ;; `ghostel--cursor-char-pos' is the live terminal cursor after a redraw;
          ;; its line is the prompt the user is currently editing.  Capture as
          ;; buffer-position bounds so the per-match skip check is O(1).
          (active-pos (or ghostel--cursor-char-pos (point)))
-         (active-bounds (save-excursion
-                          (goto-char active-pos)
-                          (cons (line-beginning-position)
-                                (line-end-position)))))
-    (save-excursion
-      ;; Pass 1: http(s) URLs
-      (when ghostel-enable-url-detection
-        (goto-char begin)
-        (while (re-search-forward
+         (active-bounds (cons (ghostel--soft-wrap-line-beginning
+                               active-pos ghostel--soft-wrap-row-limit)
+                              (ghostel--soft-wrap-line-end
+                               active-pos ghostel--soft-wrap-row-limit)))
+         (joined (ghostel--wrap-joined-region
+                  begin end ghostel--soft-wrap-row-limit))
+         (text (car joined))
+         (chunks (cdr joined))
+         ;; Disable file detection over TRAMP
+         (files (and ghostel-enable-file-detection
+                     (not (file-remote-p default-directory))))
+         ;; Every range a pattern matched, whether or not it was linkified.
+         ;; What no pattern covers any more is a leftover to clear.
+         (matched nil)
+         (url-ranges nil))
+    ;; Pass 1: http(s) URLs
+    (when ghostel-enable-url-detection
+      (let ((offset 0))
+        (while (string-match
                 "https?://[^ \t\n\r\"<>]*[^ \t\n\r\"<>.,;:!?)>]"
-                end t)
-          (let ((beg (match-beginning 0))
-                (mend (match-end 0)))
-            (unless (ghostel--detect-urls-skip-p beg active-bounds)
-              (let ((url (match-string-no-properties 0)))
-                (put-text-property beg mend 'help-echo url)
-                (put-text-property beg mend 'mouse-face 'highlight)
-                (put-text-property beg mend 'keymap ghostel-link-map))))))
-      ;; Pass 2: file:line[:col] references (e.g. "./foo.el:42",
-      ;; "/tmp/bar.rs:10", or bare relative paths like "src/main.rs:42:4"
-      ;; from compiler output).  The full regex is assembled from fixed anchor
-      ;; + user-tunable path + fixed `:LINE[:COL]' tail so group 1 (path) and
-      ;; group 2 (line[:col]) are always present — no nil-guarding needed in
-      ;; the hot loop.  A small hash memoizes `file-exists-p' so repeated paths
-      ;; in a redraw (common in multi-line compiler diagnostics) don't re-stat.
-      ;; Skip entirely over TRAMP: every candidate would `expand-file-name' to
-      ;; a remote path and `file-exists-p' would do a network round-trip on
-      ;; every redraw, stalling the timer on high-latency links.
-      (when (and ghostel-enable-file-detection
-                 (not (file-remote-p default-directory)))
-        (goto-char begin)
-        (let ((full-regex (concat ghostel--file-detection-leading-anchor
-                                  "\\(" ghostel-file-detection-path-regex "\\)"
-                                  "\\(" ghostel--file-detection-tail "\\)"))
-              (seen (make-hash-table :test 'equal)))
-          (while (re-search-forward full-regex end t)
-            (let ((beg (match-beginning 1))
-                  (mend (match-end 2)))
-              (unless (ghostel--detect-urls-skip-p beg active-bounds)
-                (let* ((path (match-string-no-properties 1))
-                       (loc (match-string-no-properties 2))
-                       (abs-path (expand-file-name path))
+                text offset)
+          (setq offset (match-end 0))
+          (let* ((beg (ghostel--wrap-offset-to-pos (match-beginning 0) chunks))
+                 (mend (ghostel--wrap-offset-to-pos (match-end 0) chunks))
+                 (url (match-string-no-properties 0 text))
+                 (fragments (ghostel--wrap-fragments beg mend))
+                 (range (cons beg mend)))
+            (push range url-ranges)
+            (push range matched)
+            (unless (ghostel--skip-match-p fragments url active-bounds)
+              (ghostel--linkify fragments url url))))))
+    ;; Pass 2: file:line[:col] references (e.g. "./foo.el:42",
+    ;; "/tmp/bar.rs:10", or bare relative paths like "src/main.rs:42:4"
+    ;; from compiler output).  The full regex is assembled from fixed anchor
+    ;; + user-tunable path + fixed `:LINE[:COL]' tail so group 1 (path) and
+    ;; group 2 (line[:col]) are always present — no nil-guarding needed in
+    ;; the hot loop.  A small hash memoizes `file-exists-p' so repeated paths
+    ;; in a redraw (common in multi-line compiler diagnostics) don't re-stat.
+    (when files
+      (let ((full-regex (concat ghostel--file-detection-leading-anchor
+                                "\\(" ghostel-file-detection-path-regex "\\)"
+                                "\\(" ghostel--file-detection-tail "\\)"))
+            (seen (make-hash-table :test 'equal))
+            (offset 0))
+        (while (string-match full-regex text offset)
+          (setq offset (match-end 2))
+          (let* ((beg (ghostel--wrap-offset-to-pos (match-beginning 1) chunks))
+                 (mend (ghostel--wrap-offset-to-pos (match-end 2) chunks))
+                 (path (match-string-no-properties 1 text))
+                 (loc (match-string-no-properties 2 text))
+                 (raw (concat path loc))
+                 (fragments (ghostel--wrap-fragments beg mend)))
+            ;; A URL owns its whole span: its `//host/path' half also looks
+            ;; like a path, and re-marking it would replace the link with a
+            ;; local file — and stat that file on every scan.
+            (unless (or (ghostel--range-overlaps-p beg mend url-ranges)
+                        ;; With the URL pass switched off nothing recorded a
+                        ;; range, so fall back to the link already there.
+                        ;; When it did run its ranges are the whole truth,
+                        ;; and a leftover URL link is about to be cleared.
+                        (and (not ghostel-enable-url-detection)
+                             (ghostel--url-link-p beg)))
+              (if (ghostel--skip-match-p fragments raw active-bounds)
+                  ;; Whatever is there stays; it must not count as stranded.
+                  (push (cons beg mend) matched)
+                (let* ((abs-path (expand-file-name path))
                        (cached (gethash abs-path seen 'unset))
                        (exists (if (eq cached 'unset)
                                    (puthash abs-path (file-exists-p abs-path) seen)
                                  cached)))
+                  ;; A candidate that names no file leaves the range
+                  ;; uncovered, so a link left over from the text it used
+                  ;; to hold is cleared.
                   (when exists
-                    (put-text-property beg mend 'help-echo
-                                       (if (> (length loc) 0)
-                                           (concat "fileref:" abs-path ":"
-                                                   (substring loc 1))
-                                         (concat "fileref:" abs-path)))
-                    (put-text-property beg mend 'mouse-face 'highlight)
-                    (put-text-property beg mend 'keymap ghostel-link-map)))))))))))
+                    (push (cons beg mend) matched)
+                    (ghostel--linkify
+                     fragments
+                     (if (> (length loc) 0)
+                         (concat "fileref:" abs-path ":" (substring loc 1))
+                       (concat "fileref:" abs-path))
+                     raw)))))))))
+    (ghostel--drop-stranded-links
+     begin end matched ghostel-enable-url-detection files)))
 
 (defun ghostel--run-queued-plain-link-detection (buffer)
   "Run any queued redraw-triggered plain-text link detection for BUFFER."
@@ -3838,6 +4130,8 @@ EVENT is the state-change description passed by Emacs."
         (remove-hook 'pre-redisplay-functions #'ghostel--fake-cursor-update t)
         (ghostel--fake-cursor-clear)
         (run-hook-with-args 'ghostel-exit-functions buf event)
+        ;; Dead terminal: restore the plain read-only barrier.
+        (ghostel--sync-inhibit-read-only)
         (if ghostel-kill-buffer-on-exit
             (kill-buffer buf)
           (let ((inhibit-read-only t))
@@ -4354,7 +4648,9 @@ TRAMP can manage the remote shell."
                     (ghostel--spawn-via-emacs program program-args remote-p))))
     (when (processp process)
       (process-put process 'adjust-window-size-function #'ignore))
-    (setq ghostel--process process)))
+    (setq ghostel--process process)
+    (ghostel--sync-inhibit-read-only)
+    process))
 
 (defun ghostel--spawn-via-emacs (program program-args &optional remote-p)
   "Spawn PROGRAM with PROGRAM-ARGS through Emacs process machinery.
@@ -4613,16 +4909,15 @@ timer.  Hidden output remains pending until the buffer is displayed."
         (forward-line (- tr))
         (line-beginning-position)))))
 
-(defun ghostel--schedule-link-detection (&optional begin end)
-  "Schedule deferred plain-text link detection over BEGIN..END.
-BEGIN defaults to the current viewport start (or `point-min' if the
-buffer has no viewport yet).  END defaults to `point-max'.  Covers
+(defun ghostel--schedule-link-detection ()
+  "Schedule deferred plain-text link detection over the viewport.
+Falls back to `point-min' when the buffer has no viewport yet.  Covers
 plain-text URL and file:line detection; native OSC-8 hyperlink spans
 remain handled inside the renderer."
   (when (or ghostel-enable-url-detection ghostel-enable-file-detection)
     (ghostel--queue-plain-link-detection
-     (or begin (ghostel--viewport-start) (point-min))
-     (or end (point-max)))))
+     (or (ghostel--viewport-start) (point-min))
+     (point-max))))
 
 (defun ghostel--daemon-dummy-frame-p (frame)
   "Non-nil if FRAME is the daemon's invisible initial frame.
@@ -4648,6 +4943,31 @@ Windows on the daemon's dummy initial frame are excluded."
      'no-minibuf all-frames)
     (nreverse windows)))
 
+(defun ghostel--window-on-cursor-p (window)
+  "Non-nil if WINDOW's point rides the live terminal cursor.
+WINDOW's buffer must be current.  Riding means point exactly on the cursor or
+at `point-max'; positions between the two do not count.  An active region vetoes
+the ride, except in a non-selected window showing the selected window's buffer."
+  (and ghostel--cursor-char-pos
+       (not (and (region-active-p)
+                 (or (eq window (selected-window))
+                     (not (eq (window-buffer (selected-window))
+                              (current-buffer))))))
+       (or (= (window-point window) ghostel--cursor-char-pos)
+           (= (window-point window) (point-max)))))
+
+(defun ghostel--window-follows-p (window)
+  "Non-nil if WINDOW's point lets it follow live terminal output.
+WINDOW's buffer must be current.  Emacs mode follows on the live cursor,
+a line-mode window selected in its frame on the live edge (other windows' point
+carries no user intent); all other modes always follow."
+  (pcase ghostel--input-mode
+    ('emacs (ghostel--window-on-cursor-p window))
+    ('line (or (not (eq window (frame-selected-window
+                                (window-frame window))))
+               (ghostel--line-mode-on-live-edge-p window)))
+    (_ t)))
+
 (defun ghostel--window-anchored-p (window &optional body-pixel-height)
   "Non-nil if WINDOW is scrolled to follow the live terminal output.
 WINDOW follows the output when the lines from its `window-start' to
@@ -4658,10 +4978,12 @@ line the graphical anchor leaves via `window-vscroll'.
 
 A cursor-clamped anchor (see `ghostel--anchor-window') can start above
 that geometric bound; WINDOW also counts as anchored while its
-`window-start' sits exactly on the live cursor's line."
+`window-start' sits exactly on the live cursor's line.
+WINDOW additionally follows only while `ghostel--window-follows-p'
+holds."
   (with-current-buffer (window-buffer window)
     (when (and (derived-mode-p 'ghostel-mode)
-               (not (eq ghostel--input-mode 'emacs)))
+               (ghostel--window-follows-p window))
       (or (and ghostel--cursor-char-pos
                (not (eq ghostel--input-mode 'line))
                (eql (window-start window)
@@ -4730,7 +5052,7 @@ the bottom of WINDOW."
               (start (nth 2 size)))
     (cons start (max 0 (- (nth 1 size) body-height)))))
 
-(defun ghostel--anchor-window (&optional window force)
+(defun ghostel--anchor-window (&optional window force following)
   "Scroll WINDOW so that the last row is aligned to the bottom of the window.
 In graphical frames, use Emacs's pixel layout for exact bottom alignment.
 In text frames, use line-count geometry with no vscroll.
@@ -4743,20 +5065,19 @@ window over a mostly-empty grid), the anchor starts at the cursor's line
 instead.  `ghostel--window-anchored-p' recognizes such a clamped window
 as still following the output.
 
-Copy mode is never anchored (the viewport is frozen).  Emacs mode is
-anchored only when FORCE is non-nil, reserved for deliberate anchors such
-as paste/yank that should scroll to the live cursor even in Emacs mode;
-auto-follow callers leave FORCE nil so a buffer reading its scrollback in
-Emacs mode keeps its position.  Semi-char/char always anchor and snap
-point to the live cursor; line mode anchors the viewport but keeps the
-user's point, since its input region is user-owned."
+Copy mode is never anchored (the viewport is frozen).  Otherwise
+WINDOW anchors while `ghostel--window-follows-p' holds, or when
+FOLLOWING (the caller established the follow before the render moved
+the cursor) or FORCE (deliberate anchors such as paste/yank) is
+non-nil.  Semi-char/char/Emacs snap point to the live cursor; line
+mode keeps the user's point."
   (when-let* ((window (or window (selected-window)))
               (buffer (window-buffer window))
               ((with-current-buffer buffer
                  (and (derived-mode-p 'ghostel-mode)
-                      (if (eq ghostel--input-mode 'emacs)
-                          force
-                        (ghostel--terminal-live-p))
+                      (ghostel--terminal-live-p)
+                      (or force following
+                          (ghostel--window-follows-p window))
                       ;; Per-window veto: a consumer (e.g. evil-ghostel) can
                       ;; keep point roaming off the live cursor while the
                       ;; buffer stays in a follow-capable input mode.
@@ -4851,7 +5172,10 @@ them during synchronized output or when BUFFER has no render window."
               (setq ghostel--pending-redraw nil
                     ghostel--force-next-redraw nil))
             (ghostel--apply-cursor-style)
-            (dolist (win anchored) (ghostel--anchor-window win))
+            ;; FOLLOWING=t: the render advanced the cursor while preserving
+            ;; window-point, so the pre-render snapshot carries the Emacs-mode
+            ;; follow decision.
+            (dolist (win anchored) (ghostel--anchor-window win nil t))
             (let ((line-restored
                    (and line-snapshot
                         (ghostel--line-mode-restore line-snapshot))))
@@ -4860,11 +5184,10 @@ them during synchronized output or when BUFFER has no render window."
               (when (and line-snapshot (not line-restored))
                 (let ((input (plist-get line-snapshot :input)))
                   (when (and input (> (length input) 0))
-                    (ghostel--write-pty ghostel--term input))
-                  (message
-                   "ghostel: line-mode prompt lost; input forwarded raw")))
-              (ghostel--schedule-link-detection
-               (ghostel--viewport-start) (point-max)))
+                    (ghostel--write-pty ghostel--term input)
+                    (message
+                     "ghostel: line-mode prompt lost; input forwarded raw"))))
+              (ghostel--schedule-link-detection))
             ;; Resume line mode if alt-screen just turned off, and update the
             ;; alt-screen-prev cache for the next cycle.
             (ghostel--line-mode-post-redraw)
@@ -5093,6 +5416,12 @@ may change freely (`ghostel-compile' finalize relies on this)."
   ;; The terminal renderer owns the buffer contents.  User-editable
   ;; modes are exceptional and must opt in explicitly.
   (setq buffer-read-only t)
+  ;; Terminal-input modes forward foreign insertions to the PTY and
+  ;; repair foreign deletions; see `ghostel--sync-inhibit-read-only'.
+  ;; Depth 90 so other hook members still see an insertion before the
+  ;; forwarding removes it.
+  (add-hook 'after-change-functions
+            #'ghostel--forward-inserts-after-change 90 t)
   (setq-local scroll-margin 0)
   (setq-local auto-hscroll-mode nil)
   (setq-local hscroll-margin 0)

@@ -155,7 +155,7 @@ binaries are available for:
 - =aarch64-windows=
 
 If you prefer to build from source or need a different platform, you will also
-need *exactly* [[https://ziglang.org/][Zig]] 0.15.2 - older or newer Zig versions will not build.  See
+need *exactly* [[https://ziglang.org/][Zig]] 0.16.0 - older or newer Zig versions will not build.  See
 [[#building-from-source][Building from source]].
 
 * Installation
@@ -265,7 +265,7 @@ Building is only needed if you do not want the pre-built binaries.  Ghostel
 vendors a generated =vendor/emacs-module.h=, so normal builds do not require
 local Emacs headers.
 
-Building requires *exactly* [[https://ziglang.org/][Zig]] 0.15.2 - older or newer Zig versions will not build.
+Building requires *exactly* [[https://ziglang.org/][Zig]] 0.16.0 - older or newer Zig versions will not build.
 Check your installed version with =zig version=.
 
 #+begin_src sh
@@ -435,9 +435,10 @@ etc. themselves.  =M-RET= (or =C-M-m=) is the sole escape hatch.
 Entered with =C-c C-e=.  *The terminal keeps running*, the buffer is read-only,
 and standard Emacs bindings fall through to the global map.  =isearch-forward=,
 =occur=, =M-x=, =C-SPC= + =M-w=, arrow keys, wheel scroll - all work unmodified.  The
-terminal keeps producing output and the buffer keeps growing, but your point
-stays where you navigated it (the delayed-redraw path preserves point in Emacs
-mode).
+terminal keeps producing output and the buffer keeps growing.  While point sits
+on the live terminal cursor the window follows the new output; the moment you
+navigate away (or start a selection) the following stops and point stays where
+you put it, resuming once point returns to the cursor (=M->= jumps back to it).
 
 *Typed keys do not reach the shell* - Emacs mode is a "look but don't touch"
 view.  Self-insert, =RET=, =TAB=, =DEL= fall through to the read-only buffer and
@@ -498,8 +499,9 @@ output cannot clobber the selection - the target is picked by
 - =copy= - enter copy mode.  Redraws pause; the selection is stable regardless of
   where it sits.
 - =emacs= - enter Emacs mode.  The terminal keeps streaming and the buffer becomes
-  read-only; selections wholly in scrollback survive, selections over rows the
-  live program rewrites can still be lost.
+  read-only; the window never follows live output while the region is active.
+  Selections wholly in scrollback survive, selections over rows the live
+  program rewrites can still be lost.
 - =nil= - stay in semi-char.  Same selection-survival guarantees as =emacs=, but
   =M-w= is forwarded to the shell so it cannot copy the region - pick this only if
   you copy via primary selection or the GUI menu.
@@ -567,6 +569,11 @@ path captures the in-progress input before each redraw and re-inserts it at the
 new prompt-end afterwards, so async output or a fresh prompt arriving mid-edit
 does not clobber what you typed.  After =RET=, line mode stays active - the next
 prompt is found on the following redraw cycle and the input marker moves there.
+
+The window follows live output while point rides the live edge - the input
+region while composing, or the end of the output while a command runs.  Move
+point up into the scrollback and the view stays put; =M->=, clicking the
+prompt, or simply typing resumes the following.
 
 Line mode uses the terminal cursor as the input-area boundary, so REPLs without
 shell integration (=python3=, =irb=, =sqlite3=, ...) work too.  When OSC 133 prompt
@@ -693,6 +700,10 @@ to leave the directory alone.
 - *File path detection* - patterns like =/path/to/file.el:42= become clickable,
   opening the file at the given line (toggle with =ghostel-enable-file-detection=;
   tune the path pattern with =ghostel-file-detection-path-regex=).
+- *Wrapped links* - a URL or path too long for the terminal is split across
+  rows, and each row is clickable for the whole target.  Hyperlink navigation
+  visits such a link once, and a window resize that reflows the terminal
+  leaves it intact.
 
 ** Clipboard
 :properties:
@@ -1496,7 +1507,7 @@ Commands:
 A run looks like a =M-x compile= buffer:
 
 #+begin_example
--*- mode: ghostel-compile -*-
+-*- mode: ghostel-compile-view -*-
 Compilation started at Wed Apr 15 08:30:11
 
 make -j4 test
@@ -1520,8 +1531,11 @@ anything that wants live keystrokes work.  The rendered buffer remains read-only
 
 When the command finishes, the live process and ghostel renderer are torn down
 and the buffer's major mode is switched to =ghostel-compile-view-mode= (derived
-from =compilation-mode=).  =mode-line-process= shows =:run= while the command runs
-and =:exit [N]= afterwards; an interactive run reads =:run/i= instead of =:run=.
+from =compilation-mode=).  Rows the terminal wrapped are joined back into single
+lines at that point, so error parsing, =next-error=, =ffap= and saving the buffer
+see whole paths even when one straddled the wrap column.  =mode-line-process=
+shows =:run= while the command runs and =:exit [N]= afterwards; an interactive
+run reads =:run/i= instead of =:run=.
 
 *** Live mode switching
 
@@ -1703,26 +1717,28 @@ buffers applies here too - see the docstring of =ghostel-comint-mode=.
 :end:
 #+cindex: input methods
 
-Some Emacs Lisp input methods (=hangul-input-method= is the common example)
-commit text by inserting it into the current buffer instead of returning key
-events.  Inside a ghostel buffer that insert lands in the buffer but is never
-sent to the PTY, so the next redraw erases it.
+Emacs Lisp input methods compose and commit text by editing the current buffer
+instead of returning key events: =hangul-input-method= inserts the composed
+syllable directly, and Quail-based methods (Japanese, Chinese, ...) use the
+buffer for their in-flight preedit as well.  A ghostel buffer is
+terminal-owned, so those edits either fail against the read-only barrier or
+are picked up by insert forwarding and sent to the PTY mid-composition.
 
 =ghostel-ime-mode= is an optional minor mode that wraps the buffer-local
 =input-method-function=.  When the input method commits by buffer insertion, the
 wrapper deletes the transient insert and forwards the committed text to the PTY
 as UTF-8, letting the shell echo it back through the normal redraw path.  While a
-Quail-style composition is in flight it also asks ghostel to defer redraws (via
-=ghostel-inhibit-redraw-functions=) so the renderer does not rewrite the buffer
-mid-composition.  GUI native preedit handling is unaffected.
+composition is in flight it also stands down insert forwarding (via
+=ghostel-inhibit-input-forwarding-functions=) and asks ghostel to defer redraws
+(via =ghostel-inhibit-redraw-functions=) so the renderer does not rewrite the
+buffer mid-composition.  GUI native preedit handling is unaffected.
+
+Enable it for any Emacs Lisp input method:
 
 #+begin_src emacs-lisp
 (use-package ghostel-ime
   :hook (ghostel-mode . ghostel-ime-mode))
 #+end_src
-
-This generalizes to any Lisp input method that uses =quail-overlay= (Korean
-Hangul, Japanese, Chinese, ...).
 
 * Commands
 :properties:

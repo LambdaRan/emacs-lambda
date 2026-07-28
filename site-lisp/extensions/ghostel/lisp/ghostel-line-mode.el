@@ -28,6 +28,7 @@
 (declare-function ghostel--redraw "ghostel-module"
                   (term &optional full force-sync))
 (declare-function ghostel--regex-prompt-end "ghostel")
+(declare-function ghostel--sync-inhibit-read-only "ghostel")
 (declare-function ghostel--send-encoded "ghostel")
 (declare-function ghostel--uri-at-pos "ghostel")
 (declare-function ghostel--write-pty "ghostel-module")
@@ -240,6 +241,19 @@ from a raw fullscreen TUI when deciding whether to enter on the alt screen."
                                    (line-beginning-position))))
     (and (text-property-not-all bol cursor 'ghostel-prompt nil) t)))
 
+(defun ghostel--line-mode-on-live-edge-p (window)
+  "Non-nil if WINDOW's point rides the live edge of its ghostel buffer.
+The live edge is the input region, the terminal cursor, or `point-max'.
+WINDOW's buffer must be current."
+  (let ((wp (window-point window)))
+    (or (and (markerp ghostel--line-input-start)
+             (marker-position ghostel--line-input-start)
+             (>= wp ghostel--line-input-start)
+             (<= wp ghostel--line-input-end))
+        (and ghostel--cursor-char-pos
+             (= wp ghostel--cursor-char-pos))
+        (= wp (point-max)))))
+
 (defun ghostel--line-mode-apply-readonly (marker-pos)
   "Mark `[point-min, MARKER-POS)' read-only with the rear-nonsticky trick.
 The non-sticky flag lands on the last protected character so
@@ -273,7 +287,8 @@ content (a status bar drawn below the prompt, a multi-line UI from
 the shell, etc.) intact."
   (when (string-match-p "\\`[[:space:]]*\\'"
                         (buffer-substring-no-properties start (point-max)))
-    (let ((inhibit-read-only t))
+    (let ((inhibit-read-only t)
+          (inhibit-modification-hooks t))
       (delete-region start (point-max)))))
 
 (defun ghostel--line-mode-snapshot ()
@@ -317,7 +332,8 @@ forwarding the pending input raw.
 
 Trims pure-whitespace tails past the input but preserves any
 non-blank content the renderer wrote past the prompt row (e.g. a
-status bar)."
+status bar).  Point is restored from the snapshot's offset when it
+was inside the input region, and left untouched otherwise."
   (when snapshot
     (let ((prompt-end (ghostel-input-start-point)))
       (when prompt-end
@@ -335,15 +351,16 @@ status bar)."
           (setq ghostel--line-input-end (copy-marker prompt-end t))
           (set-marker-insertion-type ghostel--line-input-end t)
           (when (and input (> (length input) 0))
-            (goto-char (marker-position ghostel--line-input-start))
-            ;; Insertion advances `ghostel--line-input-end' (insertion
-            ;; type t) so end-marker tracks the tail of the input.
-            (insert input))
+            (save-excursion
+              (goto-char (marker-position ghostel--line-input-start))
+              ;; Insertion advances `ghostel--line-input-end' (insertion
+              ;; type t) so end-marker tracks the tail of the input.
+              (insert input)))
           (let ((start-pos (marker-position ghostel--line-input-start))
                 (end-pos (marker-position ghostel--line-input-end)))
             (ghostel--line-mode-apply-readonly start-pos)
             ;; Mark the line-mode input region with `ghostel-input' so
-            ;; `ghostel--detect-urls-skip-p' skips it on the cursor's
+            ;; `ghostel--skip-match-p' skips it on the cursor's
             ;; line — without this, a path the user typed locally
             ;; (e.g. `cd src/main.rs') would get linkified and RET
             ;; would open the file instead of running
@@ -423,6 +440,7 @@ in line mode (the interactive entry validates these)."
       (setq ghostel--line-mode-on-alt-screen (ghostel-alt-screen-p))
       (setq ghostel--line-mode-paused nil)
       (setq ghostel--input-mode 'line)
+      (ghostel--sync-inhibit-read-only)
       (use-local-map ghostel-line-mode-map)
       (setq ghostel--mode-line-tag (ghostel--mode-line-tag-make 'line ":Line"))
       (ghostel--mode-line-refresh)
@@ -461,7 +479,10 @@ to the shell in one write.
 
 Completion runs against the editable input and follows OSC 7 / TRAMP
 directory tracking.  The terminal stays live while output streams
-around the prompt.  After RET, line mode stays active for the next
+around the prompt.  The window follows new output while point rides
+the live edge (the input region, or the end of output while a command
+runs); move point into the scrollback and the view stays put until
+point returns.  After RET, line mode stays active for the next
 prompt.
 
 On the alt screen, line mode enters at a shell prompt whose OSC 133
@@ -583,7 +604,8 @@ which discards any type-ahead and runs inside `ghostel--redraw-now'."
     (setq ghostel--line-mode-saved-cursor-type nil))
   (unless pause
     (when ghostel--term
-      (let ((inhibit-read-only t))
+      (let ((inhibit-read-only t)
+            (inhibit-modification-hooks t))
         (ghostel--redraw ghostel--term t t)))))
 
 (defun ghostel--line-mode-pause ()
@@ -594,6 +616,7 @@ re-enters line mode at the new prompt."
   (ghostel--line-mode-teardown 'pause)
   (setq ghostel--char-mode-override-active nil)
   (setq ghostel--input-mode 'semi-char)
+  (ghostel--sync-inhibit-read-only)
   (use-local-map ghostel-semi-char-mode-map)
   (setq ghostel--mode-line-tag nil)
   (ghostel--mode-line-refresh)
