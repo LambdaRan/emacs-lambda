@@ -27,7 +27,7 @@ Check the [documentation](https://dakra.github.io/ghostel/#features) for a full 
 
 ## Quick Start
 
-**Requirements:** Emacs 28.1+ with dynamic module support, on macOS, Linux, FreeBSD, or native Windows.
+**Requirements:** Emacs 28.1+ with dynamic module support, on macOS, Linux, FreeBSD, Android/Termux, or native Windows.
 The native module is a prebuilt binary that **auto-downloads on first use**.
 No toolchain or build step required.
 
@@ -186,8 +186,8 @@ and select your text. When you copy something or type any
 character you're automatically back in your normal ghostel
 terminal session.
 Similarly, some actions automatically activate **copy mode**,
-like selecting with the mouse, navigating to hyperlinks (`C-c C-p`),
-activating the mark.  In copy mode, mouse selection remains normal
+like selecting with the mouse, navigating to hyperlinks (`C-c C-p`)
+or prompts (`C-c M-p`), activating the mark.  In copy mode, mouse selection remains normal
 Emacs selection even if the terminal app enabled mouse tracking.
 
 ## Documentation

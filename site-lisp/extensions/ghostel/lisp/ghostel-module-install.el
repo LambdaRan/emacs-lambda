@@ -68,7 +68,7 @@ Customize this when downloading pre-built modules from a fork or mirror."
 
 ;;; Native module download, compilation, and loading
 
-(defconst ghostel--minimum-module-version "0.46.0"
+(defconst ghostel--minimum-module-version "0.49.0"
   "Minimum native module version required by this Elisp version.
 Bump this only when the Elisp code requires a newer native module
 \(e.g. new Zig-exported function or changed calling convention).")
@@ -83,6 +83,13 @@ Returns nil if the platform is not recognized."
                  (_ raw-arch)))
          (os (cond
               ((eq system-type 'darwin) "macos")
+              ;; Termux builds Emacs with an `*-linux-android' triple;
+              ;; `system-type' is `android' there, but older Emacs
+              ;; versions report `gnu/linux', so check both.  Bionic
+              ;; modules are not interchangeable with glibc ones.
+              ((or (eq system-type 'android)
+                   (string-match-p "android" system-configuration))
+               "android")
               ((eq system-type 'gnu/linux) "linux")
               ((eq system-type 'windows-nt) "windows")
               (t nil))))

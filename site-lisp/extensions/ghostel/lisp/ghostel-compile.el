@@ -69,9 +69,8 @@
 
 (declare-function ghostel--redraw "ghostel-module"
                   (term &optional full force-sync))
-(declare-function ghostel--set-size "ghostel-module")
 (declare-function ghostel--write-vt "ghostel-module")
-(declare-function ghostel--sync-inhibit-read-only "ghostel")
+(declare-function ghostel--sync-read-only "ghostel")
 (defvar ghostel--inhibit-insert-forwarding)
 
 
@@ -129,6 +128,9 @@ status message string (e.g. \"finished\\n\" or
 
 (defvar-local ghostel-compile--start-time nil
   "`current-time' when the most recent command was launched.")
+
+(defvar-local ghostel-compile--end-time nil
+  "`current-time' when the most recent command finished, or nil while running.")
 
 (defvar-local ghostel-compile--directory nil
   "`default-directory' captured at `ghostel-compile' invocation time.
@@ -398,6 +400,13 @@ same as in any compilation buffer."
           (when start
             (ghostel-compile--trim-trailing-blanks start))
           (ghostel-compile--teardown-terminal)
+          ;; Owed link detection has to run before the rows are joined,
+          ;; whose `ghostel-wrap' properties it reads, and before the mode
+          ;; switch drops the queue's buffer-locals.  Demoted because
+          ;; `ghostel-compile--finalized' is already set: a signal here
+          ;; would leave the buffer with no footer and no way to retry.
+          (with-demoted-errors "ghostel-compile: link detection failed: %S"
+            (ghostel--flush-plain-link-detection))
           ;; Must follow the teardown: a live renderer would rewrite the
           ;; joined rows on its next redraw.
           (ghostel-compile--unwrap-soft-wraps)
@@ -434,6 +443,7 @@ same as in any compilation buffer."
             (setq-local ghostel-compile--command saved-command
                         ghostel-compile--directory saved-directory
                         ghostel-compile--start-time saved-start-time
+                        ghostel-compile--end-time end-time
                         ghostel-compile--last-exit exit
                         ghostel-compile--interactive saved-interactive
                         ghostel-compile--finalized t)
@@ -501,7 +511,9 @@ destroys the grid, so commit it here or lose the output it holds."
                          (with-selected-window window
                            (ghostel--redraw ghostel--term full t))
                        (ghostel--redraw ghostel--term full t))))
-      (when rendered (setq ghostel--pending-redraw nil)))))
+      (when rendered
+        (setq ghostel--pending-redraw nil)
+        (ghostel--schedule-link-detection)))))
 
 (defun ghostel-compile--sentinel (process _event)
   "Sentinel for the compile PROCESS: finalize the buffer on exit."
@@ -532,16 +544,15 @@ destroys the grid, so commit it here or lose the output it holds."
 
 (defconst ghostel-compile--stty-flags
   (concat ghostel--default-stty " -echo")
-  "`stty' flags for the compile PTY.
-Layers `-echo' on top of `ghostel--default-stty' so we don't render
-an echoed copy of the command (which users already see in the
-header).  `sane' in the baseline turns echo on; the trailing
-`-echo' overrides it.")
+  "`stty' flags for compilation-style compile PTYs.
+Layers `-echo' on top of `ghostel--default-stty': the buffer is a
+pure log, and echoed terminal query replies (DA1, DSR, OSC color
+reports) would render as escape-sequence garbage.")
 
-(defun ghostel-compile--spawn (command buffer height width)
+(defun ghostel-compile--spawn (command buffer height width &optional interactive)
   "Spawn COMMAND in BUFFER via a PTY sized HEIGHT rows by WIDTH columns.
-Installs `ghostel--filter' and `ghostel-compile--sentinel'.  Returns
-the process.
+Installs `ghostel--filter' and `ghostel-compile--sentinel'.
+When INTERACTIVE is non-nil the PTY keeps echo on, so input typed is visible.
 
 COMMAND is passed verbatim to `shell-file-name' via
 `shell-command-switch', so multi-line scripts and shell
@@ -552,7 +563,9 @@ exec'ing the user's shell.
 For remote (TRAMP) `default-directory's, `shell-file-name' and
 `shell-command-switch' are resolved via `with-connection-local-variables'
 so the remote host's shell is used (not whatever zsh/bash path the
-local machine happens to have)."
+local machine happens to have).
+
+Returns the process."
   (let* ((remote-p (file-remote-p default-directory))
          (shell (if remote-p
                     (with-connection-local-variables shell-file-name)
@@ -563,7 +576,9 @@ local machine happens to have)."
          (wrapper
           (list "/bin/sh" "-c"
                 (concat
-                 "stty " ghostel-compile--stty-flags
+                 "stty " (if interactive
+                             ghostel--default-stty
+                           ghostel-compile--stty-flags)
                  (format " rows %d columns %d" height width)
                  " 2>/dev/null; "
                  "exec "
@@ -595,7 +610,7 @@ local machine happens to have)."
     ;; (`htop', `less', test prompts, ...) during the compile.
     (with-current-buffer buffer
       (setq ghostel--process proc)
-      (ghostel--sync-inhibit-read-only))
+      (ghostel--sync-read-only))
     (set-process-coding-system proc 'binary 'binary)
     (set-process-window-size proc height width)
     (when compilation-always-kill
@@ -772,6 +787,7 @@ any other code that walks `compilation-arguments') re-runs via
       (setq ghostel-compile--command command
             ghostel-compile--directory dir
             ghostel-compile--start-time start-time
+            ghostel-compile--end-time nil
             ghostel-compile--last-exit nil
             ghostel-compile--finalized nil
             ghostel-compile--view-mode-override finished-mode
@@ -793,7 +809,7 @@ any other code that walks `compilation-arguments') re-runs via
         (let ((oh (max 1 (with-selected-window outwin
                            (floor (window-screen-lines)))))
               (ow (max 1 (window-max-chars-per-line outwin))))
-          (ghostel--set-size ghostel--term oh ow)))
+          (ghostel--set-size-with-cell-dims ghostel--term oh ow)))
       ;; Render the compilation header into the terminal before spawning
       ;; the command, so the user sees the "Compilation started at ..."
       ;; banner *during* the run rather than only when it finishes (the
@@ -829,7 +845,8 @@ any other code that walks `compilation-arguments') re-runs via
              (width (max 1 (if outwin
                                (window-max-chars-per-line outwin)
                              (window-max-chars-per-line))))
-             (proc (ghostel-compile--spawn command buffer height width)))
+             (proc (ghostel-compile--spawn command buffer height width
+                                           interactive)))
         ;; Match stock `compilation-start' ordering: hook fires before
         ;; `compilation-in-progress' is updated, so hook functions can
         ;; install filter-hooks / error-regexps before the next
@@ -946,13 +963,34 @@ nothing to send keystrokes to, and a non-compile buffer has no
   (unless (and (boundp 'ghostel--process) (process-live-p ghostel--process))
     (user-error "No live process - recompile with `g' instead")))
 
+(defun ghostel-compile--set-pty-echo (enable)
+  "Flip the live compile PTY's ECHO flag to ENABLE, best-effort.
+Acts on `process-tty-name' with an out-of-band `stty'; local runs
+only.  Enabling is skipped while the tty is in non-canonical mode —
+a full-screen program owns the display then, and echoed keystrokes
+would splatter over it."
+  (when-let* ((tty (and (not (file-remote-p default-directory))
+                        (processp ghostel--process)
+                        (process-live-p ghostel--process)
+                        (process-tty-name ghostel--process))))
+    (ignore-errors
+      (call-process
+       "/bin/sh" nil nil nil "-c"
+       (if enable
+           (format "s=$(stty -a < %s 2>/dev/null) || exit 0; \
+case \"$s\" in *-icanon*) ;; *) stty echo < %s 2>/dev/null ;; esac"
+                   (shell-quote-argument tty) (shell-quote-argument tty))
+         (format "stty -echo < %s 2>/dev/null"
+                 (shell-quote-argument tty)))))))
+
 (defun ghostel-compile-switch-to-interactive ()
   "Switch the current `ghostel-compile' run to interactive mode.
 `ghostel-semi-char-mode-map' is restored so keystrokes reach the running
 process — useful when the command turned out to need input (a
 `read -p', a `git push' password prompt, an `htop'-style program).
-The renderer-owned buffer remains read-only.  No-op if the buffer
-is already interactive.
+Keystrokes are forwarded to the process; foreign buffer edits are
+intercepted by `ghostel--forward-inserts-after-change'.
+No-op if the buffer is already interactive.
 
 Bound to \\[ghostel-compile-switch-to-interactive] in
 `ghostel-compile-toggle-mode' (active in compile buffers)."
@@ -962,9 +1000,14 @@ Bound to \\[ghostel-compile-switch-to-interactive] in
       (message "ghostel-compile: already interactive")
     (setq ghostel-compile--interactive t)
     (use-local-map ghostel-semi-char-mode-map)
-    (setq buffer-read-only t)
     (setq ghostel--inhibit-insert-forwarding nil)
-    (ghostel--sync-inhibit-read-only)
+    (ghostel--sync-read-only)
+    ;; Turn on PTY echo so input typed at a read prompt is visible.
+    ;; Skipped when the cursor row looks like a password prompt: the
+    ;; pty state cannot distinguish a program-set `-echo' from the
+    ;; spawn default, but the prompt text can.
+    (unless (ghostel--password-regex-matches-cursor-row-p)
+      (ghostel-compile--set-pty-echo t))
     ;; Place point at the VT cursor so the user's first keystroke
     ;; lands at the prompt, not at wherever they happened to be
     ;; navigating in the read-only buffer.
@@ -993,9 +1036,9 @@ Bound to \\[ghostel-compile-switch-to-compilation-style] in
       (message "ghostel-compile: already compilation-style")
     (setq ghostel-compile--interactive nil)
     (use-local-map ghostel-compile-view-mode-map)
-    (setq buffer-read-only t)
     (setq ghostel--inhibit-insert-forwarding t)
-    (ghostel--sync-inhibit-read-only)
+    (ghostel--sync-read-only)
+    (ghostel-compile--set-pty-echo nil)
     (ghostel-compile--set-mode-line-running)
     (when ghostel-compile-debug
       (message "ghostel-compile: switched to compilation-style"))))

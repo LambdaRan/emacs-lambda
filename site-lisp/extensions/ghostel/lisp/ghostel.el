@@ -4,7 +4,7 @@
 
 ;; Author: Daniel Kraus <daniel@kraus.my>
 ;; URL: https://github.com/dakra/ghostel
-;; Version: 0.46.0
+;; Version: 0.49.0
 ;; Keywords: terminals
 ;; Package-Requires: ((emacs "28.1") (compat "30.1.0.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -98,6 +98,7 @@
 (require 'ghostel-faces)
 (require 'ghostel-kitty)
 (require 'ghostel-line-mode)
+(require 'ghostel-links)
 (require 'ghostel-module-install)
 (require 'ghostel-prompt)
 
@@ -291,7 +292,7 @@ This is a heuristic — Emacs has no portable API for the OS-level
 backing scale factor, so exact parity with standalone Ghostty
 \(which measures cell size in real physical pixels via the window
 server) requires setting an explicit number here.  Useful overrides:
-the exact `physical_cell_w / frame-char-width' ratio (e.g. 2.28) for
+the exact `physical_cell_w / default-font-width' ratio (e.g. 2.28) for
 pixel-perfect parity with standalone Ghostty's image rendering, or
 1 to opt out of HiDPI-aware reporting altogether.
 
@@ -606,62 +607,6 @@ Only consulted when `ghostel-progress-function' is
 `ghostel-spinner-progress'."
   :type 'symbol)
 
-(defcustom ghostel-enable-url-detection t
-  "Automatically detect and linkify URLs in terminal output.
-When non-nil, plain-text URLs (http:// and https://) are made
-clickable even if the program did not use OSC 8 hyperlink escapes."
-  :type 'boolean)
-
-(defcustom ghostel-enable-file-detection t
-  "Automatically detect and linkify file:line references in terminal output.
-When non-nil, patterns like /path/to/file.el:42 are made clickable,
-opening the file at the given line in another window.  Automatically
-disabled when `default-directory' is a TRAMP path, because each
-candidate would require a remote `file-exists-p' round-trip per
-redraw."
-  :type 'boolean)
-
-(defcustom ghostel-plain-link-detection-delay 0.1
-  "Delay in seconds before redraw-triggered plain-text link detection runs.
-Redraws queue URL/file detection through
-`ghostel--schedule-link-detection' so multiple updates can be
-coalesced into a single scan.  Set to 0 to scan immediately after each
-redraw.  Native OSC-8 hyperlinks remain applied during redraw."
-  :type 'number)
-
-(defcustom ghostel-file-detection-path-regex
-  "[~[:alnum:]_.-]*/[^] \t\n\r:\"<>(){}[`']+"
-  "Regex matching the PATH portion of a file:line[:col] reference.
-This is the middle of the full detection pattern; ghostel wraps it
-with a fixed leading path-boundary anchor (line start or any
-non-path character) and a fixed `:LINE[:COL]' tail, so any match
-is guaranteed to end in `:DIGITS'.
-
-The matched path is resolved against `default-directory'; linkification
-only applies when that file exists.  The default matches absolute
-paths, explicit `./' paths, tilde-prefixed paths like `~/file.el',
-and bare relative paths containing at least one `/' (e.g. compiler
-output like `src/main.rs').  Paths embedded in punctuation like
-`(/home/user/index.js:17:5)' are supported via the fixed anchor.
-
-Performance: each match triggers a filesystem check on every redraw.
-Broadening this pattern (for example to match bare `file.go' without
-a `/') will cause `file-exists-p' to be called for every matching
-token, which can be expensive on slow or network filesystems (NFS,
-FUSE).  The default uses non-backtracking character classes so the
-per-redraw scan stays cheap."
-  :type 'regexp)
-
-(defconst ghostel--file-detection-leading-anchor
-  "\\(?:^\\|[^[:alnum:]_./~-]\\)"
-  "Fixed anchor placed before `ghostel-file-detection-path-regex'.")
-
-(defconst ghostel--file-detection-tail
-  "\\(?::[0-9]+\\(?::[0-9]+\\)?\\)?"
-  "Fixed optional `:LINE[:COL]' tail.
-When absent, the match is linkified as a bare file/directory
-reference opened at its start.")
-
 (defcustom ghostel-shell-integration t
   "Automatically inject shell integration on startup.
 When non-nil, ghostel modifies the shell invocation to automatically
@@ -782,10 +727,26 @@ anchor the input region.  Has no effect on `ghostel-exec'."
                  (const :tag "Char mode" char)
                  (const :tag "Line mode" line)))
 
-(defcustom ghostel-mouse-drag-input-mode 'copy
+(defcustom ghostel-readonly-default-mode 'copy
+  "Which read-only mode gestures and commands enter by default.
+
+- `copy' (default): `ghostel-copy-mode'.
+  Pauses redraws - the buffer is stable while you look around.
+- `emacs': `ghostel-emacs-mode'.  Terminal output keeps streaming.
+
+Followed by `ghostel-readonly-enter', hyperlink navigation and every trigger
+option left at its `default' setting: `ghostel-mouse-drag-input-mode',
+`ghostel-mark-activation-input-mode', `ghostel-point-leave-input-mode',
+`ghostel-prompt-navigation-input-mode'.
+Set one of those to override this choice for that trigger only."
+  :type '(choice (const :tag "Copy mode (frozen)" copy)
+                 (const :tag "Emacs mode (live)"  emacs)))
+
+(defcustom ghostel-mouse-drag-input-mode 'default
   "Input mode to switch to after a left-button mouse click or selection.
 
-- `copy' (default): enter `ghostel-copy-mode'.  Pauses redraws -
+- `default': enter `ghostel-readonly-default-mode' (initially copy).
+- `copy': enter `ghostel-copy-mode'.  Pauses redraws -
   the selection is stable and the buffer is read-only.
 - `emacs': enter `ghostel-emacs-mode'.  Terminal output keeps
   streaming; the buffer is read-only.  Pick this when you do not
@@ -798,30 +759,44 @@ when the buffer is not in semi-char-mode when the gesture
 completes.  Copy, Emacs, and line modes keep normal Emacs mouse
 behavior even if terminal mouse tracking is active.
 A click that focuses the window or its frame never switches mode."
-  :type '(choice (const :tag "Copy mode (default)" copy)
-                 (const :tag "Emacs mode"          emacs)
-                 (const :tag "Do not switch"       nil)))
+  :type '(choice (const :tag "Follow ghostel-readonly-default-mode" default)
+                 (const :tag "Copy mode"     copy)
+                 (const :tag "Emacs mode"    emacs)
+                 (const :tag "Do not switch" nil)))
 
-(defcustom ghostel-mark-activation-input-mode 'copy
+(defcustom ghostel-mark-activation-input-mode 'default
   "Input mode to switch to when the mark becomes active in semi-char mode.
 Triggered by any command that activates the region, e.g. `set-mark-command',
 expand-region variants, `mark-whole-buffer', `exchange-point-and-mark'.
+`default' follows `ghostel-readonly-default-mode'; nil disables the switch.
 
 Mouse selection is governed separately by `ghostel-mouse-drag-input-mode'."
-  :type '(choice (const :tag "Copy mode (default)" copy)
-                 (const :tag "Emacs mode"          emacs)
-                 (const :tag "Do not switch"       nil)))
+  :type '(choice (const :tag "Follow ghostel-readonly-default-mode" default)
+                 (const :tag "Copy mode"     copy)
+                 (const :tag "Emacs mode"    emacs)
+                 (const :tag "Do not switch" nil)))
 
-(defcustom ghostel-point-leave-input-mode 'copy
+(defcustom ghostel-point-leave-input-mode 'default
   "Input mode to switch to when point leaves the live input point in semi-char.
 Triggered by any command that moves point off the terminal cursor without a
 mouse click or region activation.  Something like `isearch', `consult-line',
 `avy', `goto-line', wheel scrolling, etc.
+`default' follows `ghostel-readonly-default-mode'; nil disables the switch.
 
 See also `ghostel-mouse-drag-input-mode', `ghostel-mark-activation-input-mode'."
-  :type '(choice (const :tag "Copy mode (default)" copy)
-                 (const :tag "Emacs mode"          emacs)
-                 (const :tag "Do not switch"       nil)))
+  :type '(choice (const :tag "Follow ghostel-readonly-default-mode" default)
+                 (const :tag "Copy mode"     copy)
+                 (const :tag "Emacs mode"    emacs)
+                 (const :tag "Do not switch" nil)))
+
+(defcustom ghostel-prompt-navigation-input-mode 'default
+  "Input mode prompt navigation switches to before jumping.
+Applies to `ghostel-next-prompt', `ghostel-previous-prompt', and imenu
+jumps to a prompt.  `default' follows `ghostel-readonly-default-mode';
+`copy' freezes the terminal while you browse, `emacs' keeps output streaming."
+  :type '(choice (const :tag "Follow ghostel-readonly-default-mode" default)
+                 (const :tag "Copy mode"  copy)
+                 (const :tag "Emacs mode" emacs)))
 
 (defcustom ghostel-word-boundary-string " \t\"'`|:;,()[]{}<>$│"
   "Characters that terminate words in ghostel buffers.
@@ -989,6 +964,7 @@ Matches Ghostty 1.2.0's `bold-color' configuration."
                (let ((inhibit-read-only t)
                      (inhibit-modification-hooks t))
                  (ghostel--redraw ghostel--term t t))
+               (ghostel--schedule-link-detection)
                (ghostel--apply-cursor-style))))))
 
 (defvar-local ghostel--cursor-pos nil
@@ -1017,6 +993,12 @@ otherwise hide its cursor for whatever buffer it shows next.")
 Values match libghostty's cursor style enum: 0=bar, 1=block,
 2=underline, 3=hollow-block, or nil for hidden.")
 
+(defvar-local ghostel--repainted-region nil
+  "Buffer range the last redraw rewrote, as a (MIN . MAX) cons, or nil.
+Published by the renderer, which inserts every character of terminal
+output.  Every redraw that renders sets it: nil when it painted
+nothing, so the value never outlives the redraw that produced it.")
+
 (defvar-local ghostel--input-mode 'semi-char
   "Current input mode.
 One of `semi-char', `char', `copy', `emacs', or `line'.  See
@@ -1044,20 +1026,6 @@ local code should not assume it is signalable unless the process is local.")
 
 (defvar-local ghostel--pending-redraw nil
   "Non-nil when redraw is needed when buffer is displayed again.")
-
-(defvar-local ghostel--link-id-counter 0
-  "Source of `ghostel-link-id' values for detected multi-row links.
-Counts up so an id stays unique after scrollback eviction shifts
-buffer positions.")
-
-(defvar-local ghostel--plain-link-detection-timer nil
-  "Timer for delayed redraw-triggered plain-text link detection.")
-
-(defvar-local ghostel--plain-link-detection-begin nil
-  "Queued start bound for redraw-triggered plain-text link detection.")
-
-(defvar-local ghostel--plain-link-detection-end nil
-  "Queued end bound for redraw-triggered plain-text link detection.")
 
 (defvar-local ghostel--force-next-redraw nil
   "When non-nil, redraw regardless of synchronized output mode.")
@@ -1170,9 +1138,7 @@ is non-nil."
 
 (defsubst ghostel--terminal-input-mode-p ()
   "Non-nil when user input should be forwarded to the terminal.
-True in semi-char and char modes.  This is independent of
-`buffer-read-only': ghostel buffers are protected by default because
-the rendered buffer is owned by the terminal, not by editing commands."
+True in semi-char and char modes."
   (memq ghostel--input-mode '(semi-char char)))
 
 (defsubst ghostel--terminal-live-p ()
@@ -1227,7 +1193,8 @@ When NO-EXCEPTIONS is non-nil, also bind the keys in
   (define-key map (kbd "DEL") #'ghostel--send-event)
   ;; Emacs reports S-TAB as <backtab>
   (define-key map (kbd "<backtab>") #'ghostel--send-event)
-  ;; Control keys - bind all C-<letter> to send ASCII control codes.
+  ;; Control keys - bind all C-<letter> to go through the key encoder
+  ;; (C0 byte in legacy mode, CSI-u when kitty mode is active).
   ;; C-i = TAB and C-m = RET are equivalent to <tab>/<return> (bound above).
   ;; C-y is reserved for ghostel-yank in semi-char mode.
   ;; C-g is bound separately via `ghostel--rebuild-semi-char-keymap'.
@@ -1237,10 +1204,7 @@ When NO-EXCEPTIONS is non-nil, also bind the keys in
         (unless (or (memq c skip)
                     (and (not no-exceptions)
                          (member key-str ghostel-keymap-exceptions)))
-          (define-key map (kbd key-str)
-                      (let ((code (- c 96)))
-                        (lambda () (interactive)
-                          (ghostel--send-string (string code)))))))))
+          (define-key map (kbd key-str) #'ghostel--send-event)))))
   ;; Meta keys - bind M-<printable ASCII> so the full set reaches the terminal.
   ;; Skip ?\[ and ?O: those are escape-sequence prefixes (CSI / SS3)
   ;; used by Emacs input decoding for arrow/function keys in TTY mode.
@@ -1273,15 +1237,12 @@ When NO-EXCEPTIONS is non-nil, also bind the keys in
   ;; Ctrl+Space is NUL. A TTY delivers it as `C-@'.  GUI Emacs as the distinct
   ;; event `C-SPC', which only char mode captures.  In semi-char `C-SPC' falls
   ;; through to the global map so mark commands run there.
-  (define-key map (kbd "C-@")
-              (lambda () (interactive) (ghostel--send-string "\x00")))
+  (define-key map (kbd "C-@") #'ghostel--send-event)
   ;; Char mode extras: also bind non-letter exception keys so nothing
   ;; gets stolen by Emacs while a TUI app runs.
   (when no-exceptions
-    (define-key map (kbd "C-SPC")
-                (lambda () (interactive) (ghostel--send-string "\x00")))
-    (define-key map (kbd "C-\\")
-                (lambda () (interactive) (ghostel--send-string "\x1c")))
+    (define-key map (kbd "C-SPC") #'ghostel--send-event)
+    (define-key map (kbd "C-\\") #'ghostel--send-event)
     (define-key map (kbd "M-:") #'ghostel--send-event)))
 
 (defvar-keymap ghostel-mode-map
@@ -1311,8 +1272,8 @@ Input modes (`ghostel-semi-char-mode-map', `ghostel-char-mode-map',
   "C-c C-n"          #'ghostel-next-hyperlink
   "C-c C-p"          #'ghostel-previous-hyperlink
   ;; Prompt navigation (OSC 133) — `ghostel-next-prompt' and
-  ;; `ghostel-previous-prompt' switch to Emacs mode so the terminal
-  ;; keeps running while the user jumps between prompts.
+  ;; `ghostel-previous-prompt' switch to the read-only mode picked by
+  ;; `ghostel-prompt-navigation-input-mode' before jumping.
   "C-c M-n"          #'ghostel-next-prompt
   "C-c M-p"          #'ghostel-previous-prompt
   ;; Input mode switching (eat.el conventions)
@@ -1320,6 +1281,12 @@ Input modes (`ghostel-semi-char-mode-map', `ghostel-char-mode-map',
   "C-c C-j"          #'ghostel-semi-char-mode
   "C-c M-d"          #'ghostel-char-mode
   "C-c C-l"          #'ghostel-line-mode
+  ;; `buffer-read-only' is owned by the input-mode machinery; C-x C-q
+  ;; enters the configured read-only mode instead of raw `read-only-mode'
+  "<remap> <read-only-mode>" #'ghostel-readonly-enter
+  ;; ffap extracts its string from raw buffer text, so a path split by a
+  ;; soft-wrapped row resolves to the fragment before the break
+  "<remap> <find-file-at-point>" #'ghostel-find-file-at-point
   ;; Mouse click events
   "<down-mouse-1>"   #'ghostel-mouse-press-or-copy-mode
   "<mouse-1>"        #'ghostel-mouse-release-or-set-point
@@ -1339,16 +1306,6 @@ Input modes (`ghostel-semi-char-mode-map', `ghostel-char-mode-map',
 ;; sub-file would couple load order to a core value the `require'
 ;; can't guarantee is bound yet.
 (set-keymap-parent ghostel-line-mode-map ghostel-mode-map)
-
-(defvar-keymap ghostel-hyperlink-repeat-map
-  :doc "Repeat map for `ghostel-next-hyperlink' / `ghostel-previous-hyperlink'.
-Active after either command when `repeat-mode' is enabled, so a
-bare \\`n'/\\`p' or \\`C-n'/\\`C-p' keeps navigating."
-  :repeat t
-  "n"   #'ghostel-next-hyperlink
-  "p"   #'ghostel-previous-hyperlink
-  "C-n" #'ghostel-next-hyperlink
-  "C-p" #'ghostel-previous-hyperlink)
 
 (defvar-keymap ghostel-prompt-repeat-map
   :doc "Repeat map for `ghostel-next-prompt' / `ghostel-previous-prompt'.
@@ -1444,7 +1401,9 @@ top so that \\`q', \\`C-g', or any self-insert key exits."
   "M->"            #'ghostel-readonly-end-of-buffer
   "C-e"            #'ghostel-readonly-end-of-line
   "RET"            #'ghostel-open-link-at-point
-  "<return>"       #'ghostel-open-link-at-point)
+  "<return>"       #'ghostel-open-link-at-point
+  ;; Toggle symmetry with the parent map's `ghostel-readonly-enter'.
+  "<remap> <read-only-mode>" #'ghostel-readonly-exit)
 
 (defvar-keymap ghostel-readonly-fast-exit-mode-map
   :doc "Keymap layered on `ghostel-readonly-mode-map' when fast exit is on.
@@ -1560,12 +1519,16 @@ Returns the sequence string, or nil for unknown keys."
      ;; Ctrl + a single ASCII char with a C0 control code.  Both a-z and
      ;; the @ A-Z [ \ ] ^ _ range fold to (char & #x1f): ctrl-a=1,
      ;; ctrl-z=26, ctrl-^=#x1e, ctrl-_=#x1f (readline / zle undo).
+     ;; Meta additionally prefixes the C0 byte with ESC.
      ((and (= (length key-name) 1)
            (let ((c (aref key-name 0)))
              (or (and (<= ?a c) (<= c ?z))
                  (and (<= ?@ c) (<= c ?_))))
            (> (logand mod-num 4) 0))        ; ctrl bit
-      (string (logand (aref key-name 0) #x1f)))
+      (let ((c0 (string (logand (aref key-name 0) #x1f))))
+        (if (> (logand mod-num 2) 0)        ; alt/meta bit
+            (concat "\e" c0)
+          c0)))
      ;; Meta + printable ASCII → ESC + char (legacy alt encoding)
      ((and (= (length key-name) 1)
            (let ((c (aref key-name 0)))
@@ -1663,14 +1626,30 @@ Detect that case via `this-command-keys-vector' and re-inject meta."
          (mods (if (and via-esc (not (memq 'meta mods)))
                    (cons 'meta mods)
                  mods))
+         ;; Raw C0 bytes for RET/TAB/ESC are ambiguous with C-m/C-i/C-[
+         ;; and Emacs decodes them as ctrl+letter.  Treat them as the
+         ;; functional key and drop the artifact ctrl modifier so Enter
+         ;; encodes as CR, not as a fixterms CSI-u sequence.
+         (c0-key (and (memq event '(?\r ?\t ?\e))
+                      (cdr (assq event '((?\r . "return")
+                                         (?\t . "tab")
+                                         (?\e . "escape"))))))
+         (mods (if c0-key (remq 'control mods) mods))
          (key-name (cond
+                    (c0-key c0-key)
                     ;; backtab is Emacs's name for S-TAB
                     ((eq base 'backtab) "tab")
                     ;; Terminal mode sends ASCII 127 for the backspace key
                     ((and (integerp base) (= base 127)) "backspace")
-                    ;; Integer base (character key)
+                    ;; Integer base (character key).  Uppercase chords
+                    ;; arrive as lowercase base + shift; restore the case
+                    ;; so the encoder emits the shifted character.
                     ((integerp base)
-                     (and (< base 128) (string base)))
+                     (and (< base 128)
+                          (string (if (and (memq 'shift mods)
+                                           (<= ?a base ?z))
+                                      (upcase base)
+                                    base))))
                     ((eq base 'deletechar) "delete")
                     ;; Normal function key symbol
                     ((and base (symbolp base)) (symbol-name base))
@@ -1721,6 +1700,7 @@ restoring the terminal contents, with point realigned to the VT cursor."
     (if (> old-len 0)
         (progn
           (ghostel--redraw ghostel--term t t)
+          (ghostel--schedule-link-detection)
           ;; The reverted edit must not move point either; realign it.
           (when ghostel--cursor-char-pos
             (goto-char ghostel--cursor-char-pos)))
@@ -1732,14 +1712,15 @@ restoring the terminal contents, with point realigned to the VT cursor."
               (ghostel--paste-text text)
             (ghostel--send-string (encode-coding-string text 'utf-8))))))))
 
-(defun ghostel--sync-inhibit-read-only ()
-  "Set buffer-local `inhibit-read-only' from the terminal state.
-Non-nil in terminal-input modes with a live process, so
-`(interactive \"*\")' commands run and the after-change hook
-forwards their insertions while `buffer-read-only' stays non-nil;
-nil restores the plain read-only barrier."
-  (setq-local inhibit-read-only
-              (and (ghostel--insert-forwarding-live-p) t)))
+(defun ghostel--sync-read-only ()
+  "Set `buffer-read-only' from the terminal state.
+Nil while foreign edits are intercepted (live terminal-input modes, see
+`ghostel--forward-inserts-after-change') or user-editable (line mode);
+t restores the read-only barrier for copy/Emacs modes,
+dead terminals and compile-style buffers."
+  (setq buffer-read-only
+        (not (or (ghostel--insert-forwarding-live-p)
+                 (eq ghostel--input-mode 'line)))))
 
 
 ;;; Public input API
@@ -1786,16 +1767,20 @@ paste rather than character-by-character typed keystrokes."
 ;;; Terminal control commands (C-c prefix)
 
 (defun ghostel-send-C-c ()
-  "Send interrupt signal to the terminal."
+  "Send interrupt signal to the terminal.
+Sends the raw byte so the tty line discipline raises SIGINT even
+when the foreground program has kitty keyboard mode active."
   (interactive)
   (ghostel--on-user-input)
-  (ghostel--send-encoded "c" "ctrl"))
+  (ghostel--send-string "\x03"))
 
 (defun ghostel-send-C-z ()
-  "Send suspend signal to the terminal."
+  "Send suspend signal to the terminal.
+Sends the raw byte so the tty line discipline raises SIGTSTP even
+when the foreground program has kitty keyboard mode active."
   (interactive)
   (ghostel--on-user-input)
-  (ghostel--send-encoded "z" "ctrl"))
+  (ghostel--send-string "\x1a"))
 
 (defun ghostel-send-C-backslash ()
   "Send C-\\ (quit) to the terminal."
@@ -1804,10 +1789,12 @@ paste rather than character-by-character typed keystrokes."
   (ghostel--send-string "\x1c"))
 
 (defun ghostel-send-C-d ()
-  "Send EOF to the terminal."
+  "Send EOF to the terminal.
+Sends the raw byte so the tty line discipline sees EOF even when
+the foreground program has kitty keyboard mode active."
   (interactive)
   (ghostel--on-user-input)
-  (ghostel--send-encoded "d" "ctrl"))
+  (ghostel--send-string "\x04"))
 
 (defun ghostel-send-C-g ()
   "Send \\`C-g' to the terminal.
@@ -1817,7 +1804,7 @@ overlay clears the way \\`keyboard-quit' would in other buffers."
   (interactive)
   (setq quit-flag nil)
   (deactivate-mark)
-  (ghostel--send-string (string 7)))
+  (ghostel--send-encoded "g" "ctrl"))
 
 
 ;;; Paste / yank
@@ -2194,9 +2181,7 @@ the pre-click view and stays in semi-char (skipped when
      (t
       (mouse-set-point event promote-to-region)
       (when active
-        (pcase ghostel-mouse-drag-input-mode
-          ('copy  (ghostel-copy-mode))
-          ('emacs (ghostel-emacs-mode))))))))
+        (ghostel--enter-readonly-input-mode ghostel-mouse-drag-input-mode))))))
 
 (defun ghostel-mouse-drag-or-set-region (event)
   "Forward EVENT to the terminal, or hand off to `mouse-set-region'.
@@ -2220,9 +2205,7 @@ so a focus click stays in semi-char like a plain click."
    (t
     (mouse-set-region event)
     (when (eq ghostel--input-mode 'semi-char)
-      (pcase ghostel-mouse-drag-input-mode
-        ('copy  (ghostel-copy-mode))
-        ('emacs (ghostel-emacs-mode)))))))
+      (ghostel--enter-readonly-input-mode ghostel-mouse-drag-input-mode)))))
 
 (defun ghostel-mouse-down-2-or-noop (event)
   "Offer middle-button press EVENT to the terminal.
@@ -2455,7 +2438,7 @@ Most keys are sent to the terminal; keys in
       ('line  (ghostel--line-mode-teardown)))
     (setq ghostel--char-mode-override-active nil)
     (setq ghostel--input-mode 'semi-char)
-    (ghostel--sync-inhibit-read-only)
+    (ghostel--sync-read-only)
     (use-local-map ghostel-semi-char-mode-map)
     (setq ghostel--mode-line-tag nil)
     (ghostel--mode-line-refresh)
@@ -2484,7 +2467,7 @@ Even keys listed in `ghostel-keymap-exceptions' (\\`C-c', \\`C-x',
       ('emacs (ghostel--leave-readonly-state))
       ('line  (ghostel--line-mode-teardown)))
     (setq ghostel--input-mode 'char)
-    (ghostel--sync-inhibit-read-only)
+    (ghostel--sync-read-only)
     ;; Route char mode through `emulation-mode-map-alists' so it
     ;; overrides minor-mode keymaps (without this, a minor mode that
     ;; binds a prefix like \\`C-c' would steal those keys before
@@ -2515,6 +2498,20 @@ mode and copy → Emacs → exit returns to copy.")
   (if ghostel-readonly-fast-exit
       ghostel-readonly-fast-exit-mode-map
     ghostel-readonly-mode-map))
+
+(defun ghostel--enter-readonly-input-mode (spec)
+  "Enter the read-only input mode SPEC names.
+`copy' and `emacs' enter that mode directly; `default' follows
+`ghostel-readonly-default-mode'; nil is a no-op."
+  (pcase (if (eq spec 'default) ghostel-readonly-default-mode spec)
+    ('copy  (ghostel-copy-mode))
+    ('emacs (ghostel-emacs-mode))))
+
+(defun ghostel-readonly-enter ()
+  "Enter the read-only mode configured in `ghostel-readonly-default-mode'."
+  (interactive)
+  (ghostel--ensure-ghostel-buffer)
+  (ghostel--enter-readonly-input-mode 'default))
 
 (defun ghostel--enter-readonly (mode freeze label entry-message)
   "Enter or transition between read-only modes.
@@ -2552,7 +2549,7 @@ a non-read-only mode."
       (when ghostel--term
         (ghostel--invalidate)))
     (setq ghostel--input-mode mode)
-    (ghostel--sync-inhibit-read-only)
+    (ghostel--sync-read-only)
     (use-local-map (ghostel--readonly-keymap))
     (setq ghostel--mode-line-tag (ghostel--mode-line-tag-make mode label))
     (ghostel--mode-line-refresh)
@@ -2587,8 +2584,13 @@ returns to whichever input mode was active before."
   (ghostel--ensure-ghostel-buffer)
   (if (eq ghostel--input-mode 'copy)
       (ghostel-readonly-exit)
-    (ghostel--enter-readonly 'copy t ":Copy"
-                             "Copy mode: Press any key to exit")))
+    (ghostel--enter-readonly
+     'copy t ":Copy"
+     (if ghostel-readonly-fast-exit
+         "Copy mode: press any printable key to exit"
+       (format "Copy mode: %s or %s to exit"
+               (substitute-command-keys "\\[ghostel-copy-mode]")
+               (substitute-command-keys "\\[ghostel-semi-char-mode]"))))))
 
 (defun ghostel--mark-activated ()
   "Switch input mode when the region becomes active in semi-char mode.
@@ -2603,9 +2605,7 @@ command set the region, so the selection survives the switch."
                                        ghostel-mouse-release-or-set-point
                                        ghostel-mouse-drag-or-set-region)))
              (eq ghostel--input-mode 'semi-char))
-    (pcase ghostel-mark-activation-input-mode
-      ('copy  (ghostel-copy-mode))
-      ('emacs (ghostel-emacs-mode)))))
+    (ghostel--enter-readonly-input-mode ghostel-mark-activation-input-mode)))
 
 (defun ghostel-maybe-leave-input (&rest _)
   "Leave semi-char for `ghostel-point-leave-input-mode' if point left the input.
@@ -2619,9 +2619,7 @@ Add it to other jump commands as a hook or `:after' advice (see the README)."
              ghostel--cursor-char-pos
              (not executing-kbd-macro)
              (/= (point) ghostel--cursor-char-pos))
-    (pcase ghostel-point-leave-input-mode
-      ('copy  (ghostel-copy-mode))
-      ('emacs (ghostel-emacs-mode)))))
+    (ghostel--enter-readonly-input-mode ghostel-point-leave-input-mode)))
 
 (defun ghostel-readonly-exit ()
   "Exit copy or Emacs mode and return to the mode active before entry."
@@ -2875,487 +2873,6 @@ available."
       (when (and text (> (length text) 0))
         (kill-new text)
         (message "Copied %d characters to kill ring" (length text))))))
-
-
-;;; Hyperlinks (OSC 8)
-
-(defvar-keymap ghostel-link-map
-  :doc "Keymap for clickable hyperlinks in ghostel buffers.
-Mouse clicks on a linkified cell open the link in any input mode.
-
-RET not bound here so a misdetected link inside a typed command in
-semi-char/char mode never hijacks the key away from the PTY."
-  "<mouse-1>" #'ghostel-open-link-at-click
-  "<mouse-2>" #'ghostel-open-link-at-click)
-
-(defun ghostel--uri-at-pos (pos)
-  "Return the URI string stored in POS's `help-echo', or nil."
-  (let ((uri (get-text-property pos 'help-echo)))
-    (and (stringp uri) uri)))
-
-(defun ghostel--eldoc-link (callback &rest _)
-  "Report the hyperlink URI at point via eldoc CALLBACK.
-For `eldoc-documentation-functions'."
-  (when-let* (((eq (get-text-property (point) 'keymap) ghostel-link-map))
-              (uri (ghostel--uri-at-pos (point)))
-              (link (if (string-prefix-p "fileref:" uri)
-                        (substring uri (length "fileref:"))
-                      uri)))
-    (funcall callback link :thing "Link" :face 'link)))
-
-(defun ghostel--open-link (url)
-  "Open URL, dispatching by scheme.
-file:// URIs open in Emacs; http(s) and other schemes use `browse-url'.
-fileref: URIs (from auto-detected file[:line[:col]] patterns) open
-the file at the given position in another window.  A fileref without
-a line suffix opens at the start of the file or directory."
-  (when (and url (stringp url))
-    (cond
-     ((string-match "\\`fileref:\\(.*?\\)\\(?::\\([0-9]+\\)\\(?::\\([0-9]+\\)\\)?\\)?\\'" url)
-      (let ((file (match-string 1 url))
-            (line (and (match-string 2 url)
-                       (string-to-number (match-string 2 url))))
-            (col (and (match-string 3 url)
-                      (string-to-number (match-string 3 url)))))
-        (when (file-exists-p file)
-          (find-file-other-window file)
-          (when line
-            (goto-char (point-min))
-            (forward-line (1- (max 1 line)))
-            (when col (move-to-column (max 0 (1- col))))))))
-     ((string-match "\\`file://\\(?:localhost\\)?\\(/.*\\)" url)
-      (find-file (url-unhex-string (match-string 1 url))))
-     ((string-match-p "\\`[a-z]+://" url)
-      (browse-url url)))))
-
-(defun ghostel-open-link-at-click (event)
-  "Open the hyperlink at the mouse click EVENT position."
-  (interactive "e")
-  (ghostel--open-link (ghostel--uri-at-pos (posn-point (event-start event)))))
-
-(defun ghostel-open-link-at-point ()
-  "Open the hyperlink at point."
-  (interactive)
-  (ghostel--open-link (ghostel--uri-at-pos (point))))
-
-(defun ghostel--find-link-1 (direction from)
-  "Return the start of the next/previous hyperlink from FROM, or nil.
-DIRECTION is `next' or `previous'.
-
-Treats runs sharing a `ghostel-link-id' as one logical link: if FROM is
-inside such a run, other runs with that id are skipped; for `previous',
-the result is walked back to the earliest same-id run so a wrapped URL
-lands at its start, not its last chunk."
-  (let ((search-fn (if (eq direction 'next)
-                       #'text-property-search-forward
-                     #'text-property-search-backward))
-        (skip-id (get-text-property from 'ghostel-link-id)))
-    (save-excursion
-      (goto-char from)
-      (catch 'found
-        (while-let ((match (funcall search-fn 'help-echo nil
-                                    (lambda (_ v) v) t)))
-          (let* ((pos (prop-match-beginning match))
-                 (id (get-text-property pos 'ghostel-link-id)))
-            (unless (and skip-id (equal skip-id id))
-              (when (and (eq direction 'previous) id)
-                (catch 'walked
-                  (while-let ((earlier (text-property-search-backward
-                                        'help-echo nil
-                                        (lambda (_ v) v) t)))
-                    (let ((earlier-pos (prop-match-beginning earlier)))
-                      (if (equal id (get-text-property
-                                     earlier-pos 'ghostel-link-id))
-                          (setq pos earlier-pos)
-                        (throw 'walked nil))))))
-              (throw 'found pos))))))))
-
-(defun ghostel--find-next-link (from)
-  "Return start position of the first hyperlink after FROM, or nil.
-A hyperlink is any region with a non-nil `help-echo' property.
-Covers OSC 8 links, auto-detected URLs, and `fileref:' references."
-  (ghostel--find-link-1 'next from))
-
-(defun ghostel--find-previous-link (from)
-  "Return start position of the first hyperlink before FROM, or nil."
-  (ghostel--find-link-1 'previous from))
-
-(defun ghostel--goto-hyperlink (direction)
-  "Jump to the next/previous hyperlink.  DIRECTION is `next' or `previous'.
-Wraps around when no link is found in the requested direction.
-Signals `user-error' if the buffer has no hyperlinks at all."
-  (let* ((search (if (eq direction 'next)
-                     #'ghostel--find-next-link
-                   #'ghostel--find-previous-link))
-         (target (funcall search (point))))
-    (unless target
-      (let ((wrap-from (if (eq direction 'next) (point-min) (point-max))))
-        (setq target (funcall search wrap-from))
-        (when target (message "Wrapped"))))
-    (if target
-        (goto-char target)
-      (user-error "No hyperlinks in buffer"))))
-
-(defun ghostel-next-hyperlink (&optional n)
-  "Enter copy mode and move point to the Nth next hyperlink.
-A hyperlink is any OSC 8 link, auto-detected URL, or `file:line'
-reference in the buffer.  Wraps to `point-min' when no link is found
-after point.  Press RET to follow the link at point."
-  (interactive "p")
-  (unless (eq ghostel--input-mode 'copy)
-    (ghostel-copy-mode))
-  (dotimes (_ (or n 1))
-    (ghostel--goto-hyperlink 'next)))
-
-(defun ghostel-previous-hyperlink (&optional n)
-  "Enter copy mode and move point to the Nth previous hyperlink.
-Wraps to `point-max' when no link is found before point."
-  (interactive "p")
-  (unless (eq ghostel--input-mode 'copy)
-    (ghostel-copy-mode))
-  (dotimes (_ (or n 1))
-    (ghostel--goto-hyperlink 'previous)))
-
-(eldoc-add-command #'ghostel-next-hyperlink #'ghostel-previous-hyperlink)
-
-(defconst ghostel--soft-wrap-row-limit 50
-  "How many rows `ghostel--detect-urls' joins into one logical line.
-Output like a minified JSON blob is a single line megabytes long;
-joining all of it would cost more than any link is worth, and would hand the
-patterns a match candidate long enough to overflow the regexp matcher.
-Past the limit a row break is kept and joining starts over,
-so a link straddling that break resolves to one side of it.")
-
-(defun ghostel--soft-wrap-line-beginning (pos limit)
-  "Return the start of POS's logical line, crossing soft-wrap newlines.
-A line the terminal split to fit its width continues on the next
-buffer line; the newline between them carries `ghostel-wrap'.
-LIMIT caps how many rows the search walks back."
-  (save-excursion
-    (goto-char pos)
-    (beginning-of-line)
-    (let ((rows 0))
-      (while (and (< rows limit)
-                  (> (point) (point-min))
-                  (get-text-property (1- (point)) 'ghostel-wrap))
-        (forward-line -1)
-        (setq rows (1+ rows))))
-    (point)))
-
-(defun ghostel--soft-wrap-line-end (pos limit)
-  "Return the end of POS's logical line, crossing soft-wrap newlines.
-LIMIT caps how many rows the search walks forward."
-  (save-excursion
-    (goto-char pos)
-    (end-of-line)
-    (let ((rows 0))
-      (while (and (< rows limit)
-                  (get-text-property (point) 'ghostel-wrap))
-        (forward-line 1)
-        (end-of-line)
-        (setq rows (1+ rows))))
-    (point)))
-
-(defun ghostel--wrap-joined-region (begin end limit)
-  "Return (STRING . CHUNKS) for BEGIN..END with soft-wrap newlines removed.
-STRING is the region's text as the terminal program wrote it, so a
-value split across rows matches as one token.  CHUNKS maps it back:
-a vector of (STRING-OFFSET . BUFFER-POS) pairs, one per row, ascending.
-
-LIMIT bounds how many rows may be joined into one line, which keeps a
-megabyte-long line of output from becoming one unbroken token for the
-regexps to chew through."
-  (let ((chunks nil)
-        (parts nil)
-        (offset 0)
-        (rows 0)
-        (pos begin))
-    (while (< pos end)
-      (let* ((wrap (text-property-not-all pos end 'ghostel-wrap nil))
-             (wrapped (and wrap (eq (char-after wrap) ?\n)))
-             (join (and wrapped (< rows limit)))
-             (piece (buffer-substring-no-properties
-                     pos (cond (join wrap)
-                               (wrapped (1+ wrap))
-                               (t end)))))
-        (push (cons offset pos) chunks)
-        (push piece parts)
-        (setq rows (if join (1+ rows) 0)
-              offset (+ offset (length piece))
-              pos (if wrapped (1+ wrap) end))))
-    (cons (string-join (nreverse parts))
-          (vconcat (nreverse chunks)))))
-
-(defun ghostel--wrap-offset-to-pos (offset chunks)
-  "Return the buffer position for STRING OFFSET given CHUNKS.
-CHUNKS is the map returned by `ghostel--wrap-joined-region'.
-Binary search, so a region with thousands of rows stays cheap to map."
-  (unless (zerop (length chunks))
-    (let ((low 0)
-          (high (1- (length chunks))))
-      (while (< low high)
-        (let ((mid (/ (+ low high 1) 2)))
-          (if (<= (car (aref chunks mid)) offset)
-              (setq low mid)
-            (setq high (1- mid)))))
-      (let ((chunk (aref chunks low)))
-        (+ (cdr chunk) (- offset (car chunk)))))))
-
-(defun ghostel--wrap-fragments (beg end)
-  "Return the buffer ranges covering BEG..END, split at soft-wrap newlines.
-Each element is a (START . STOP) cons; the wrap newlines themselves
-are left out so link properties never cover a row break."
-  (let ((fragments nil)
-        (pos beg))
-    (while (< pos end)
-      (let ((wrap (text-property-not-all pos end 'ghostel-wrap nil)))
-        (if (and wrap (eq (char-after wrap) ?\n))
-            (progn
-              (when (< pos wrap) (push (cons pos wrap) fragments))
-              (setq pos (1+ wrap)))
-          (push (cons pos end) fragments)
-          (setq pos end))))
-    (nreverse fragments)))
-
-(defun ghostel--url-link-p (pos)
-  "Non-nil when POS carries a URL link this scan attached.
-The file pattern also matches the `//host/path' half of a URL, so the file
-pass has to recognise a URL link to leave it alone, including one an earlier
-scan attached, when URL detection has since been switched off."
-  (let ((echo (get-text-property pos 'help-echo)))
-    (and (ghostel--detected-link-p pos)
-         (stringp echo)
-         (not (string-prefix-p "fileref:" echo)))))
-
-(defun ghostel--range-overlaps-p (beg end ranges)
-  "Non-nil when BEG..END overlaps any (START . STOP) cons in RANGES."
-  (and (seq-find (lambda (range)
-                   (and (< beg (cdr range)) (> end (car range))))
-                 ranges)
-       t))
-
-(defun ghostel--linkify (fragments uri raw)
-  "Mark FRAGMENTS as a hyperlink to URI.
-FRAGMENTS is the buffer ranges of one match, as `ghostel--wrap-fragments'
-returns them.  RAW is the text the match was made of, kept so a later
-scan can tell this link from one whose text has since changed.
-A range broken by soft wraps is marked one row at a time, with a
-shared `ghostel-link-id' so link navigation treats the rows as one
-link.  The id is a cons, which never `equal's an OSC 8 id (those
-are strings or integers)."
-  (let ((props (list 'help-echo uri
-                     'mouse-face 'highlight
-                     'keymap ghostel-link-map
-                     'ghostel-link-text raw
-                     'ghostel-link-id (cons 'ghostel-detected
-                                            (cl-incf ghostel--link-id-counter)))))
-    (pcase-dolist (`(,start . ,stop) fragments)
-      (add-text-properties start stop props))))
-
-(defun ghostel--detected-link-p (pos)
-  "Non-nil when the link at POS is one this scan attached earlier."
-  (eq (car-safe (get-text-property pos 'ghostel-link-id)) 'ghostel-detected))
-
-(defun ghostel--foreign-link-p (beg end)
-  "Non-nil when BEG..END overlaps a link this scan did not attach.
-An OSC 8 span keeps its own target even where a path pattern also
-matches, so the whole range is checked, not just its first cell."
-  (let ((pos beg)
-        (foreign nil))
-    (while (and (not foreign) (< pos end))
-      (let ((echo (get-text-property pos 'help-echo)))
-        (when (and echo (not (ghostel--detected-link-p pos)))
-          (setq foreign t))
-        (setq pos (next-single-property-change pos 'help-echo nil end))))
-    foreign))
-
-(defun ghostel--skip-match-p (fragments raw active-bounds)
-  "Return non-nil if the link over FRAGMENTS should not be applied.
-RAW is the text this match is made of.  Leaves alone what another
-source owns (an OSC 8 span), the prompt, the line the cursor is on,
-and a match whose link already covers this same text.  A match whose
-text changed, or that is only partly marked, is re-applied: the
-renderer repaints the rows that changed, so the rows of a wrapped
-link that did not change would otherwise keep pointing at text they
-no longer hold.  The test is on the text rather than on the resolved
-target, so a `cd' — which moves `default-directory' under output that
-never changed — leaves existing links pointing where they did.
-ACTIVE-BOUNDS is a (BOL . EOL) cons covering the cursor's line."
-  (let ((skip nil)
-        (current t))
-    (pcase-dolist (`(,start . ,stop) fragments)
-      (when (or (get-text-property start 'ghostel-prompt)
-                (and active-bounds
-                     (>= start (car active-bounds))
-                     (<= start (cdr active-bounds)))
-                (ghostel--foreign-link-p start stop))
-        (setq skip t))
-      (unless (and (ghostel--detected-link-p start)
-                   (equal raw (get-text-property start 'ghostel-link-text)))
-        (setq current nil)))
-    (or skip current)))
-
-(defun ghostel--drop-stranded-links (begin end matched urls files)
-  "Remove this scan's links in BEGIN..END that no match covers.
-MATCHED is the list of (START . STOP) ranges the scan matched, whatever
-it then did with them.  A row repainted on its own can leave the other
-rows of a wrapped link behind, pointing at text that is gone.
-URLS and FILES say which patterns ran: a link of a kind that was not
-scanned for is unexamined, not stranded."
-  (let ((pos begin))
-    (while (setq pos (text-property-not-all pos end 'ghostel-link-id nil))
-      (let* ((stop (next-single-property-change pos 'ghostel-link-id nil end))
-             (echo (get-text-property pos 'help-echo))
-             (scanned (if (and (stringp echo)
-                               (string-prefix-p "fileref:" echo))
-                          files
-                        urls)))
-        (when (and scanned
-                   (ghostel--detected-link-p pos)
-                   (not (ghostel--range-overlaps-p pos stop matched)))
-          (remove-text-properties pos stop
-                                  '(help-echo nil mouse-face nil keymap nil
-                                              ghostel-link-id nil
-                                              ghostel-link-text nil)))
-        (setq pos stop)))))
-
-(defun ghostel--detect-urls (&optional begin end)
-  "Scan a buffer region for plain-text URLs and file:line references.
-BEGIN and END default to `point-min' and `point-max' respectively.
-Skips regions that already have a `help-echo' property (e.g. from OSC 8)
-and the user's active input on the current prompt line.
-Bounding the scan keeps streaming output from re-scanning the entire
-materialized scrollback on every redraw.
-Binds `inhibit-read-only' and suppresses modification hooks so the scan
-can attach text properties when called from the deferred-detection timer
-outside the redraw scope."
-  (let* (;; Whole logical lines: a value the terminal split across rows is
-         ;; only recognisable once the rows are joined, and starting mid-line
-         ;; would let the `^' anchor below match where there is no line start.
-         (begin (ghostel--soft-wrap-line-beginning
-                 (or begin (point-min)) ghostel--soft-wrap-row-limit))
-         (end (ghostel--soft-wrap-line-end
-               (or end (point-max)) ghostel--soft-wrap-row-limit))
-         (inhibit-read-only t)
-         (inhibit-modification-hooks t)
-         ;; `ghostel--cursor-char-pos' is the live terminal cursor after a redraw;
-         ;; its line is the prompt the user is currently editing.  Capture as
-         ;; buffer-position bounds so the per-match skip check is O(1).
-         (active-pos (or ghostel--cursor-char-pos (point)))
-         (active-bounds (cons (ghostel--soft-wrap-line-beginning
-                               active-pos ghostel--soft-wrap-row-limit)
-                              (ghostel--soft-wrap-line-end
-                               active-pos ghostel--soft-wrap-row-limit)))
-         (joined (ghostel--wrap-joined-region
-                  begin end ghostel--soft-wrap-row-limit))
-         (text (car joined))
-         (chunks (cdr joined))
-         ;; Disable file detection over TRAMP
-         (files (and ghostel-enable-file-detection
-                     (not (file-remote-p default-directory))))
-         ;; Every range a pattern matched, whether or not it was linkified.
-         ;; What no pattern covers any more is a leftover to clear.
-         (matched nil)
-         (url-ranges nil))
-    ;; Pass 1: http(s) URLs
-    (when ghostel-enable-url-detection
-      (let ((offset 0))
-        (while (string-match
-                "https?://[^ \t\n\r\"<>]*[^ \t\n\r\"<>.,;:!?)>]"
-                text offset)
-          (setq offset (match-end 0))
-          (let* ((beg (ghostel--wrap-offset-to-pos (match-beginning 0) chunks))
-                 (mend (ghostel--wrap-offset-to-pos (match-end 0) chunks))
-                 (url (match-string-no-properties 0 text))
-                 (fragments (ghostel--wrap-fragments beg mend))
-                 (range (cons beg mend)))
-            (push range url-ranges)
-            (push range matched)
-            (unless (ghostel--skip-match-p fragments url active-bounds)
-              (ghostel--linkify fragments url url))))))
-    ;; Pass 2: file:line[:col] references (e.g. "./foo.el:42",
-    ;; "/tmp/bar.rs:10", or bare relative paths like "src/main.rs:42:4"
-    ;; from compiler output).  The full regex is assembled from fixed anchor
-    ;; + user-tunable path + fixed `:LINE[:COL]' tail so group 1 (path) and
-    ;; group 2 (line[:col]) are always present — no nil-guarding needed in
-    ;; the hot loop.  A small hash memoizes `file-exists-p' so repeated paths
-    ;; in a redraw (common in multi-line compiler diagnostics) don't re-stat.
-    (when files
-      (let ((full-regex (concat ghostel--file-detection-leading-anchor
-                                "\\(" ghostel-file-detection-path-regex "\\)"
-                                "\\(" ghostel--file-detection-tail "\\)"))
-            (seen (make-hash-table :test 'equal))
-            (offset 0))
-        (while (string-match full-regex text offset)
-          (setq offset (match-end 2))
-          (let* ((beg (ghostel--wrap-offset-to-pos (match-beginning 1) chunks))
-                 (mend (ghostel--wrap-offset-to-pos (match-end 2) chunks))
-                 (path (match-string-no-properties 1 text))
-                 (loc (match-string-no-properties 2 text))
-                 (raw (concat path loc))
-                 (fragments (ghostel--wrap-fragments beg mend)))
-            ;; A URL owns its whole span: its `//host/path' half also looks
-            ;; like a path, and re-marking it would replace the link with a
-            ;; local file — and stat that file on every scan.
-            (unless (or (ghostel--range-overlaps-p beg mend url-ranges)
-                        ;; With the URL pass switched off nothing recorded a
-                        ;; range, so fall back to the link already there.
-                        ;; When it did run its ranges are the whole truth,
-                        ;; and a leftover URL link is about to be cleared.
-                        (and (not ghostel-enable-url-detection)
-                             (ghostel--url-link-p beg)))
-              (if (ghostel--skip-match-p fragments raw active-bounds)
-                  ;; Whatever is there stays; it must not count as stranded.
-                  (push (cons beg mend) matched)
-                (let* ((abs-path (expand-file-name path))
-                       (cached (gethash abs-path seen 'unset))
-                       (exists (if (eq cached 'unset)
-                                   (puthash abs-path (file-exists-p abs-path) seen)
-                                 cached)))
-                  ;; A candidate that names no file leaves the range
-                  ;; uncovered, so a link left over from the text it used
-                  ;; to hold is cleared.
-                  (when exists
-                    (push (cons beg mend) matched)
-                    (ghostel--linkify
-                     fragments
-                     (if (> (length loc) 0)
-                         (concat "fileref:" abs-path ":" (substring loc 1))
-                       (concat "fileref:" abs-path))
-                     raw)))))))))
-    (ghostel--drop-stranded-links
-     begin end matched ghostel-enable-url-detection files)))
-
-(defun ghostel--run-queued-plain-link-detection (buffer)
-  "Run any queued redraw-triggered plain-text link detection for BUFFER."
-  (when (buffer-live-p buffer)
-    (with-current-buffer buffer
-      (let ((begin ghostel--plain-link-detection-begin)
-            (end ghostel--plain-link-detection-end))
-        (setq ghostel--plain-link-detection-timer nil
-              ghostel--plain-link-detection-begin nil
-              ghostel--plain-link-detection-end nil)
-        (when (and begin end (<= begin end))
-          (ghostel--detect-urls begin end))))))
-
-(defun ghostel--queue-plain-link-detection (begin end)
-  "Coalesce redraw-triggered plain-text link detection for BEGIN..END."
-  (when (and begin end (<= begin end))
-    (setq ghostel--plain-link-detection-begin
-          (if ghostel--plain-link-detection-begin
-              (min ghostel--plain-link-detection-begin begin)
-            begin)
-          ghostel--plain-link-detection-end
-          (if ghostel--plain-link-detection-end
-              (max ghostel--plain-link-detection-end end)
-            end))
-    (unless ghostel--plain-link-detection-timer
-      (if (<= ghostel-plain-link-detection-delay 0)
-          (ghostel--run-queued-plain-link-detection (current-buffer))
-        (setq ghostel--plain-link-detection-timer
-              (run-with-timer ghostel-plain-link-detection-delay nil
-                              #'ghostel--run-queued-plain-link-detection
-                              (current-buffer)))))))
 
 
 ;;; Password prompt detection
@@ -4120,18 +3637,13 @@ EVENT is the state-change description passed by Emacs."
   (let ((buf (process-buffer process)))
     (when (buffer-live-p buf)
       (with-current-buffer buf
-        (when ghostel--plain-link-detection-timer
-          (cancel-timer ghostel--plain-link-detection-timer)
-          (setq ghostel--plain-link-detection-timer nil
-                ghostel--plain-link-detection-begin nil
-                ghostel--plain-link-detection-end nil))
         (ghostel--cancel-password-confirm-timer)
         (ghostel--spinner-stop)
         (remove-hook 'pre-redisplay-functions #'ghostel--fake-cursor-update t)
         (ghostel--fake-cursor-clear)
         (run-hook-with-args 'ghostel-exit-functions buf event)
         ;; Dead terminal: restore the plain read-only barrier.
-        (ghostel--sync-inhibit-read-only)
+        (ghostel--sync-read-only)
         (if ghostel-kill-buffer-on-exit
             (kill-buffer buf)
           (let ((inhibit-read-only t))
@@ -4649,7 +4161,7 @@ TRAMP can manage the remote shell."
     (when (processp process)
       (process-put process 'adjust-window-size-function #'ignore))
     (setq ghostel--process process)
-    (ghostel--sync-inhibit-read-only)
+    (ghostel--sync-read-only)
     process))
 
 (defun ghostel--spawn-via-emacs (program program-args &optional remote-p)
@@ -4910,14 +4422,17 @@ timer.  Hidden output remains pending until the buffer is displayed."
         (line-beginning-position)))))
 
 (defun ghostel--schedule-link-detection ()
-  "Schedule deferred plain-text link detection over the viewport.
-Falls back to `point-min' when the buffer has no viewport yet.  Covers
-plain-text URL and file:line detection; native OSC-8 hyperlink spans
-remain handled inside the renderer."
-  (when (or ghostel-enable-url-detection ghostel-enable-file-detection)
-    (ghostel--queue-plain-link-detection
-     (or (ghostel--viewport-start) (point-min))
-     (point-max))))
+  "Schedule deferred plain-text link detection over the repainted region.
+The renderer publishes the buffer range it rewrote in
+`ghostel--repainted-region', and every character of terminal output
+goes through it, so queueing that range scans each row exactly once —
+including rows a flood pushed past the viewport between two redraws.
+Covers plain-text URL and file:line detection; native OSC-8 hyperlink
+spans remain handled inside the renderer."
+  (when-let* ((region ghostel--repainted-region))
+    (setq ghostel--repainted-region nil)
+    (when (or ghostel-enable-url-detection ghostel-enable-file-detection)
+      (ghostel--queue-plain-link-detection (car region) (cdr region)))))
 
 (defun ghostel--daemon-dummy-frame-p (frame)
   "Non-nil if FRAME is the daemon's invisible initial frame.
@@ -5235,12 +4750,14 @@ reported (some multi-monitor setups), letting the caller fall back."
 
 (defun ghostel--reported-cell-width ()
   "Return cell width to report to libghostty, in physical pixels."
-  (round (* (frame-char-width) (ghostel--cell-pixel-scale))))
+  (round (* (default-font-width) (ghostel--cell-pixel-scale))))
 
 (defun ghostel--cell-height ()
   "Return the terminal cell height in logical pixels.
-`frame-char-height' plus the buffer's `line-spacing' in pixels."
-  (+ (frame-char-height)
+The buffer's default font height plus its `line-spacing' in pixels.
+Redisplay scales a float `line-spacing' by the frame's char height, not
+by the buffer's font height."
+  (+ (default-font-height)
      (cond ((not (display-graphic-p)) 0)
            ((integerp line-spacing) (max 0 line-spacing))
            ((floatp line-spacing)
@@ -5253,7 +4770,8 @@ reported (some multi-monitor setups), letting the caller fall back."
 
 (defun ghostel--set-size-with-cell-dims (term rows cols)
   "Resize TERM to ROWS×COLS, including the reported cell pixel dimensions.
-Convenience wrapper to keep the five resize sites consistent."
+Convenience wrapper to keep the resize sites consistent.  Resolves the cell
+dimensions from the current buffer, so call it with TERM's buffer current."
   (ghostel--set-size term rows cols
                      (ghostel--reported-cell-width)
                      (ghostel--reported-cell-height)))
@@ -5319,6 +4837,10 @@ When BUFFER is non-nil, only refit windows showing BUFFER."
 
 (unless (advice-member-p #'ghostel--around-local-font-scale 'text-scale-mode)
   (advice-add 'text-scale-mode :around #'ghostel--around-local-font-scale))
+;; `buffer-face-set', `buffer-face-toggle' and `variable-pitch-mode' all
+;; remap through `buffer-face-mode', which rescales the font.
+(unless (advice-member-p #'ghostel--around-local-font-scale 'buffer-face-mode)
+  (advice-add 'buffer-face-mode :around #'ghostel--around-local-font-scale))
 (when (and (fboundp 'global-text-scale-adjust)
            (not (advice-member-p #'ghostel--around-global-font-scale
                                  'global-text-scale-adjust)))
@@ -5395,6 +4917,10 @@ may change freely (`ghostel-compile' finalize relies on this)."
   (when (process-live-p ghostel--process)
     (user-error "Cannot change major mode in a live ghostel buffer")))
 
+;; Like `term-mode': the buffer is not for ordinary text editing, and
+;; `read-only-mode' must not drag in `view-mode' under `view-read-only'.
+(put 'ghostel-mode 'mode-class 'special)
+
 (define-derived-mode ghostel-mode fundamental-mode "Ghostel"
   "Major mode for Ghostel terminal emulator."
   (hack-dir-local-variables)
@@ -5413,11 +4939,12 @@ may change freely (`ghostel-compile' finalize relies on this)."
   ;; whether font-lock ends up on.  `ghostel-mode' has no keywords, so
   ;; skipping unfontify has no other effect.
   (setq-local font-lock-unfontify-region-function #'ignore)
-  ;; The terminal renderer owns the buffer contents.  User-editable
-  ;; modes are exceptional and must opt in explicitly.
+  ;; The terminal renderer owns the buffer contents.  Read-only until
+  ;; a process spawn runs `ghostel--sync-read-only'.
   (setq buffer-read-only t)
-  ;; Terminal-input modes forward foreign insertions to the PTY and
-  ;; repair foreign deletions; see `ghostel--sync-inhibit-read-only'.
+  ;; Live terminal-input modes clear `buffer-read-only' and instead
+  ;; intercept foreign edits here: insertions are forwarded to the PTY,
+  ;; deletions repaired by a redraw; see `ghostel--sync-read-only'.
   ;; Depth 90 so other hook members still see an insertion before the
   ;; forwarding removes it.
   (add-hook 'after-change-functions
@@ -5458,8 +4985,8 @@ may change freely (`ghostel-compile' finalize relies on this)."
   (add-hook 'isearch-mode-end-hook #'ghostel-maybe-leave-input nil t)
   (add-hook 'kill-buffer-query-functions #'ghostel--kill-buffer-query nil t)
   (add-hook 'change-major-mode-hook #'ghostel--change-major-mode-guard nil t)
-  ;; Show the hyperlink URI at point in eldoc.
-  (add-hook 'eldoc-documentation-functions #'ghostel--eldoc-link nil t)
+  ;; Eldoc link echo, thing-at-point providers, file-name-at-point.
+  (ghostel-links-setup)
 
   ;; Set up the comint/shell completion plumbing once per buffer so
   ;; `ghostel-line-mode-complete-at-point' has the right
@@ -5530,12 +5057,14 @@ spawn after initialization."
       (cancel-timer ghostel--redraw-timer))
     (when ghostel--plain-link-detection-timer
       (cancel-timer ghostel--plain-link-detection-timer))
+    (ghostel--clear-plain-link-detection-bounds)
     ;; Reinitialization may reuse an existing ghostel buffer that was in
     ;; line mode; reset it to the renderer-owned default before erasing.
     (setq buffer-read-only t)
     (let ((inhibit-read-only t))
       (erase-buffer))
-    (setq ghostel--term nil
+    (setq ghostel--input-mode 'semi-char
+          ghostel--term nil
           ghostel--term-rows nil
           ghostel--term-cols nil
           ghostel--process nil
@@ -5547,11 +5076,10 @@ spawn after initialization."
           ghostel--redraw-timer nil
           ghostel--pending-redraw nil
           ghostel--plain-link-detection-timer nil
-          ghostel--plain-link-detection-begin nil
-          ghostel--plain-link-detection-end nil
           ghostel--force-next-redraw nil
           ghostel--cursor-pos nil
-          ghostel--cursor-char-pos nil)
+          ghostel--cursor-char-pos nil
+          ghostel--repainted-region nil)
     (let* ((w (or (get-buffer-window buffer t) (selected-window)))
            (height (max 1 (or rows
                               (if (window-live-p w)

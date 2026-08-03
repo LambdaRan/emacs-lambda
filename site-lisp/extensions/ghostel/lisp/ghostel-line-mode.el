@@ -28,7 +28,8 @@
 (declare-function ghostel--redraw "ghostel-module"
                   (term &optional full force-sync))
 (declare-function ghostel--regex-prompt-end "ghostel")
-(declare-function ghostel--sync-inhibit-read-only "ghostel")
+(declare-function ghostel--schedule-link-detection "ghostel")
+(declare-function ghostel--sync-read-only "ghostel")
 (declare-function ghostel--send-encoded "ghostel")
 (declare-function ghostel--uri-at-pos "ghostel")
 (declare-function ghostel--write-pty "ghostel-module")
@@ -440,7 +441,7 @@ in line mode (the interactive entry validates these)."
       (setq ghostel--line-mode-on-alt-screen (ghostel-alt-screen-p))
       (setq ghostel--line-mode-paused nil)
       (setq ghostel--input-mode 'line)
-      (ghostel--sync-inhibit-read-only)
+      (ghostel--sync-read-only)
       (use-local-map ghostel-line-mode-map)
       (setq ghostel--mode-line-tag (ghostel--mode-line-tag-make 'line ":Line"))
       (ghostel--mode-line-refresh)
@@ -606,7 +607,8 @@ which discards any type-ahead and runs inside `ghostel--redraw-now'."
     (when ghostel--term
       (let ((inhibit-read-only t)
             (inhibit-modification-hooks t))
-        (ghostel--redraw ghostel--term t t)))))
+        (ghostel--redraw ghostel--term t t))
+      (ghostel--schedule-link-detection))))
 
 (defun ghostel--line-mode-pause ()
   "Drop line mode to semi-char while a full-screen app holds the alt screen.
@@ -616,7 +618,7 @@ re-enters line mode at the new prompt."
   (ghostel--line-mode-teardown 'pause)
   (setq ghostel--char-mode-override-active nil)
   (setq ghostel--input-mode 'semi-char)
-  (ghostel--sync-inhibit-read-only)
+  (ghostel--sync-read-only)
   (use-local-map ghostel-semi-char-mode-map)
   (setq ghostel--mode-line-tag nil)
   (ghostel--mode-line-refresh)
