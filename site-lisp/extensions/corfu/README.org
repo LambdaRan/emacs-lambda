@@ -9,8 +9,8 @@
 #+html: <a href="https://www.gnu.org/software/emacs/"><img alt="GNU Emacs" src="https://github.com/minad/corfu/blob/screenshots/emacs.svg?raw=true"/></a>
 #+html: <a href="https://elpa.gnu.org/packages/corfu.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/packages/corfu.svg"/></a>
 #+html: <a href="https://elpa.gnu.org/devel/corfu.html"><img alt="GNU-devel ELPA" src="https://elpa.gnu.org/devel/corfu.svg"/></a>
-#+html: <a href="https://melpa.org/#/corfu"><img alt="MELPA" src="https://melpa.org/packages/corfu-badge.svg"/></a>
-#+html: <a href="https://stable.melpa.org/#/corfu"><img alt="MELPA Stable" src="https://stable.melpa.org/packages/corfu-badge.svg"/></a>
+#+html: <a href="https://releases.melpa.org/#/corfu"><img alt="MELPA Releases" src="https://releases.melpa.org/packages/corfu-badge.svg"/></a>
+#+html: <a href="https://snapshots.melpa.org/#/corfu"><img alt="MELPA Snapshots" src="https://snapshots.melpa.org/packages/corfu-badge.svg"/></a>
 
 Corfu enhances in-buffer completion with a small completion popup. The current
 candidates are shown in a popup below or above the point, and can be selected by
@@ -63,7 +63,7 @@ terminal Emacs. Use the [[https://codeberg.org/akib/emacs-corfu-terminal][corfu-
 
 * Installation
 
-Corfu is available from [[https://elpa.gnu.org/packages/corfu.html][ELPA]] or [[https://melpa.org/#/corfu][MELPA]] and can be installed via =M-x package-install RET corfu RET=.
+Corfu is available from [[https://elpa.gnu.org/packages/corfu.html][ELPA]] or [[https://releases.melpa.org/#/corfu][MELPA]] and can be installed via =M-x package-install RET corfu RET=.
 After installation, activate the global minor mode with =M-x global-corfu-mode
 RET=. For completion press =M-TAB= (or =TAB=) within a buffer. Auto completion is
 disabled by default for safety and unobtrusiveness.
@@ -135,6 +135,7 @@ Here is an example configuration:
 
   ;; Enable optional extension modes:
   ;; (corfu-history-mode)
+  ;; (corfu-mouse-mode)
   ;; (corfu-popupinfo-mode)
   )
 
@@ -525,6 +526,7 @@ Corfu package:
 - [[https://github.com/minad/corfu/blob/main/extensions/corfu-indexed.el][corfu-indexed]]: =corfu-indexed-mode= allows you to select indexed candidates with
   prefix arguments.
 - [[https://github.com/minad/corfu/blob/main/extensions/corfu-info.el][corfu-info]]: Actions to access the candidate location and documentation.
+- [[https://github.com/minad/corfu/blob/main/extensions/corfu-mouse.el][corfu-mouse]]: =corfu-mouse-mode= enables mouse support.
 - [[https://github.com/minad/corfu/blob/main/extensions/corfu-popupinfo.el][corfu-popupinfo]]: Display candidate documentation or source in a popup next to
   the candidate menu.
 - [[https://github.com/minad/corfu/blob/main/extensions/corfu-quick.el][corfu-quick]]: Commands to select using Avy-style quick keys.
@@ -574,9 +576,9 @@ enhance your setup.
   which are incompatible with the Emacs completion infrastructure. Company
   provides an adapter ~company-capf~ to handle Capfs as a Company backend. As a
   result of this design, Company is a more complex package than Corfu, three
-  times as large, even without backends. Company by default uses overlays for
-  the popup in contrast to the child frames used by Corfu. Overall both packages
-  work well, but Company integrates less tightly with Emacs. The
+  times as large, even without backends. Older versions of Company defaulted to
+  overlays in contrast to the child frames used by Corfu. Overall both packages
+  work well, but Corfu integrates more tightly with Emacs. Company's
   ~completion-styles~ support is more limited and the ~completion-at-point~ command
   and the ~completion-in-region~ function do not invoke Company.
 

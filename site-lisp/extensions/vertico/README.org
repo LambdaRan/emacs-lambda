@@ -9,8 +9,8 @@
 #+html: <a href="https://www.gnu.org/software/emacs/"><img alt="GNU Emacs" src="https://github.com/minad/corfu/blob/screenshots/emacs.svg?raw=true"/></a>
 #+html: <a href="https://elpa.gnu.org/packages/vertico.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/packages/vertico.svg"/></a>
 #+html: <a href="https://elpa.gnu.org/devel/vertico.html"><img alt="GNU-devel ELPA" src="https://elpa.gnu.org/devel/vertico.svg"/></a>
-#+html: <a href="https://melpa.org/#/vertico"><img alt="MELPA" src="https://melpa.org/packages/vertico-badge.svg"/></a>
-#+html: <a href="https://stable.melpa.org/#/vertico"><img alt="MELPA Stable" src="https://stable.melpa.org/packages/vertico-badge.svg"/></a>
+#+html: <a href="https://releases.melpa.org/#/vertico"><img alt="MELPA Releases" src="https://releases.melpa.org/packages/vertico-badge.svg"/></a>
+#+html: <a href="https://snapshots.melpa.org/#/vertico"><img alt="MELPA Snapshots" src="https://snapshots.melpa.org/packages/vertico-badge.svg"/></a>
 #+html: <img src="https://github.com/minad/vertico/blob/screenshots/movie.jpg?raw=true" align="right">
 
 Vertico provides a performant and minimalistic vertical completion UI based on
@@ -42,7 +42,7 @@ without white space and comments.
 
 * Installation
 
-Vertico is available from [[https://elpa.gnu.org/packages/vertico.html][ELPA]] or [[https://melpa.org/#/vertico][MELPA]]. You can install it directly via =M-x package-install RET vertico RET=.
+Vertico is available from [[https://elpa.gnu.org/packages/vertico.html][ELPA]] or [[https://releases.melpa.org/#/vertico][MELPA]]. You can install it directly via =M-x package-install RET vertico RET=.
 After installation, activate the global minor mode with =M-x vertico-mode RET=.
 
 * Key bindings
@@ -276,9 +276,7 @@ Configuration example for =vertico-directory=:
   :bind (:map vertico-map
               ("RET" . vertico-directory-enter)
               ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
-  ;; Tidy shadowed file names
-  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+              ("M-DEL" . vertico-directory-delete-word)))
 #+end_src
 
 ** Configure Vertico per command or completion category
@@ -476,7 +474,7 @@ the users interacts with Emacs.
 
 There are other interactive completion UIs, which follow a similar philosophy:
 
-- [[https://git.sr.ht/~protesilaos/mct][Mct]]: Minibuffer and Completions in Tandem. Mct reuses the default
+- [[https://github.com/protesilaos/mct][Mct]]: Minibuffer and Completions in Tandem. Mct reuses the default
   ~*Completions*~ buffer and enhances it with automatic updates. From Emacs
   version 31 automatic updates are built-in, see the settings
   =completions-eager-update= and =completions-eager-display=.
@@ -494,7 +492,7 @@ following resources:
 - Configurations which use Vertico and Corfu for completion:
   + [[https://github.com/doomemacs/doomemacs/tree/master/modules/completion/vertico][Doom Emacs Vertico Module]]
   + [[https://github.com/SystemCrafters/crafted-emacs/blob/master/modules/crafted-completion-config.el][Crafted Emacs Completion Module]]
-  + [[https://git.sr.ht/~protesilaos/dotfiles/tree/master/item/emacs/.emacs.d/][Prot's Emacs configuration]]
+  + [[https://github.com/protesilaos/dotfiles/tree/master/emacs/.emacs.d][Prot's Emacs configuration]]
   + [[https://codeberg.org/ashton314/emacs-bedrock/src/branch/main/extras/base.el][Bedrock Emacs Base Enhancements]]
 - Videos:
   + [[https://www.youtube.com/watch?v=fnE0lXoe7Y0][Emacs Completion Explained]] (2022-07-19) by Andrew Tropin.

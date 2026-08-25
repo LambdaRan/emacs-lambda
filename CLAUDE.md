@@ -22,9 +22,13 @@ python assistant.py add owner/repo --ref main --sync
 python assistant.py add owner/repo --manual --note "说明"
 ```
 
-`packages.json` 中标记 `"manual": true` 的包（ghostel、vterm、lazycat、lazycat-theme、ran）不会自动同步——它们包含原生 DLL 或为个人维护的代码。
+`packages.json` 中标记 `"manual": true` 的包（lazycat、lazycat-theme、ran）不会自动同步——它们为个人维护的代码。
+
+ghostel 比较特殊：**非 manual**，通过 `files` 白名单（`etc`、`lisp`、`LICENSE`、`README*`）从上游自动同步 lisp 代码；目录中的原生 DLL（`conpty.dll`、`ghostel-module.dll`、`x64/`、`arm64/`）不在白名单内，`copy_with_files` 只覆盖拷贝不删除，因此 DLL 保持手动维护。
 
 ## 目录结构
+
+Emacs 安装目录：`C:\Program Files\Emacs\emacs-31.1`
 
 ```
 setup/
@@ -37,8 +41,7 @@ site-lisp/
     lazycat/         → 个人工具集合（手动维护）
     lazycat-theme/   → 个人主题（手动维护）
     ran/             → 个人工具（手动维护）
-    ghostel/         → 手动维护，含原生 DLL
-    vterm/           → 手动维护，含原生 DLL
+    ghostel/         → files 白名单同步 lisp 代码，原生 DLL 手动维护
 packages.json        → 包清单（name、repo、ref、ignores、files）
 assistant.py         → 包管理器（从 GitHub Archive 同步）
 ```

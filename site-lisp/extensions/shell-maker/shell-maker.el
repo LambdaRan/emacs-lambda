@@ -4,7 +4,7 @@
 
 ;; Author: Alvaro Ramirez https://xenodium.com
 ;; URL: https://github.com/xenodium/shell-maker
-;; Version: 0.93.1
+;; Version: 0.97.2
 ;; Package-Requires: ((emacs "27.1"))
 
 ;; This package is free software; you can redistribute it and/or modify
@@ -32,10 +32,9 @@
 
 ;;; Code:
 
-(defconst shell-maker-version "0.93.1")
+(defconst shell-maker-version "0.97.2")
 
 (require 'comint)
-(require 'goto-addr)
 (require 'json)
 (require 'map)
 (require 'seq)
@@ -160,7 +159,8 @@ or an absolute path like \"/usr/local/bin/curl\"."
   "<remap> <save-buffer>" #'shell-maker-save-session-transcript
   "C-M-h" #'shell-maker-mark-output)
 
-(defun shell-maker-start (config &optional no-focus welcome-function new-session buffer-name mode-line-name)
+(cl-defun shell-maker-start-v2 (&key config no-focus welcome-function new-session
+                                     buffer-name mode-line-name (alias-commands t))
   "Start a shell with CONFIG.
 
 Specify NO-FOCUS if started shell should not be focused.
@@ -171,7 +171,12 @@ Set NEW-SESSION to start a new session.
 
 Set BUFFER-NAME to override the buffer name.
 
-Set MODE-LINE-NAME to override the mode line name."
+Set MODE-LINE-NAME to override the mode line name.
+
+When ALIAS-COMMANDS is non-nil (the default), define the namespaced
+shell commands (e.g. `NAMESPACE-shell-submit') as aliases.  Pass nil
+to skip this so the caller can define its own commands under those
+names without them being clobbered on every shell start."
   (shell-maker--with-temp-buffer-if new-session ;; Avoid picking up buffer-local vars from current buffer
     (let* ((old-point)
            (namespace (downcase (shell-maker-config-name config)))
@@ -188,17 +193,18 @@ Set MODE-LINE-NAME to override the mode line name."
       (when new-session
         (setq buffer-name (generate-new-buffer-name buffer-name)))
       ;; Alias with concrete shell symbols.
-      (fset (intern (concat namespace "-shell-clear-buffer")) #'shell-maker-clear-buffer)
-      (fset (intern (concat namespace "-shell-previous-input")) #'comint-previous-input)
-      (fset (intern (concat namespace "-shell-next-input")) #'comint-next-input)
-      (fset (intern (concat namespace "-shell-submit")) #'shell-maker-submit)
-      (fset (intern (concat namespace "-shell-save-session-transcript"))
-            #'shell-maker-save-session-transcript)
-      (fset (intern (concat namespace "-shell-search-history")) #'shell-maker-search-history)
-      (fset (intern (concat namespace "-shell-newline")) #'newline)
-      (fset (intern (concat namespace "-shell-rename-buffer")) #'shell-maker-rename-buffer)
-      (fset (intern (concat namespace "-shell-delete-interaction-at-point")) #'shell-maker-delete-interaction-at-point)
-      (fset (intern (concat namespace "-shell-restore-session-from-transcript")) #'shell-maker-restore-session-from-transcript)
+      (when alias-commands
+        (fset (intern (concat namespace "-shell-clear-buffer")) #'shell-maker-clear-buffer)
+        (fset (intern (concat namespace "-shell-previous-input")) #'comint-previous-input)
+        (fset (intern (concat namespace "-shell-next-input")) #'comint-next-input)
+        (fset (intern (concat namespace "-shell-submit")) #'shell-maker-submit)
+        (fset (intern (concat namespace "-shell-save-session-transcript"))
+              #'shell-maker-save-session-transcript)
+        (fset (intern (concat namespace "-shell-search-history")) #'shell-maker-search-history)
+        (fset (intern (concat namespace "-shell-newline")) #'newline)
+        (fset (intern (concat namespace "-shell-rename-buffer")) #'shell-maker-rename-buffer)
+        (fset (intern (concat namespace "-shell-delete-interaction-at-point")) #'shell-maker-delete-interaction-at-point)
+        (fset (intern (concat namespace "-shell-restore-session-from-transcript")) #'shell-maker-restore-session-from-transcript))
       (eval
        (macroexpand
         `(define-derived-mode ,(shell-maker-major-mode config) comint-mode
@@ -232,6 +238,19 @@ Set MODE-LINE-NAME to override the mode line name."
       (when old-point
         (push-mark old-point))
       (get-buffer buffer-name))))
+
+(defun shell-maker-start (config &optional no-focus welcome-function new-session buffer-name mode-line-name)
+  "Start a shell with CONFIG.
+
+Backward-compatible wrapper over `shell-maker-start-v2' (which also
+takes an ALIAS-COMMANDS keyword).  NO-FOCUS, WELCOME-FUNCTION,
+NEW-SESSION, BUFFER-NAME and MODE-LINE-NAME are as documented there."
+  (shell-maker-start-v2 :config config
+                        :no-focus no-focus
+                        :welcome-function welcome-function
+                        :new-session new-session
+                        :buffer-name buffer-name
+                        :mode-line-name mode-line-name))
 
 (defun shell-maker-define-major-mode (config &optional mode-map)
   "Define the major mode for the shell using CONFIG.
@@ -276,7 +295,6 @@ Optionally use MODE-MAP."
     (user-error "Not in a shell"))
   (setq-local shell-maker--config (copy-sequence config))
   (visual-line-mode +1)
-  (goto-address-mode +1)
   ;; Prevents fontifying streamed response as prompt.
   (setq comint-prompt-regexp
         (shell-maker-prompt-regexp config))
@@ -345,6 +363,41 @@ Use ON-OUTPUT function to monitor output text."
   (when on-output
     (funcall on-output reply)))
 
+(defun shell-maker--freeze-submitted-input ()
+  "Make the just-submitted input read-only and drop its hover highlight.
+
+Meant to run right after `comint-send-input', while
+`comint-last-input-start' and `comint-last-input-end' still bracket the
+input that was just committed.
+
+`front-sticky' blocks inserting immediately before the input; keeping
+`read-only' out of `rear-nonsticky' (rear-sticky, the default) blocks
+appending immediately after it.  This mirrors the read-only output
+shell-maker already inserts, so a submitted prompt becomes as immutable
+as the agent's reply.  The live prompt stays editable independently, via
+the prompt marker's own `rear-nonsticky' (see `shell-maker--output-filter').
+
+Also removes the `mouse-face'/`help-echo' comint adds so old input can
+be mouse-2 re-inserted: submitted prompts are immutable here, so the
+hover highlight (the `highlight' face, `:extend t', painting the whole
+line) is just noise.
+
+Drops the undo history too.  Its entries describe the input that was
+just frozen, so undo could only fail on read-only text (or, once the
+reply pushes things around, delete the wrong text).  Only the live
+prompt is meant to be undoable.  Buffers with undo disabled
+(`buffer-disable-undo') are left alone."
+  (when (and comint-last-input-start comint-last-input-end
+             (< (marker-position comint-last-input-start)
+                (marker-position comint-last-input-end)))
+    (let ((inhibit-read-only t))
+      (add-text-properties comint-last-input-start comint-last-input-end
+                           '(read-only t front-sticky (read-only)))
+      (remove-text-properties comint-last-input-start comint-last-input-end
+                              '(mouse-face nil help-echo nil))))
+  (unless (eq buffer-undo-list t)
+    (setq buffer-undo-list nil)))
+
 (cl-defun shell-maker-submit (&key input on-output on-finished)
   "Submit current input.
 
@@ -368,8 +421,7 @@ Of the form:
   (interactive)
   (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
-  (unless (shell-maker-point-at-last-prompt-p)
-    (goto-char (point-max)))
+  (goto-char (point-max))
   (let* ((shell-buffer (shell-maker-buffer shell-maker--config))
          (called-interactively (called-interactively-p #'interactive))
          (shell-maker--input))
@@ -378,6 +430,7 @@ Of the form:
         (goto-char (point-max))
         (insert input)))
     (comint-send-input) ;; Sets shell-maker--input
+    (shell-maker--freeze-submitted-input)
     (when (shell-maker--clear-input-for-execution :input shell-maker--input
                                                   :on-output on-output)
       (if called-interactively
@@ -709,6 +762,9 @@ Return t if INPUT us cleared.  nil otherwise."
       ;; TODO: output help to on-output also.
       (shell-maker--print-help)
       (setq shell-maker--busy nil)
+      ;; Reprints the prompt without `shell-maker-finish-output', so notify
+      ;; the same observers.
+      (run-hooks 'shell-maker-finish-output-hook)
       nil)
      ((string-equal "clear" (string-trim input))
       (call-interactively #'shell-maker-clear-buffer)
@@ -716,12 +772,18 @@ Return t if INPUT us cleared.  nil otherwise."
                                   (shell-maker-prompt shell-maker--config))
       (setq shell-maker--busy nil)
       (set-buffer-modified-p nil)
+      ;; `clear' bypasses `shell-maker-finish-output' but still brings the
+      ;; prompt back, so notify the same observers.
+      (run-hooks 'shell-maker-finish-output-hook)
       nil)
      ((string-equal "config" (string-trim input))
       (shell-maker--write-reply :config shell-maker--config
                                 :reply (shell-maker--dump-config shell-maker--config)
                                 :on-output on-output)
       (setq shell-maker--busy nil)
+      ;; Reprints the prompt without `shell-maker-finish-output', so notify
+      ;; the same observers.
+      (run-hooks 'shell-maker-finish-output-hook)
       nil)
      ((not (shell-maker--curl-version-supported))
       (shell-maker--write-reply :config shell-maker--config
@@ -729,6 +791,9 @@ Return t if INPUT us cleared.  nil otherwise."
                                 :failed t
                                 :on-output on-output)
       (setq shell-maker--busy nil)
+      ;; Reprints the prompt without `shell-maker-finish-output', so notify
+      ;; the same observers.
+      (run-hooks 'shell-maker-finish-output-hook)
       nil)
      ((and (shell-maker-config-validate-command
             shell-maker--config)
@@ -748,11 +813,17 @@ Return t if INPUT us cleared.  nil otherwise."
          :output error
          :success nil))
       (setq shell-maker--busy nil)
+      ;; Reprints the prompt without `shell-maker-finish-output', so notify
+      ;; the same observers.
+      (run-hooks 'shell-maker-finish-output-hook)
       nil)
      ((string-empty-p (string-trim input))
       (shell-maker--output-filter (shell-maker--process)
                                   (concat "\n" (shell-maker-prompt shell-maker--config)))
       (setq shell-maker--busy nil)
+      ;; Empty input reprints the prompt without going through
+      ;; `shell-maker-finish-output', so notify the same observers.
+      (run-hooks 'shell-maker-finish-output-hook)
       nil)
      (t
       t))))
@@ -1188,9 +1259,9 @@ ERROR-CALLBACK accordingly."
                                   output
                                 (funcall extract-response output))
                               nil)
-                   (if-let ((error (if (string-empty-p (string-trim output))
-                                       output
-                                     (funcall extract-response output))))
+                   (if-let* ((error (if (string-empty-p (string-trim output))
+                                        output
+                                      (funcall extract-response output))))
                        (funcall error-callback error)
                      (funcall error-callback output)))))
            (kill-buffer output-buffer)
@@ -1345,6 +1416,14 @@ Use ON-OUTPUT function to monitor output text."
                                     :reply (or output "<nil-message>")
                                     :on-output on-output))
 
+(defvar shell-maker-finish-output-hook nil
+  "Hook run in the shell buffer after output finishes and the prompt returns.
+
+Run at the end of `shell-maker-finish-output' (every command completion,
+error and init) and after the built-in `clear' command brings the prompt
+back.  Use it to react once the buffer has settled, for example to
+re-apply overlays.")
+
 (cl-defun shell-maker-finish-output (&key config success on-output)
   "Finish output for CONFIG shell buffer.
 
@@ -1365,7 +1444,8 @@ Use ON-OUTPUT function to monitor output text."
     (when auto-scroll
       (goto-char (point-max))))
   (when success
-    (shell-maker--write-input-ring-history config)))
+    (shell-maker--write-input-ring-history config))
+  (run-hooks 'shell-maker-finish-output-hook))
 
 (defun shell-maker--clip-output-range (start end)
   "Clip START/END range so it does not extend into the prompt.
@@ -1378,10 +1458,10 @@ For example, with prompt at positions 100-113:
   (shell-maker--clip-output-range 50 200) => ((:start . 50) (:end . 100))
   (shell-maker--clip-output-range 50 80)  => ((:start . 50) (:end . 80))
   (shell-maker--clip-output-range 50 50)  => nil"
-  (when-let ((prompt-start (and comint-last-prompt
-                               (marker-position (car comint-last-prompt))))
-             (prompt-end (marker-position (cdr comint-last-prompt)))
-             ((< prompt-start prompt-end)))
+  (when-let* ((prompt-start (and comint-last-prompt
+                                 (marker-position (car comint-last-prompt))))
+              (prompt-end (marker-position (cdr comint-last-prompt)))
+              ((< prompt-start prompt-end)))
     (setq end (min end prompt-start)))
   (when (< start end)
     (list (cons :start start)
@@ -1389,17 +1469,19 @@ For example, with prompt at positions 100-113:
 
 (defun shell-maker--should-auto-scroll-p ()
   "Return t when streaming should auto-scroll the buffer to point-max.
-True when point is at end-of-buffer AND every window displaying the
-buffer has its visible end at point-max. Wheel-scrolling moves
-window-end without moving point, so checking only `eobp' would keep
-the window snapping back to the bottom while the user is reading."
+True when point is at end-of-buffer AND end-of-buffer is visible in
+every window displaying the buffer.  Wheel-scrolling moves the window
+without moving point, so checking only `eobp' would keep the window
+snapping back to the bottom while the user is reading.
+
+Visibility is asked of redisplay via `pos-visible-in-window-p' rather
+than compared against `window-end', whose value can land one position
+short of point-max at a trailing-newline end-of-buffer, silently
+disarming auto-scroll while the user is in fact at the bottom."
   (and (eobp)
-       (let ((windows (cl-remove-if-not
-                       (lambda (w) (eq (window-buffer w) (current-buffer)))
-                       (window-list nil 'no-mini))))
-         (or (null windows)
-             (cl-every (lambda (w) (>= (window-end w t) (point-max)))
-                       windows)))))
+       (cl-every (lambda (window)
+                   (pos-visible-in-window-p (point-max) window))
+                 (get-buffer-window-list nil 'no-mini))))
 
 (defmacro shell-maker-with-auto-scroll-edit (&rest body)
   "Execute BODY, preserving point unless already at end of buffer."
@@ -1425,10 +1507,10 @@ the window snapping back to the bottom while the user is reading."
            (when (and proc (> point (process-mark proc)))
              (set-marker (process-mark proc) point))
            (setq new-location point))))
-     (when-let (((not comint-use-prompt-regexp))
-                (safe-range (shell-maker--clip-output-range
-                             (marker-position comint-last-output-start)
-                             new-location)))
+     (when-let* (((not comint-use-prompt-regexp))
+                 (safe-range (shell-maker--clip-output-range
+                              (marker-position comint-last-output-start)
+                              new-location)))
        (with-silent-modifications
          (add-text-properties (map-elt safe-range :start) (map-elt safe-range :end)
                               `(read-only t
@@ -1452,7 +1534,7 @@ the window snapping back to the bottom while the user is reading."
       (insert json)
       (goto-char (point-min))
       (setq loc (point))
-      (while (when-let
+      (while (when-let*
                  ((data (ignore-errors (json-read))))
                (setq parsed (append parsed (list data)))
                (setq loc (point))))
@@ -1515,11 +1597,11 @@ substrings — useful when the caller wants property-aware trimming."
           (insert content)
           (write-file path nil))
         (set-buffer-modified-p nil))
-    (when-let ((path (read-file-name "Write file: "
-				     (when shell-maker-transcript-default-path
-                                       (file-name-as-directory shell-maker-transcript-default-path))
-				     nil nil (funcall shell-maker-transcript-default-filename)))
-               (content (buffer-string)))
+    (when-let* ((path (read-file-name "Write file: "
+				      (when shell-maker-transcript-default-path
+                                        (file-name-as-directory shell-maker-transcript-default-path))
+				      nil nil (funcall shell-maker-transcript-default-filename)))
+                (content (buffer-string)))
       (with-temp-buffer
         (insert content)
         (write-file path t))
@@ -1669,8 +1751,8 @@ Returns nil when there is no history."
 (cl-defun shell-maker--extract-history (prompt-regexp &key (propertized t) (trimmed t))
   "Extract command/response history by walking the current buffer.
 
-Walks the buffer with `re-search-forward' to find prompt boundaries,
-extracting each exchange as a small substring.
+Walks the buffer with `re-search-forward', finding prompt boundaries
+with PROMPT-REGEXP, extracting each exchange as a small substring.
 
 When PROPERTIZED is non-nil (the default), use text property checks
 to distinguish real prompts and markers from identical text in LLM
@@ -1800,7 +1882,13 @@ Inserts directly at `point-max' rather than via the output
 filter so the prompt-detection side effects (which strip
 `comint-highlight-prompt' from `comint-last-prompt' and reassign
 it to whatever the current line matches) don't affect replayed
-or surrounding prompts."
+or surrounding prompts.
+
+Advances the process mark to the delimiter's end, but never rewinds
+it.  A caller synthesizing history above a live prompt narrows to end
+before that prompt, so `point-max' here is the prompt's start: moving
+the mark there would make the `PROMPT> ' text part of the next
+submitted message."
   (let* ((process (shell-maker--process))
          (buffer (process-buffer process))
          (marker (if shell-maker-logging
@@ -1818,19 +1906,30 @@ or surrounding prompts."
                                'front-sticky '(read-only)
                                'rear-nonsticky '(field read-only)))))
     (with-current-buffer buffer
-      (let ((inhibit-read-only t))
+      (let ((inhibit-read-only t)
+            (buffer-undo-list t)
+            (auto-scroll (shell-maker--should-auto-scroll-p)))
         (save-excursion
           (goto-char (point-max))
           (insert marker)
-          (set-marker (process-mark process) (point)))))))
+          (when (> (point) (process-mark process))
+            (set-marker (process-mark process) (point))))
+        (when auto-scroll
+          (goto-char (point-max)))))))
 
 (defun shell-maker--output-filter (process string)
   "Copy of `comint-output-filter' but avoids fontifying non-prompt text.
 
-Uses PROCESS and STRING same as `comint-output-filter'."
-  (when-let ((oprocbuf (process-buffer process)))
+Uses PROCESS and STRING same as `comint-output-filter'.
+
+Output is read-only and never the user's to undo, so it's kept out of
+the undo history: recording it would put the shell's own writes ahead
+of whatever was typed at the live prompt, which is the only text undo
+should ever reach."
+  (when-let* ((oprocbuf (process-buffer process)))
     (with-current-buffer oprocbuf
-      (let ((inhibit-read-only t))
+      (let ((inhibit-read-only t)
+            (buffer-undo-list t))
         (save-restriction
           (widen)
           (goto-char (point-max))
@@ -1838,10 +1937,10 @@ Uses PROCESS and STRING same as `comint-output-filter'."
           (insert string)
           (set-marker (process-mark process) (point))
           (goto-char (process-mark process))
-          (when-let (((not comint-use-prompt-regexp))
-                     (safe-range (shell-maker--clip-output-range
-                                  (marker-position comint-last-output-start)
-                                  (point))))
+          (when-let* (((not comint-use-prompt-regexp))
+                      (safe-range (shell-maker--clip-output-range
+                                   (marker-position comint-last-output-start)
+                                   (point))))
             (with-silent-modifications
               (add-text-properties (map-elt safe-range :start) (map-elt safe-range :end)
                                    `(read-only t
@@ -1853,9 +1952,16 @@ Uses PROCESS and STRING same as `comint-output-filter'."
                                      inhibit-line-move-field-capture t))))
           (when-let* ((prompt-start (save-excursion (forward-line 0) (point)))
                       (inhibit-read-only t)
-                      (prompt (string-match
-                               comint-prompt-regexp
-                               (buffer-substring prompt-start (point)))))
+                      (line (buffer-substring prompt-start (point)))
+                      ((string-match comint-prompt-regexp line))
+                      ;; Bound the prompt to what actually matched, not the
+                      ;; whole line.  When a full `PROMPT> INPUT' turn is
+                      ;; rendered through this filter (e.g. a replayed or
+                      ;; echoed submission that never went through
+                      ;; `comint-send-input'), `(point)' sits past the user
+                      ;; input, so highlighting to `(point)' would paint the
+                      ;; input with `comint-highlight-prompt' too.
+                      (prompt-end (min (point) (+ prompt-start (match-end 0)))))
             (with-silent-modifications
               (or (= (point-min) prompt-start)
                   (get-text-property (1- prompt-start) 'read-only)
@@ -1870,8 +1976,8 @@ Uses PROCESS and STRING same as `comint-output-filter'."
                'font-lock-face
                'comint-highlight-prompt))
             (setq comint-last-prompt
-                  (cons (copy-marker prompt-start) (point-marker)))
-            (font-lock-append-text-property prompt-start (point)
+                  (cons (copy-marker prompt-start) (copy-marker prompt-end)))
+            (font-lock-append-text-property prompt-start prompt-end
                                             'font-lock-face
                                             'comint-highlight-prompt)
             (add-text-properties prompt-start (point)
@@ -2215,19 +2321,19 @@ Of the form:
               (cons :buffer shell-buffer)
               (cons :write-output (lambda (output &optional force)
                                     (setq output (or output "<nil-message>"))
-                                    (when-let ((active (or force
-                                                           (and (eq request-id (with-current-buffer shell-buffer
-                                                                                 (shell-maker--current-request-id)))
-                                                                (buffer-live-p shell-buffer)))))
+                                    (when-let* ((active (or force
+                                                            (and (eq request-id (with-current-buffer shell-buffer
+                                                                                  (shell-maker--current-request-id)))
+                                                                 (buffer-live-p shell-buffer)))))
                                       (with-current-buffer shell-buffer
                                         (shell-maker-write-output :config config
                                                                   :output output
                                                                   :on-output on-output)))
                                     (setq full-output (concat full-output output))))
               (cons :finish-output (lambda (success)
-                                     (when-let ((active (and (buffer-live-p shell-buffer)
-                                                             (eq request-id (with-current-buffer shell-buffer
-                                                                              (shell-maker--current-request-id))))))
+                                     (when-let* ((active (and (buffer-live-p shell-buffer)
+                                                              (eq request-id (with-current-buffer shell-buffer
+                                                                               (shell-maker--current-request-id))))))
                                        (with-current-buffer shell-buffer
                                          (shell-maker-finish-output :config config
                                                                     :success success

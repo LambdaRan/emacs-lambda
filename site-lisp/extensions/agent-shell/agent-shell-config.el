@@ -36,6 +36,7 @@
 (require 'cl-lib)
 (require 'map)
 (require 'seq)
+(require 'agent-shell-faces)
 
 ;;; Normalization
 
@@ -119,18 +120,29 @@ For example:
             (agent-shell--config-options state)))
 
 (defun agent-shell--config-option-by-category (state category)
-  "Return first config option in STATE matching CATEGORY, or nil.
+  "Return a config option in STATE matching CATEGORY, or nil.
 
 CATEGORY may be nil for uncategorized options.  Uses `equal' for
 nil-safe comparison.
+
+When several options share CATEGORY, prefers the one whose `:id'
+equals CATEGORY, falling back to the first match.  Some agents (e.g.
+Cline) tag multiple options with the same category -- both their
+`provider' and `model' options use category \"model\" -- so matching
+on category alone could otherwise resolve \"model\" to the provider
+option.
 
 For example:
 
   (agent-shell--config-option-by-category state \"model\")
   => \\='((:id . \"model\") (:category . \"model\") ...)"
-  (seq-find (lambda (option)
-              (equal category (map-elt option :category)))
-            (agent-shell--config-options state)))
+  (let ((matches (seq-filter (lambda (option)
+                               (equal category (map-elt option :category)))
+                             (agent-shell--config-options state))))
+    (or (seq-find (lambda (option)
+                    (equal category (map-elt option :id)))
+                  matches)
+        (car matches))))
 
 (defun agent-shell--select-config-options (state)
   "Return selectable (type = \"select\") config options from STATE."
@@ -223,7 +235,7 @@ https://agentclientprotocol.com/protocol/session-config-options"
 
 When a config option with category \"model\" exists, converts its
 values to legacy model shape.  Otherwise returns session :models."
-  (if-let ((model-option (agent-shell--config-option-by-category state "model")))
+  (if-let* ((model-option (agent-shell--config-option-by-category state "model")))
       (agent-shell--config-option-as-models model-option)
     (map-nested-elt state '(:session :models))))
 
@@ -240,26 +252,58 @@ Each value is an alist with :value, :name, optional :description where
 (defun agent-shell--format-available-config-options (config-options)
   "Format CONFIG-OPTIONS for shell rendering.
 
-Returns a propertized string with one block per option showing
-name, id, current value, and optional description."
+Returns a propertized string with one block per option showing the
+name (with any description inline), the current value, and the
+selectable values.  Both the current value and each selectable value
+show the id sent to the agent alongside its display name.
+
+The name carries the listing's emphasis; the `current:' and `values:'
+labels are muted so they do not read as headings."
   (string-join
    (seq-map
     (lambda (option)
-      (let ((name (propertize (format "%s (id: %s)"
-                                      (map-elt option :name)
-                                      (map-elt option :id))
-                              'font-lock-face 'font-lock-function-name-face))
-            (current (propertize (format "current: %s"
-                                         (agent-shell--config-option-value-name
-                                          option
-                                          (map-elt option :current-value)))
-                                 'font-lock-face 'font-lock-constant-face))
-            (desc (when (map-elt option :description)
-                    (propertize (map-elt option :description)
-                                'font-lock-face 'font-lock-comment-face))))
-        (string-join (delq nil (list name current desc)) "\n")))
+      (let* ((values-prefix "values: ")
+             (name (concat
+                    (propertize (format "%s (id: %s)"
+                                        (map-elt option :name)
+                                        (map-elt option :id))
+                                'font-lock-face 'agent-shell-list-name)
+                    (when (map-elt option :description)
+                      (concat ": " (map-elt option :description)))))
+             (current (concat
+                       (propertize "current: " 'font-lock-face 'agent-shell-secondary)
+                       (agent-shell--config-option-value-label
+                        (agent-shell--config-option-value-name
+                         option (map-elt option :current-value))
+                        (map-elt option :current-value))))
+             (values (when-let* ((options (map-elt option :options)))
+                       (concat
+                        (propertize values-prefix 'font-lock-face 'agent-shell-secondary)
+                        (string-join
+                         (seq-map (lambda (value)
+                                    (agent-shell--config-option-value-label
+                                     (map-elt value :name)
+                                     (map-elt value :value)))
+                                  options)
+                         (concat "\n" (make-string (length values-prefix) ?\s)))))))
+        (string-join (delq nil (list name current values)) "\n")))
     config-options)
    "\n\n"))
+
+(defun agent-shell--config-option-value-label (name id)
+  "Return a display label combining NAME with its raw ID.
+
+Shows the human NAME annotated with the ID sent to the agent, as in
+\"High (id: high)\".  Falls back to the bare ID when NAME is nil or
+adds no information.
+
+For example:
+
+  (agent-shell--config-option-value-label \"High\" \"high\")
+  => \"High (id: high)\""
+  (if (and name (not (equal name id)))
+      (format "%s (id: %s)" name id)
+    (format "%s" id)))
 
 (provide 'agent-shell-config)
 

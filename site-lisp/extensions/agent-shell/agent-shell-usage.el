@@ -33,6 +33,7 @@
 (eval-when-compile
   (require 'cl-lib))
 (require 'map)
+(require 'agent-shell-faces)
 
 (defvar agent-shell--state)
 (defvar agent-shell-mode)
@@ -171,38 +172,38 @@ When MULTILINE is non-nil, format as right-aligned labeled rows."
     (if multiline
         (concat
          (propertize " Context: "
-                     'face 'font-lock-comment-face
-                     'font-lock-face 'font-lock-comment-face)
+                     'face 'agent-shell-secondary
+                     'font-lock-face 'agent-shell-secondary)
          context "\n"
          (propertize "  Tokens: "
-                     'face 'font-lock-comment-face
-                     'font-lock-face 'font-lock-comment-face)
+                     'face 'agent-shell-secondary
+                     'font-lock-face 'agent-shell-secondary)
          tokens total "\n"
          (propertize "    Cost: "
-                     'face 'font-lock-comment-face
-                     'font-lock-face 'font-lock-comment-face)
+                     'face 'agent-shell-secondary
+                     'font-lock-face 'agent-shell-secondary)
          cost)
       (concat
        (propertize "Context: "
-                   'face 'font-lock-comment-face
-                   'font-lock-face 'font-lock-comment-face)
+                   'face 'agent-shell-secondary
+                   'font-lock-face 'agent-shell-secondary)
        context " "
        (propertize "Tokens: "
-                   'face 'font-lock-comment-face
-                   'font-lock-face 'font-lock-comment-face)
+                   'face 'agent-shell-secondary
+                   'font-lock-face 'agent-shell-secondary)
        tokens total " "
        (propertize "Cost: "
-                   'face 'font-lock-comment-face
-                   'font-lock-face 'font-lock-comment-face)
+                   'face 'agent-shell-secondary
+                   'font-lock-face 'agent-shell-secondary)
        cost))))
 
 (defun agent-shell--context-usage-face (percentage)
   "Return the face for context usage at PERCENTAGE.
 Green for normal, yellow for warning, red for critical."
   (cond
-   ((>= percentage 85) 'error)
-   ((>= percentage 60) 'warning)
-   (t 'success)))
+   ((>= percentage 85) 'agent-shell-error)
+   ((>= percentage 60) 'agent-shell-warning)
+   (t 'agent-shell-success)))
 
 (defun agent-shell--context-usage-indicator-bar (usage context-used context-size)
   "Return a bar indicator for context USAGE.

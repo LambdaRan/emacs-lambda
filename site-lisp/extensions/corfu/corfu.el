@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 2.10
+;; Version: 2.14
 ;; Package-Requires: ((emacs "29.1") (compat "31"))
 ;; URL: https://github.com/minad/corfu
 ;; Keywords: abbrev, convenience, matching, completion, text
@@ -81,8 +81,9 @@ The value should lie between 0 and corfu-count/2."
   :type '(choice (const insert) (const show) (const quit) (const nil)))
 
 (defcustom corfu-continue-commands
-  '(ignore universal-argument universal-argument-more digit-argument
-    "\\`corfu-" "\\`scroll-other-window")
+  '( ignore universal-argument universal-argument-more
+     digit-argument mwheel-scroll
+     "\\`corfu-" "\\`scroll-other-window")
   "Continue Corfu completion after executing these commands.
 The list can contain either command symbols or regular expressions."
   :type '(repeat (choice regexp symbol)))
@@ -136,7 +137,7 @@ separator: Only stay alive if there is no match and
   "Width of the right margin in units of the character width."
   :type 'float)
 
-(defcustom corfu-bar-width 0.2
+(defcustom corfu-bar-width 0.25
   "Width of the bar in units of the character width."
   :type 'float)
 
@@ -348,12 +349,19 @@ It is recommended to avoid changing these parameters.")
     (indicate-empty-lines . nil)
     (indicate-buffer-boundaries . nil)
     (buffer-read-only . t)
-    (pixel-scroll-precision-mode . nil))
+    (pixel-scroll-precision-mode . nil)
+    (x-pointer-shape . 2))
   "Default child frame buffer parameters.
 It is recommended to avoid changing these parameters.")
 
 (defvar corfu--mouse-ignore-map
-  (let ((map (define-keymap "<touchscreen-begin>" #'ignore)))
+  (let ((map (define-keymap
+               ;; Keep wheel-up/down for popupinfo scrolling.
+               "<wheel-left>" #'ignore
+               "<wheel-right>" #'ignore
+               "<touchscreen-begin>" #'ignore
+               "<right-fringe> <t>" #'ignore
+               "<left-fringe> <t>" #'ignore)))
     (dotimes (i 7)
       (dolist (k '(mouse down-mouse drag-mouse double-mouse triple-mouse))
         (keymap-set map (format "<%s-%s>" k (1+ i)) #'ignore)))
@@ -479,6 +487,7 @@ FRAME is the existing frame."
     ;; lovely surprises.
     (let* ((win (frame-root-window frame))
            (is (frame-parameters frame))
+           (params `((corfu--geometry ,x ,y ,width ,height) ,@params))
            (diff (cl-loop for p in params for (k . v) = p
                           unless (equal (alist-get k is) v) collect p)))
       (when diff (modify-frame-parameters frame diff))
@@ -489,31 +498,30 @@ FRAME is the existing frame."
       (set-window-parameter win 'no-delete-other-windows t)
       (set-window-parameter win 'no-other-window t)
       ;; Mark window as dedicated to prevent frame reuse (gh:minad/corfu#60)
-      (set-window-dedicated-p win t))
-    (redirect-frame-focus frame parent)
-    (pcase-let* ((`(,ox ,oy ,right ,bottom) (frame-edges frame 'outer-edges))
-                 (border (* 2 corfu-border-width))
-                 (ow (- (- right ox) left-fringe-width right-fringe-width border))
-                 (oh (- (- bottom oy) border))
-                 (pos-change (or (/= x ox) (/= y oy)))
-                 (size-change (or (/= ow width) (/= oh height))))
-      (cond
-       ((and pos-change size-change)
-        ;; TODO: New Emacs 31 function for faster resizing/movement in one go.
-        ;; Add this function to Compat 31 as backport.
-        (static-if (fboundp 'set-frame-size-and-position-pixelwise)
-            (set-frame-size-and-position-pixelwise frame width height x y)
-          (set-frame-size frame width height t)
-          (set-frame-position frame x y)))
-       (pos-change (set-frame-position frame x y))
-       (size-change (set-frame-size frame width height t)))))
+      (set-window-dedicated-p win t)
+      (redirect-frame-focus frame parent)
+      (pcase-let* ((`(,ox ,oy ,ow ,oh) (alist-get 'corfu--geometry is '(0 0 0 0)))
+                   (pos-change (or (/= x ox) (/= y oy)))
+                   (size-change (or (/= ow width) (/= oh height))))
+        (cond
+         ((and pos-change size-change)
+          ;; TODO: New Emacs 31 function for faster resizing/movement in one go.
+          ;; Add this function to Compat 31 as backport.
+          (static-if (fboundp 'set-frame-size-and-position-pixelwise)
+              (set-frame-size-and-position-pixelwise frame width height x y)
+            (set-frame-size frame width height t)
+            (set-frame-position frame x y)))
+         (pos-change (set-frame-position frame x y))
+         (size-change (set-frame-size frame width height t))))))
   (make-frame-visible frame)
   ;; Unparent child frame if EXWM is used, otherwise EXWM buffers are drawn on
   ;; top of the Corfu child frame.
-  (when (and (bound-and-true-p exwm--connection)
-             (display-graphic-p frame) (frame-parent frame))
+  (when-let* (((bound-and-true-p exwm--connection))
+              ((display-graphic-p frame))
+              (parent (frame-parent frame)))
     (redisplay t)
-    (set-frame-parameter frame 'parent-frame nil))
+    (modify-frame-parameters frame `((delete-before . ,parent)
+                                     (parent-frame . nil))))
   frame)
 
 (defun corfu--hide-frame-deferred (frame)

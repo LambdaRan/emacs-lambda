@@ -48,7 +48,7 @@ GLOBAL_IGNORES = [
     "test*", "tests",
     "doc", "docs",
     ".github", ".travis*", ".circleci",
-    "Makefile", "Cask", "Eask",
+    "[Mm]akefile", "Cask", "Eask",
     "CONTRIBUTING*", "CHANGELOG*", "NEWS*",
     ".gitignore", ".dir-locals.el", ".elpaignore",
     "*.elc",
@@ -129,9 +129,19 @@ def safe_extract(zf, dest):
 # sync 子命令
 # ---------------------------------------------------------------------------
 
-def should_ignore(name, ignores):
-    """检查文件名是否匹配任意排除规则（大小写敏感，跨平台一致）。"""
+def should_ignore(name, ignores, is_dir=False):
+    """检查名字是否匹配任意排除规则（大小写敏感，跨平台一致）。
+
+    name 可以是单个文件/目录名，也可以是以 "/" 分隔的相对路径。
+    模式以 "/"（或 "\\"）结尾表示 gitignore 风格的“仅匹配目录”，
+    例如 "screenshots/" 只排除目录，不会误伤同名文件。
+    """
     for pattern in ignores:
+        if pattern.endswith(("/", "\\")):
+            pattern = pattern.rstrip("/\\")
+            # 目录专用模式：非目录直接跳过；空模式（如 "/"）无意义
+            if not pattern or not is_dir:
+                continue
         if fnmatch.fnmatchcase(name, pattern):
             return True
     return False
@@ -154,24 +164,34 @@ def copy_with_files(source_dir, target_dir, files_patterns):
 
 
 def copy_all_with_ignores(source_dir, target_dir, ignores):
-    """未指定 files 时：全量拷贝，按排除规则过滤"""
+    """未指定 files 时：全量拷贝，按排除规则过滤。
+
+    目录延迟创建：内容被全部排除的目录不会在目标处留下空壳。
+    """
 
     def _copy_recursive(src, dst, rel_prefix=""):
+        copied = False
         for entry in os.listdir(src):
-            rel = os.path.join(rel_prefix, entry) if rel_prefix else entry
-
-            if should_ignore(entry, ignores) or should_ignore(rel, ignores):
-                continue
+            # 相对路径统一用 "/" 分隔，使含斜杠的模式在 Windows 上同样生效
+            rel = f"{rel_prefix}/{entry}" if rel_prefix else entry
 
             src_path = os.path.join(src, entry)
+            is_dir = os.path.isdir(src_path)
+
+            if should_ignore(entry, ignores, is_dir) or should_ignore(rel, ignores, is_dir):
+                continue
+
             dst_path = os.path.join(dst, entry)
 
-            if os.path.isdir(src_path):
-                os.makedirs(dst_path, exist_ok=True)
-                _copy_recursive(src_path, dst_path, rel)
+            if is_dir:
+                if _copy_recursive(src_path, dst_path, rel):
+                    copied = True
             else:
-                os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+                os.makedirs(dst, exist_ok=True)
                 shutil.copy2(src_path, dst_path)
+                copied = True
+
+        return copied
 
     _copy_recursive(source_dir, target_dir)
 

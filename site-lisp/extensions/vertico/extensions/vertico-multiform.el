@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 2.10
-;; Package-Requires: ((emacs "29.1") (compat "31") (vertico "2.10"))
+;; Version: 2.13
+;; Package-Requires: ((emacs "29.1") (compat "31") (vertico "2.13"))
 ;; URL: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -105,8 +105,14 @@ The keys in LIST can be symbols or regexps."
                       ((string-match-p x (symbol-name key)))))
                    list))))
 
+(defun vertico-multiform--exit ()
+  "Disable modes at minibuffer exit."
+  (vertico-multiform--toggle -1)
+  (pop vertico-multiform--stack))
+
 (defun vertico-multiform--setup ()
   "Enable modes at minibuffer setup."
+  (remove-hook 'minibuffer-setup-hook #'vertico-multiform--setup)
   (let ((cat (compat-call completion-metadata-get
               (completion-metadata (buffer-substring-no-properties
                                     (minibuffer-prompt-end)
@@ -114,17 +120,9 @@ The keys in LIST can be symbols or regexps."
                                    minibuffer-completion-table
                                    minibuffer-completion-predicate)
               'category))
-        (exit (make-symbol "vertico-multiform--exit"))
-        (depth (recursion-depth))
-        (kmaps nil)
-        (modes nil))
-    (fset exit (lambda ()
-                 (when (= depth (recursion-depth))
-                   (remove-hook 'minibuffer-exit-hook exit)
-                   (vertico-multiform--toggle -1)
-                   (pop vertico-multiform--stack))))
-    (add-hook 'minibuffer-exit-hook exit)
-    (add-hook 'context-menu-functions #'vertico-multiform--display-menu nil t)
+        kmaps modes)
+    (add-hook 'minibuffer-exit-hook #'vertico-multiform--exit nil 'local)
+    (add-hook 'context-menu-functions #'vertico-multiform--display-menu nil 'local)
     (dolist (x (cdr (or (vertico-multiform--lookup this-command vertico-multiform-commands)
                         (vertico-multiform--lookup cat vertico-multiform-categories))))
       (pcase x
@@ -175,11 +173,12 @@ The keys in LIST can be symbols or regexps."
   menu)
 
 (cl-defmethod vertico--advice (&context (vertico-multiform-mode (eql t)) &rest app)
-  (unwind-protect
+  (unwind-protect ;; Do not use `minibuffer-setup-hook' for idempotency.
       (dlet ((completion-eager-display nil)) ;; Available on Emacs 31
         (vertico-multiform--toggle -1)
-        (minibuffer-with-setup-hook #'vertico-multiform--setup
-          (apply app)))
+        (add-hook 'minibuffer-setup-hook #'vertico-multiform--setup)
+        (apply app))
+    (remove-hook 'minibuffer-setup-hook #'vertico-multiform--setup)
     (vertico-multiform--toggle 1)))
 
 (defun vertico-multiform--toggle-mode-1 (mode arg)

@@ -103,7 +103,10 @@
     {
       "name": "avy",
       "repo": "abo-abo/avy",
-      "ref": "master"
+      "ref": "master",
+      "ignores": [
+        "avy-test.el"
+      ]
     },
     {
       "name": "markdown-mode",
@@ -128,7 +131,10 @@
     {
       "name": "csharp-mode",
       "repo": "emacs-csharp/csharp-mode",
-      "ref": "master"
+      "ref": "master",
+      "ignores": [
+        "csharp-mode-tests.el"
+      ]
     },
     {
       "name": "fingertip",
@@ -163,7 +169,8 @@
       "repo": "joaotavora/yasnippet",
       "ref": "master",
       "ignores": [
-        ".gitmodules"
+        ".gitmodules",
+        "yasnippet-tests.el"
       ]
     },
     {
@@ -171,7 +178,8 @@
       "repo": "xenodium/shell-maker",
       "ref": "master",
       "ignores": [
-        "demos/"
+        "demos/",
+        "markdown-overlays-tables-tests.el"
       ]
     },
     {
@@ -233,7 +241,10 @@
     {
       "name": "compat",
       "repo": "emacs-compat/compat",
-      "ref": "main"
+      "ref": "main",
+      "ignores": [
+        "compat-tests.el"
+      ]
     },
     {
       "name": "corfu",

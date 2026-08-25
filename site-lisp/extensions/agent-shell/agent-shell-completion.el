@@ -27,12 +27,14 @@
 ;;; Code:
 
 (require 'map)
+(require 'seq)
 (require 'agent-shell-project)
 
 (declare-function agent-shell--shell-buffer "agent-shell")
 (declare-function agent-shell--project-files "agent-shell-project")
 
 (defvar agent-shell--state)
+(defvar agent-shell-prompt-queue-setup-minibuffer-functions)
 
 (defcustom agent-shell-file-completion-enabled t
   "Non-nil automatically enables file completion when starting shells."
@@ -46,7 +48,9 @@ the word, nil otherwise."
   (save-excursion
     (when-let* ((end (progn (skip-chars-forward char-class) (point)))
                 (start (progn (skip-chars-backward char-class) (point)))
-                ((eq (char-before start) trigger-char)))
+                ((eq (char-before start) trigger-char))
+                ((or (= start (1+ (line-beginning-position)))
+                     (memq (char-before (1- start)) '(?\s ?\t ?\n)))))
       `((:start . ,start) (:end . ,end)))))
 
 (defun agent-shell--capf-exit-with-space (_string _status)
@@ -163,6 +167,18 @@ enabled, so user preference set in the shell carries over."
   (remove-hook 'minibuffer-exit-hook
                #'agent-shell-completion--cleanup-minibuffer t))
 
+(defun agent-shell-completion--setup-queued-prompt (event)
+  "Enable completion in the minibuffer reading EVENT\='s queued prompt.
+
+Runs from `agent-shell-prompt-queue-setup-minibuffer-functions\=', so the
+queue need not know completion exists.
+
+EVENT is an alist as that hook documents, for example:
+
+  \='((:shell-buffer . #<buffer Claude Agent @ agent-shell>))"
+  (when-let* ((shell-buffer (map-elt event :shell-buffer)))
+    (agent-shell-completion--setup-minibuffer shell-buffer)))
+
 (define-minor-mode agent-shell-completion-mode
   "Toggle agent shell completion with @ or / prefix."
   :lighter " @/Compl"
@@ -170,10 +186,18 @@ enabled, so user preference set in the shell carries over."
       (progn
         (add-hook 'completion-at-point-functions #'agent-shell--file-completion-at-point nil t)
         (add-hook 'completion-at-point-functions #'agent-shell--command-completion-at-point nil t)
-        (add-hook 'post-self-insert-hook #'agent-shell--trigger-completion-at-point nil t))
+        (add-hook 'post-self-insert-hook #'agent-shell--trigger-completion-at-point nil t)
+        (add-hook 'agent-shell-prompt-queue-setup-minibuffer-functions
+                  #'agent-shell-completion--setup-queued-prompt))
     (remove-hook 'completion-at-point-functions #'agent-shell--file-completion-at-point t)
     (remove-hook 'completion-at-point-functions #'agent-shell--command-completion-at-point t)
-    (remove-hook 'post-self-insert-hook #'agent-shell--trigger-completion-at-point t)))
+    (remove-hook 'post-self-insert-hook #'agent-shell--trigger-completion-at-point t)
+    ;; The minibuffer hook is global, so it goes once the last shell drops it.
+    (unless (seq-find (lambda (buffer)
+                        (buffer-local-value 'agent-shell-completion-mode buffer))
+                      (buffer-list))
+      (remove-hook 'agent-shell-prompt-queue-setup-minibuffer-functions
+                   #'agent-shell-completion--setup-queued-prompt))))
 
 (provide 'agent-shell-completion)
 

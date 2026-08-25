@@ -1,4 +1,11 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
+
+;; Emacs 31 对缺 lexical-binding cookie 的文件发警告。第三方包（color-rg 等）
+;; 由 assistant.py 自动同步，改了会被覆盖；one-key 等老代码切词法绑定有风险，
+;; 一律屏蔽。type 按前缀匹配，(files missing-lexbind-cookie) 能匹配带文件名的
+;; 完整 type，又不误伤其他 files 类警告。须在加载任何扩展前设置。
+(setq warning-suppress-types '((files missing-lexbind-cookie)))
+
 (require 'init-const)
 (require 'init-accelerate)
 

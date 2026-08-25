@@ -39,7 +39,7 @@
       (rename-buffer new-name t)
       (setq ghostel--managed-buffer-name (buffer-name)))))
 
-(setq ghostel-set-title-function #'ghostel--set-title-directory)
+(setq ghostel-buffer-name-function #'ghostel--set-title-directory)
 
 (defun ghostel@always-fresh (orig-fn &optional arg)
   "Always create a new ghostel buffer when no prefix arg given."
