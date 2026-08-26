@@ -4,7 +4,11 @@
 ;; 由 assistant.py 自动同步，改了会被覆盖；one-key 等老代码切词法绑定有风险，
 ;; 一律屏蔽。type 按前缀匹配，(files missing-lexbind-cookie) 能匹配带文件名的
 ;; 完整 type，又不误伤其他 files 类警告。须在加载任何扩展前设置。
+;; 注意：Emacs 30+ 重构后 warning-suppress-types 只抑制 *Warnings* 弹窗，日志照写
+;; （docstring: "the warning is logged nonetheless"）；彻底屏蔽必须同时用
+;; warning-suppress-log-types。
 (setq warning-suppress-types '((files missing-lexbind-cookie)))
+(setq warning-suppress-log-types '((files missing-lexbind-cookie)))
 
 (require 'init-const)
 (require 'init-accelerate)

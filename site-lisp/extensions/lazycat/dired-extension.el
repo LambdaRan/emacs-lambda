@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; dired-extension.el --- Some extension for dired
 
 ;; Author: Andy Stewart lazycat.manatee@gmail.com

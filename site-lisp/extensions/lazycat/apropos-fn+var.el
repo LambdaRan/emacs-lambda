@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; apropos-fn+var.el --- Apropos for functions and variables
 ;;
 ;; Filename: apropos-fn.el

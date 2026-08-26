@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; cache-path-from-shell.el --- Provide a chache mechanism make sure exec-path-from-shell just execute once.
 
 ;; Filename: cache-path-from-shell.el

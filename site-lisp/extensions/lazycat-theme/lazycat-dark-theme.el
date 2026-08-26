@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; lazycat-dark-theme.el --- My dark theme, for night use.
 
 ;; Filename: lazycat-dark-theme.el

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 
 ;; https://github.com/skywind3000/z.lua
 

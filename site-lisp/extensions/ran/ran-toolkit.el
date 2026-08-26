@@ -1,3 +1,6 @@
+;; -*- lexical-binding: t -*-
+
+(declare-function dired-get-filename "dired.el")
 
 ;; 使用浏览器打开光标处url
 ;; browse-url-at-point
@@ -10,7 +13,7 @@
 (defun ran-markdown-to-html ()
   (interactive)
   (start-process "grip" "*gfm-to-html*" "grip" (buffer-file-name) "5000")
-  (browse-url (format "http://localhost:5000/%s.%s" (file-name-base) (file-name-extension (buffer-file-name)))))
+  (browse-url (format "http://localhost:5000/%s.%s" (file-name-base (buffer-file-name)) (file-name-extension (buffer-file-name)))))
 
 (defun ran-copy-buffer-file-name-as-kill(choice)
   "Copy the buffer-file-name to the kill-ring"
@@ -53,7 +56,7 @@
 (defun smart-align ()
   (interactive)
   (with-demoted-errors
-      "Something wrong when align."
+      "Something wrong when align: %S"
     (let ((align-start) (align-end))
       (if (use-region-p)
         (setq align-start (region-beginning)

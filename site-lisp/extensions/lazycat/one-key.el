@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; one-key.el --- One key
 
 ;; Filename: one-key.el

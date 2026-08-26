@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; watch-other-window.el --- Scroll other window and keep current window's position.
 
 ;; Filename: watch-other-window.el

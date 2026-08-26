@@ -29,7 +29,7 @@
 
 ;; treesit-fold 兼容：复用 go-mode 的折叠规则
 (with-eval-after-load 'treesit-fold
-  (when-let ((rules (alist-get 'go-mode treesit-fold-range-alist)))
+  (when-let* ((rules (alist-get 'go-mode treesit-fold-range-alist)))
     (setf (alist-get 'go-ts-mode treesit-fold-range-alist) rules)))
 
 (provide 'init-golang)

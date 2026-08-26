@@ -43,10 +43,10 @@
 
 (when (display-graphic-p)
   (change-font)
-  (when-let ((font (cl-find-if #'font-installed-p
+  (when-let* ((font (cl-find-if #'font-installed-p
                                 '("Segoe UI Symbol" "Apple Color Emoji" "Symbola" "Symbol"))))
     (set-fontset-font t 'unicode font nil 'prepend))
-  (when-let ((font (cl-find-if #'font-installed-p '("Microsoft Yahei"))))
+  (when-let* ((font (cl-find-if #'font-installed-p '("Microsoft Yahei"))))
     (dolist (charset '(kana han cjk-misc bopomofo chinese-gbk))
       (set-fontset-font t charset (font-spec :name font :size 12))))
   )

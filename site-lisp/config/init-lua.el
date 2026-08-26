@@ -85,13 +85,13 @@
     ;; 示例1: 高亮 self 关键字（self 在 AST 中是 identifier 节点，用 regexp-opt 匹配）
     :feature 'self
     `(((identifier) @font-lock-type-face
-       (:match ,(regexp-opt '("self") 'symbols)
+       (:match? ,(regexp-opt '("self") 'symbols)
                @font-lock-type-face)))
 
     ;; 示例2: 高亮 require 调用
     :feature 'require
     `(((identifier) @font-lock-preprocessor-face
-       (:match ,(regexp-opt '("require") 'symbols)
+       (:match? ,(regexp-opt '("require") 'symbols)
                @font-lock-preprocessor-face)))
 
     ;; 示例3: 高亮 method/dot 函数声明中的表名（如 function CServerPlayer:Method）

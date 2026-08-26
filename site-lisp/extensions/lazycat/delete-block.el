@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; delete-block.el --- Delete block effectively
 
 ;; Filename: delete-block.el
