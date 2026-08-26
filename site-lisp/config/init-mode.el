@@ -68,6 +68,10 @@
                ))
   (add-hook hook #'(lambda () (auto-fill-mode 1))))
 
+;; elisp 语义高亮：基于代码分析区分局部绑定、函数位置、宏等。
+;; 须用 `setopt'（有 :set 函数）。
+(setopt elisp-fontify-semantically t)
+
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
             (require 'sly-el-indent)

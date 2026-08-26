@@ -46,6 +46,11 @@
   (when-let* ((font (cl-find-if #'font-installed-p
                                 '("Segoe UI Symbol" "Apple Color Emoji" "Symbola" "Symbol"))))
     (set-fontset-font t 'unicode font nil 'prepend))
+  ;; 彩色 Emoji：`emoji' script 比上面的 `unicode' 更具体，会优先命中，
+  ;; 避免 Emoji 落到单色的 Segoe UI Symbol 上。
+  (when-let* ((font (cl-find-if #'font-installed-p
+                                '("Segoe UI Emoji" "Apple Color Emoji" "Noto Color Emoji"))))
+    (set-fontset-font t 'emoji (font-spec :family font) nil 'prepend))
   (when-let* ((font (cl-find-if #'font-installed-p '("Microsoft Yahei"))))
     (dolist (charset '(kana han cjk-misc bopomofo chinese-gbk))
       (set-fontset-font t charset (font-spec :name font :size 12))))

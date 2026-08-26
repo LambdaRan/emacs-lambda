@@ -36,6 +36,11 @@
    (("t" . "Jump Register") . jump-to-register)
    (("g" . "Split Horizontally") . split-window-horizontally)
    (("v" . "Split Vertically") . split-window-vertically)
+   ;; 整体布局操作；布局中有 dedicated 窗口时会报错，见 `transpose-dedicated-windows'
+   (("w" . "Transpose Layout") . window-layout-transpose)
+   (("b" . "Rotate Windows") . rotate-windows)
+   (("z" . "Flip Left/Right") . window-layout-flip-leftright)
+   (("p" . "Flip Top/Down") . window-layout-flip-topdown)
    )
  t t)
 

@@ -98,7 +98,6 @@
 
 ;; Lisp 求值与编译
 (setq max-lisp-eval-depth 4000)         ;lisp 最大执行深度
-(setq max-specpdl-size 4000)            ;最大容量
 (setq eval-expression-print-length nil) ;执行表达式的长度没有限制
 (setq eval-expression-print-level nil)  ;执行表达式的深度没有限制
 (setq read-quoted-char-radix 16)        ;引用字符的基数

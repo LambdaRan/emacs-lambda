@@ -15,6 +15,11 @@
 ;; Ref: Doom Emacs early-init.el:45
 (setq load-prefer-newer nil)
 
+;; PERF: 缓存 `load-path' 各目录的文件列表，避免 `load' 每次逐目录探测 .elc/.el。
+;; 新增的 .el 需重启 Emacs 才能被发现。
+(when (fboundp 'load-path-filter-cache-directory-files)
+  (setq load-path-filter-function #'load-path-filter-cache-directory-files))
+
 ;; Inhibit resizing frame
 (setq frame-inhibit-implied-resize t)
 

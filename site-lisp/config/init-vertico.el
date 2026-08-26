@@ -39,6 +39,10 @@
 (recentf-mode 1)
 (setq recentf-max-menu-items 50)
 (setq recentf-max-saved-items 200)
+;; 每 5 分钟自动落盘，避免异常退出丢失记录。
+;; 须用 `setopt'——该选项的 :set 函数负责启停定时器。
+(when (boundp 'recentf-autosave-interval)
+  (setopt recentf-autosave-interval 300))
 
 ;;; Marginalia — 候选注解
 (require 'marginalia)

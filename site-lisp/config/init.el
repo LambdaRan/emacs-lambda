@@ -146,7 +146,7 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
                      init-dired
                      init-one-key
                      init-vi-navigate
-                     init-treesit-fold
+                     init-hideshow
                      init-indent
                      ;; 第三批：工具（按需使用）
                      init-ffip

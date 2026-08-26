@@ -38,8 +38,6 @@
 ;; Increase how much is read from processes in a single chunk (default is 4kb).
 ;; 1MB：agent-shell 跑 Claude Code 等大输出进程时减少读次数（项目无 LSP，按最大输出场景设）。
 (setq read-process-output-max (* 1 1024 1024))  ; 1MB
-;; 增加IO性能
-(setq process-adaptive-read-buffering nil)
 
 ;; Introduced in Emacs HEAD (b2f8c9f), this inhibits fontification while
 ;; receiving input, which should help a little with scrolling performance.

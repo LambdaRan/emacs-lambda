@@ -239,6 +239,13 @@
 
 ;;; --- 文件与项目 ---
 
+;;; ### One-Key Directory ###
+;;; --- 常用目录快速打开
+(lazy-load-global-keys
+ '(("C-c a" . one-key-menu-directory)   ;目录打开菜单
+   )
+ "init-one-key")
+
 ;; ### Dired;;  ###
 (lazy-load-global-keys
  '(

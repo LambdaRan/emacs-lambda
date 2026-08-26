@@ -142,15 +142,6 @@
       "ref": "master"
     },
     {
-      "name": "treesit-fold",
-      "repo": "emacs-tree-sitter/treesit-fold",
-      "ref": "master",
-      "ignores": [
-        "_scripts/",
-        "etc/"
-      ]
-    },
-    {
       "name": "web-mode",
       "repo": "fxbois/web-mode",
       "ref": "master",

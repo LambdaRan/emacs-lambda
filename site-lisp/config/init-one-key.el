@@ -1,6 +1,6 @@
 ;; -*- coding: utf-8; lexical-binding: t; -*-
 
-(require 'lazy-load)
+(require 'one-key)
 
 (one-key-create-menu
  "DIRECTORY"
@@ -24,10 +24,5 @@
    (("m" . "Menu-Bar") . menu-bar-mode)
    (("c" . "Scroll-Bar") . scroll-bar-mode))
  t)
-
-(lazy-load-set-keys
- '(
-   ("C-c a" . one-key-menu-directory)       ;目录打开菜单
-   ))
 
 (provide 'init-one-key)
