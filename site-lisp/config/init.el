@@ -26,6 +26,15 @@
 (defvar my-incremental-idle-timer 0.2
   "每两个包之间的空闲秒数。加载完一个包后，等多久加载下一个。")
 
+(defvar my-incremental-busy-timer 0.5
+  "用户正在输入时的退避秒数。不能复用值为 0 的 `my-incremental-first-idle-timer'。")
+
+(defvar my-incremental-retry-limit 3
+  "包被中断后的重试上限，超过则放弃，避免加载不了的包无限入队。")
+
+(defvar my-incremental--retries (make-hash-table :test 'eq)
+  "feature -> 已重试次数。")
+
 (defvar my-init-start-time (current-time)
   "Emacs 初始化开始时间，用于计算从启动到所有包加载完成的总耗时。")
 
@@ -41,15 +50,23 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
               idle-time)
           (if (featurep req)
               nil  ; 已加载，跳过
-            (condition-case-unless-debug e
-                (and (or (null (setq idle-time (current-idle-time)))
-                         (< (float-time idle-time)
-                            my-incremental-first-idle-timer)
-                         (not (while-no-input
-                                (require req nil t)
-                                t)))
-                     (push req packages))  ; 用户正在操作，重新入队
-              (error (message "增量加载 %S 失败: %s" req e)))
+            (setq idle-time (current-idle-time))
+            (if (or (null idle-time)
+                    (< (float-time idle-time) my-incremental-first-idle-timer))
+                (push req packages)     ; 用户正在操作，本轮不尝试
+              (condition-case-unless-debug e
+                  (progn
+                    ;; `while-no-input' 加载成功与被输入中断都返回 t，无法区分；
+                    ;; 中断时 provide 未执行，须靠 `featurep' 复查重新入队，
+                    ;; 否则该包已被 pop 出队列却没放回，本次会话不再加载。
+                    (while-no-input (require req nil t) t)
+                    (unless (featurep req)
+                      (let ((n (1+ (gethash req my-incremental--retries 0))))
+                        (puthash req n my-incremental--retries)
+                        (if (<= n my-incremental-retry-limit)
+                            (push req packages)
+                          (message "增量加载 %S 放弃：重试 %d 次仍未加载" req n)))))
+                (error (message "增量加载 %S 失败: %s" req e))))
             (if (null packages)
                 ;; 全部加载完成，打印总耗时
                 (message "All packages loaded in %.2f seconds (init %.2fs + lazy %.2fs), %d GCs."
@@ -59,7 +76,7 @@ NOW 非 nil 时立即开始加载，否则注册待后续加载。"
                          gcs-done)
               (run-at-time (if idle-time
                                my-incremental-idle-timer
-                             my-incremental-first-idle-timer)
+                             my-incremental-busy-timer)
                            nil #'my-load-packages-incrementally
                            packages t)
               (setq packages nil))))))))
