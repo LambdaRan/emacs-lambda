@@ -6,6 +6,16 @@
 ;; config
 ;; use fd instread find
 (setq ffip-use-rust-fd t)
+
+;; fd 默认遵守 .gitignore / .ignore / .fdignore / 全局 ignore 文件；ffip 只在
+;; `ffip-rust-fd-respect-ignore-files' 为 nil 时才给 fd 传 -I（--no-ignore）。
+;;
+;; 两种解法（按需启用其一）：
+;; 1) 关掉 fd 的全部 ignore 机制（-I）；本机没用 .ignore/.fdignore，代价为零：
+(setq ffip-rust-fd-respect-ignore-files nil)
+;; 2) 只关掉 VCS 忽略文件，保留 .ignore / .fdignore 的能力：
+;; (setq ffip-rust-fd-extra-opts "--no-ignore-vcs")
+
 ;; "Don 't show search results from '.*ignore' files."
 
 (setq ffip-prefer-ido-mode nil)
