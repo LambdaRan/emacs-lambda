@@ -108,12 +108,50 @@ Replace comint's built-in `ansi-color-process-output` with Ghostel's VT parser.
   :hook (after-init . ghostel-comint-global-mode))
 ```
 
+Add a `ghostel:` Org link type.
+```emacs-lisp
+(use-package ghostel-org
+  :after org)
+```
+
 If you use an Emacs Lisp input method (Korean Hangul, Japanese, Chinese, or any
 other Quail-based method), add Ghostel support:
 ```emacs-lisp
 (use-package ghostel-ime
   :hook (ghostel-mode . ghostel-ime-mode))
 ```
+
+## Consult
+Pick a Ghostel terminal via [consult](https://github.com/minad/consult) with live
+preview (and create-on-miss) with the [consult-ghostel](https://melpa.org/#/consult-ghostel) extension;
+with a prefix argument the pickers behave like `ghostel` / `ghostel-project`
+(`C-u` creates a new terminal):
+
+```emacs-lisp
+(use-package consult-ghostel
+  :hook (after-init . consult-ghostel-mode)
+  :bind (("C-x m" . consult-ghostel)
+         :map project-prefix-map
+         ("m" . consult-ghostel-project)
+         :map ghostel-semi-char-mode-map
+         ("C-c h" . consult-ghostel-history)))
+```
+
+`consult-ghostel-history` picks from the shell's own command history and
+types the selection into the terminal, replacing what's already on the
+command line.  The history is retrieved per shell (bash, zsh, fish, and
+nushell work out of the box); users of a history manager can point their
+shell's entry in `ghostel-shell-history-commands` at it, e.g. for
+[atuin](https://atuin.sh):
+
+```emacs-lisp
+(setf (alist-get 'zsh ghostel-shell-history-commands)
+      "atuin history list --cmd-only --print0 --reverse false")
+```
+
+`consult-ghostel-mode` adds a `Ghostel` group to `consult-bookmark` (narrow
+with `g`), hidden ghostel sources to `consult-buffer`, and makes `consult-line`
+match across soft line wraps in ghostel buffers.
 
 ## Evil
 If you're an evil user you can install the [evil-ghostel](https://melpa.org/#/evil-ghostel) extension:

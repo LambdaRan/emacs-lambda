@@ -6,11 +6,11 @@
 ;;; Commentary:
 
 ;; Appearance definitions for ghostel's terminal rendering: the 16 ANSI
-;; color faces (inheriting Emacs's `ansi-color-*' faces), the hint-cursor
-;; faces drawn in copy/Emacs modes, the `ghostel-default' base face that
-;; controls the buffer's inherited terminal appearance, and the
-;; `ghostel-color-palette' vector that maps the 16 palette slots to those
-;; faces.
+;; color faces (inheriting Emacs's `ansi-color-*' faces), the bold and
+;; italic attribute faces, the hint-cursor faces drawn in copy/Emacs
+;; modes, the `ghostel-default' base face that controls the buffer's
+;; inherited terminal appearance, and the `ghostel-color-palette' vector
+;; that maps the 16 palette slots to those faces.
 
 ;;; Code:
 
@@ -100,6 +100,19 @@
   :group 'ghostel)
 
 
+;;; Text attribute faces
+
+(defface ghostel-bold
+  '((t :inherit ansi-color-bold))
+  "Face used to render bold text."
+  :group 'ghostel)
+
+(defface ghostel-italic
+  '((t :inherit ansi-color-italic))
+  "Face used to render italic text."
+  :group 'ghostel)
+
+
 ;;; Cursor and default faces
 
 (defface ghostel-fake-cursor
@@ -163,6 +176,14 @@ Falls back to white (for :foreground) or black (for :background)."
               (and (string-prefix-p "#" color) (= (length color) 7)
                    color)))))
       (if (eq attr :foreground) "#ffffff" "#000000")))
+
+(defun ghostel--hex-color-scheme (hex)
+  "Return `light' or `dark' for HEX (\"#RRGGBB\") as `color-dark-p' judges it."
+  (if (color-dark-p (mapcar (lambda (i)
+                              (/ (string-to-number (substring hex i (+ i 2)) 16)
+                                 255.0))
+                            '(1 3 5)))
+      'dark 'light))
 
 (provide 'ghostel-faces)
 ;;; ghostel-faces.el ends here

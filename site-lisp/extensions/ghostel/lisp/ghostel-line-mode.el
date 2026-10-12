@@ -19,6 +19,7 @@
 (require 'compat)
 
 (declare-function ghostel--cursor-blink-stop "ghostel")
+(declare-function ghostel--cursor-row-input-start "ghostel")
 (declare-function ghostel--ensure-ghostel-buffer "ghostel")
 (declare-function ghostel--invalidate "ghostel")
 (declare-function ghostel--leave-readonly-state "ghostel")
@@ -27,7 +28,6 @@
 (declare-function ghostel--open-link "ghostel")
 (declare-function ghostel--redraw "ghostel-module"
                   (term &optional full force-sync))
-(declare-function ghostel--regex-prompt-end "ghostel")
 (declare-function ghostel--schedule-link-detection "ghostel")
 (declare-function ghostel--sync-read-only "ghostel")
 (declare-function ghostel--send-encoded "ghostel")
@@ -52,6 +52,15 @@
 (defcustom ghostel-line-mode-history-size 200
   "Maximum number of lines kept in `ghostel--line-mode-history'."
   :type 'integer
+  :group 'ghostel)
+
+(defcustom ghostel-line-mode-send-functions nil
+  "Abnormal hook run by `ghostel-line-mode-send' before the input is sent.
+Each function is called with the input text while it is still in the buffer.
+The first one returning non-nil has taken over, and the input is neither
+deleted nor sent.  A function that decides to send after
+all calls `ghostel-line-mode-send-input' itself."
+  :type 'hook
   :group 'ghostel)
 
 (defcustom ghostel-line-mode-completion-at-point-functions
@@ -683,22 +692,6 @@ screen.  Also drives the deferred startup entry when
     (ghostel--line-mode-try-resume))
   (ghostel--line-mode-maybe-enter-initial))
 
-(defun ghostel--line-mode-startup-prompt-ready-p ()
-  "Non-nil when the cursor row shows a real prompt (OSC 133 prop or regex).
-Gates the deferred startup entry so line mode skips a blank pre-prompt screen.
-Unlike `ghostel-input-start-point', the bare cursor does not count as a prompt."
-  (when-let* ((cursor-pos ghostel--cursor-char-pos))
-    (save-excursion
-      (goto-char cursor-pos)
-      (let ((row-start (line-beginning-position))
-            (pos cursor-pos))
-        (while (and (> pos row-start)
-                    (not (get-text-property (1- pos) 'ghostel-prompt)))
-          (setq pos (1- pos)))
-        (or (and (> pos row-start)
-                 (get-text-property (1- pos) 'ghostel-prompt))
-            (ghostel--regex-prompt-end cursor-pos))))))
-
 (defun ghostel--line-mode-maybe-enter-initial ()
   "Enter line mode once the first prompt renders, if armed at startup.
 Armed by `ghostel-initial-input-mode' = `line'.  Runs each redraw cycle until a
@@ -708,7 +701,7 @@ wins: a non-semi-char buffer drops the flag without entering."
     (cond
      ((not (eq ghostel--input-mode 'semi-char))
       (setq ghostel--pending-initial-line-mode nil))
-     ((ghostel--line-mode-startup-prompt-ready-p)
+     ((ghostel--cursor-row-input-start)
       (setq ghostel--pending-initial-line-mode nil)
       (ghostel-line-mode)))))
 
@@ -723,27 +716,33 @@ accept the same CR as `accept-line'."
   (unless (eq ghostel--input-mode 'line)
     (user-error "Not in line mode"))
   (let ((input (ghostel--line-mode-input-text)))
-    (ghostel--line-mode-delete-input)
-    (when (and (> (length input) 0)
-               (or (null ghostel--line-mode-history)
-                   (not (string= input (car ghostel--line-mode-history)))))
-      (push input ghostel--line-mode-history)
-      (when (> (length ghostel--line-mode-history)
-               ghostel-line-mode-history-size)
-        (setcdr (nthcdr (1- ghostel-line-mode-history-size)
-                        ghostel--line-mode-history)
-                nil)))
-    (setq ghostel--line-mode-history-index nil)
-    ;; Erase any prefix the shell already had in its readline buffer
-    ;; (adopted on line-mode entry) before sending — otherwise the
-    ;; shell would concatenate ours after that prefix and echo a
-    ;; duplicated line.
-    (ghostel--line-mode-clear-shell-readline)
-    (when (> (length input) 0)
-      (ghostel--write-pty ghostel--term input))
-    (ghostel--send-encoded "return" "")
-    ;; Drop this line's undo history so the next line starts clean.
-    (setq buffer-undo-list nil)))
+    (unless (run-hook-with-args-until-success
+             'ghostel-line-mode-send-functions input)
+      (ghostel-line-mode-send-input input))))
+
+(defun ghostel-line-mode-send-input (input)
+  "Delete the line-mode input region and write INPUT plus Return to the PTY.
+Bypasses `ghostel-line-mode-send-functions'."
+  (ghostel--line-mode-delete-input)
+  (when (and (> (length input) 0)
+             (or (null ghostel--line-mode-history)
+                 (not (string= input (car ghostel--line-mode-history)))))
+    (push input ghostel--line-mode-history)
+    (when (> (length ghostel--line-mode-history)
+             ghostel-line-mode-history-size)
+      (setcdr (nthcdr (1- ghostel-line-mode-history-size)
+                      ghostel--line-mode-history)
+              nil)))
+  (setq ghostel--line-mode-history-index nil)
+  ;; Erase any prefix the shell already had in its readline buffer
+  ;; (adopted on line-mode entry) before sending, otherwise the shell
+  ;; would concatenate ours after that prefix and echo a duplicated line.
+  (ghostel--line-mode-clear-shell-readline)
+  (when (> (length input) 0)
+    (ghostel--write-pty ghostel--term input))
+  (ghostel--send-encoded "return" "")
+  ;; Drop this line's undo history so the next line starts clean.
+  (setq buffer-undo-list nil))
 
 (defun ghostel-line-mode-interrupt ()
   "Discard local input and send SIGINT (\\`C-c') to the shell.
