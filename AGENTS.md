@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-本文件为 Claude Code (claude.ai/code) 在此仓库中工作时提供指导。
+本文件为 Pi（pi coding agent）在此仓库中工作时提供指导。
 
 ## 项目概述
 
@@ -65,6 +65,12 @@ assistant.py         → 包管理器（从 GitHub Archive 同步）
 - 平台判断使用 `init-const.el` 中的 `sys/windows-p`、`sys/mac-p`、`sys/linux-p`
 - 根目录变量：`my-emacs-root-dir`（site-lisp/），配置目录：`my-emacs-config-dir`
 - 所有 `.el` 文件使用 `lexical-binding: t` 和 `utf-8` 编码
+
+## Pi 环境说明
+
+- 上下文文件即本文件（`AGENTS.md`，随仓库提交）；全局约定在 `~/.pi/agent/AGENTS.md`。
+- 项目配置：`.pi/settings.json`（仅本机生效，已在 `.gitignore` 忽略）。其中固定 `defaultProvider: "leihuo"`、`defaultModel: "deepseek-flash"`、`defaultThinkingLevel: "max"`。
+- 需要项目级扩展、技能或提示模板时，放 `.pi/extensions/`、`.pi/skills/`、`.pi/prompts/`。这些属于 project trust 保护资源，本机已设 `defaultProjectTrust: "always"`，无需每次确认。
 
 ## 错误排查
 
