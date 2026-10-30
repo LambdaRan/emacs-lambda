@@ -28,7 +28,7 @@ Check the [documentation](https://dakra.github.io/ghostel/#features) for a full 
 ## Quick Start
 
 **Requirements:** Emacs 28.1+ with dynamic module support, on macOS, Linux, FreeBSD, Android/Termux, or native Windows.
-The native module is a prebuilt binary that **auto-downloads on first use**.
+On first use Ghostel **offers to download a prebuilt native module**.
 No toolchain or build step required.
 
 Windows release binaries are built for common native Windows Emacs builds on
@@ -55,6 +55,7 @@ or custom functions that interact with the Ghostel buffer.
 
 ```emacs-lisp
 (use-package ghostel
+  :hook (after-init . ghostel-status-indicator-mode)
   :bind (("C-x m" . ghostel)
          :map ghostel-semi-char-mode-map
          ("C-s"  . consult-line)
@@ -62,10 +63,7 @@ or custom functions that interact with the Ghostel buffer.
          ;; I'm used to go up/down the shell history with M-n/p from eshell
          ;; Simulate this behavior in ghostel by sending C-p and C-n
          ("M-p" . (lambda () (interactive) (ghostel-send-key "p" "ctrl")))
-         ("M-n" . (lambda () (interactive) (ghostel-send-key "n" "ctrl")))
-         :map project-prefix-map
-         ("m" . ghostel-project)
-         ("M" . ghostel-project-list-buffers))
+         ("M-n" . (lambda () (interactive) (ghostel-send-key "n" "ctrl"))))
   :config
   (defun my/ghostel-send-C-k-and-kill ()
     "Send `C-k' to ghostel.
@@ -74,9 +72,15 @@ Like normal Emacs `C-k'.  Kill to end of line and put content in kill-ring."
     (kill-ring-save (point) (line-end-position))
     (ghostel-send-key "k" "ctrl"))
 
-  (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t)
-  (add-to-list 'project-switch-commands '(ghostel-project-list-buffers "Ghostel buffers") t)
   (add-to-list 'ghostel-eval-cmds '("magit-status-setup-buffer" magit-status-setup-buffer)))
+
+(use-package ghostel-project
+  :bind (:map project-prefix-map
+         ("m" . ghostel-project)
+         ("M" . ghostel-project-list-buffers))
+  :config
+  (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t)
+  (add-to-list 'project-switch-commands '(ghostel-project-list-buffers "Ghostel buffers") t))
 ```
 
 Now you can `C-x m` to open a Ghostel buffer, or
@@ -100,6 +104,12 @@ Run all `compile` commands in a Ghostel buffer.
 ```emacs-lisp
 (use-package ghostel-compile
   :hook (after-init . ghostel-compile-global-mode))
+```
+
+Replace `async-shell-command` with a Ghostel version.
+```emacs-lisp
+(use-package ghostel-shell-command
+  :hook (after-init . ghostel-shell-command-global-mode))
 ```
 
 Replace comint's built-in `ansi-color-process-output` with Ghostel's VT parser.

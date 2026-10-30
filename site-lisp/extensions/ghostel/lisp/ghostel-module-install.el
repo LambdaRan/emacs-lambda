@@ -68,7 +68,7 @@ Customize this when downloading pre-built modules from a fork or mirror."
 
 ;;; Native module download, compilation, and loading
 
-(defconst ghostel--minimum-module-version "0.57.0"
+(defconst ghostel--minimum-module-version "0.60.0"
   "Minimum native module version required by this Elisp version.
 Bump this only when the Elisp code requires a newer native module
 \(e.g. new Zig-exported function or changed calling convention).")
@@ -90,6 +90,9 @@ Returns nil if the platform is not recognized."
               ((or (eq system-type 'android)
                    (string-match-p "android" system-configuration))
                "android")
+              ((and (eq system-type 'berkeley-unix)
+                    (string-match-p "freebsd" system-configuration))
+               "freebsd")
               ((eq system-type 'gnu/linux) "linux")
               ((eq system-type 'windows-nt) "windows")
               (t nil))))
@@ -526,22 +529,19 @@ triggers an interactive prompt."
 (defun ghostel--load-module (&optional prompt-user)
   "Ensure the ghostel native module is loaded.
 When PROMPT-USER is non-nil (called from an interactive command like
-`ghostel'), missing or stale modules trigger
-`ghostel-module-auto-install' and load failures signal `user-error'
-so the calling flow aborts.  Otherwise (load time, including
-byte-compilation and Emacs 31's `user-lisp/' auto-compile), this
-function never prompts, downloads, or compiles - it only loads an
-existing module file and warns if one is missing or stale.  Module
-installation only happens on an explicit user action: `M-x ghostel',
-`M-x ghostel-download-module', or `M-x ghostel-module-compile'.
+`ghostel'), missing or stale modules trigger `ghostel-module-auto-install'
+and load failures signal `user-error' so the calling flow aborts.
+Otherwise (load time, including byte-compilation and Emacs 31's
+`user-lisp/' auto-compile), this function never prompts, downloads, or compiles,
+it only loads an existing module file and warns if it is stale.
+Module installation only happens on an explicit user action:
+`M-x ghostel', `M-x ghostel-download-module' or `M-x ghostel-module-compile'.
 
-Before calling `module-load' the sidecar file
-`ghostel-module.version' (written by `build.zig' and the downloader)
-is consulted.  When the sidecar reports a version older than
-`ghostel--minimum-module-version' the .so is NOT mapped into this
-process — that lets the freshly installed module be loaded in
-place after a subsequent `ghostel--ensure-module' call, avoiding an
-extra restart.
+Before calling `module-load' the sidecar file `ghostel-module.version' (written
+by `build.zig' and the downloader) is consulted.  When the sidecar reports
+a version older than `ghostel--minimum-module-version' the .so is NOT mapped
+into this process - that lets the freshly installed module be loaded in place
+after a subsequent `ghostel--ensure-module' call, avoiding an extra restart.
 
 The guard also honours `ghostel--new' being already `fboundp', which
 covers the pure-Elisp test path where `cl-letf' stubs the native
@@ -576,20 +576,14 @@ entry points so tests run without the module present."
                              (error-message-string err))))))))
        ;; Module file missing.
        ((not (file-exists-p mod))
-        (cond
-         (prompt-user
+        (when prompt-user
           (ghostel--ensure-module dir)
           (when (file-exists-p mod)
             (condition-case err
                 (module-load mod)
               (error
                (user-error "Failed to load ghostel native module: %s"
-                           (error-message-string err))))))
-         (t
-          (display-warning
-           'ghostel
-           (concat "Native module not found: " mod
-                   "\nRun M-x ghostel-download-module or M-x ghostel-module-compile")))))
+                           (error-message-string err)))))))
        ;; File exists and the sidecar (when present) is fresh.  Load it.
        ;; When the sidecar is absent (existing installs predating it),
        ;; fall back to a live version check post-load.  We skip the live
